@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Scroll, Map, BookOpen, Church, Lock, CheckCircle } from "lucide-react";
@@ -112,7 +112,7 @@ const categories = [
   },
 ];
 
-export default function ApprendrePage() {
+function ApprendreContent() {
   const searchParams = useSearchParams();
   const categoryParam = searchParams.get("category");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(
@@ -152,7 +152,8 @@ export default function ApprendrePage() {
                 selectedCategory === category.name_key
                   ? category.color
                   : undefined,
-              ringColor: category.color,
+              // @ts-expect-error CSS custom property for ring color
+              "--tw-ring-color": category.color,
             }}
           >
             <div
@@ -267,5 +268,13 @@ export default function ApprendrePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function ApprendrePage() {
+  return (
+    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 py-8">Chargement...</div>}>
+      <ApprendreContent />
+    </Suspense>
   );
 }

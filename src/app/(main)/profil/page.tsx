@@ -8,8 +8,6 @@ import {
   LogOut,
   Trophy,
   Flame,
-  Target,
-  Star,
   ShoppingBag,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
