@@ -65,7 +65,7 @@ export function FillBlank({ content, onAnswer, disabled }: FillBlankProps) {
             value={userAnswer}
             onChange={(e) => setUserAnswer(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Tapez votre reponse..."
+            placeholder="Tapez votre réponse..."
             disabled={disabled}
             className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-primary-500 focus:outline-none text-center text-lg"
           />
@@ -74,7 +74,7 @@ export function FillBlank({ content, onAnswer, disabled }: FillBlankProps) {
             disabled={disabled || !userAnswer.trim()}
             className="w-full"
           >
-            Verifier
+            Vérifier
           </Button>
         </div>
       ) : (
@@ -94,7 +94,7 @@ export function FillBlank({ content, onAnswer, disabled }: FillBlankProps) {
             <>
               <X className="w-6 h-6" />
               <span className="font-medium">
-                La bonne reponse etait: {content.answer}
+                La bonne réponse était: {content.answer}
               </span>
             </>
           )}

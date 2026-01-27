@@ -44,7 +44,7 @@ const cosmetics = [
   {
     id: "c4",
     type: "title",
-    name: "Theologien",
+    name: "Théologien",
     price: 200,
     currency: "coins" as const,
     icon: Sparkles,
@@ -77,9 +77,9 @@ export default function BoutiquePage() {
     }
 
     if (success) {
-      alert(`${itemName} achete avec succes!`);
+      alert(`${itemName} acheté avec succès!`);
     } else {
-      alert(`Pas assez de ${currency === "coins" ? "pieces" : "gemmes"}!`);
+      alert(`Pas assez de ${currency === "coins" ? "pièces" : "gemmes"}!`);
     }
   };
 
@@ -102,8 +102,8 @@ export default function BoutiquePage() {
       {/* Tabs */}
       <div className="flex gap-2 mb-6">
         {[
-          { value: "hearts", label: "Coeurs", icon: Heart },
-          { value: "cosmetics", label: "Cosmetiques", icon: Sparkles },
+          { value: "hearts", label: "Cœurs", icon: Heart },
+          { value: "cosmetics", label: "Cosmétiques", icon: Sparkles },
           { value: "gems", label: "Gemmes", icon: Gem },
         ].map((tab) => (
           <button
@@ -128,7 +128,7 @@ export default function BoutiquePage() {
       {activeTab === "hearts" && (
         <div className="space-y-4">
           <p className="text-gray-600 mb-4">
-            Vous avez actuellement {hearts}/5 coeurs. Les coeurs se regenerent
+            Vous avez actuellement {hearts}/5 cœurs. Les cœurs se régénèrent
             toutes les 30 minutes.
           </p>
 
@@ -145,7 +145,7 @@ export default function BoutiquePage() {
                     ))}
                   </div>
                   <span className="font-medium">
-                    {pkg.hearts} coeur{pkg.hearts > 1 ? "s" : ""}
+                    {pkg.hearts} cœur{pkg.hearts > 1 ? "s" : ""}
                   </span>
                 </div>
                 <Button
@@ -153,7 +153,7 @@ export default function BoutiquePage() {
                     handlePurchase(
                       pkg.price,
                       pkg.currency,
-                      `${pkg.hearts} coeur(s)`
+                      `${pkg.hearts} cœur(s)`
                     )
                   }
                   variant={pkg.currency === "gems" ? "secondary" : "primary"}
@@ -210,8 +210,8 @@ export default function BoutiquePage() {
       {activeTab === "gems" && (
         <div className="space-y-4">
           <p className="text-gray-600 mb-4">
-            Achetez des gemmes pour debloquer des cosmetiques exclusifs et des
-            bonus speciaux.
+            Achetez des gemmes pour débloquer des cosmétiques exclusifs et des
+            bonus spéciaux.
           </p>
 
           {gemPackages.map((pkg) => (
@@ -246,7 +246,7 @@ export default function BoutiquePage() {
           ))}
 
           <p className="text-xs text-gray-500 text-center mt-4">
-            Les achats en argent reel seront disponibles prochainement via
+            Les achats en argent réel seront disponibles prochainement via
             Stripe.
           </p>
         </div>

@@ -35,7 +35,7 @@ export default function HomePage() {
         </h1>
         <p className="text-gray-600">
           {isGuest
-            ? "Commencez votre voyage biblique des maintenant"
+            ? "Commencez votre voyage biblique dès maintenant"
             : "Continuez votre apprentissage"}
         </p>
       </div>
@@ -46,7 +46,7 @@ export default function HomePage() {
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
               <Flame className="w-5 h-5 text-orange-500" />
-              <span className="text-sm text-gray-600">Serie</span>
+              <span className="text-sm text-gray-600">Série</span>
             </div>
             <p className="text-2xl font-bold">{currentStreak} jours</p>
           </CardContent>
@@ -80,7 +80,7 @@ export default function HomePage() {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold mb-2">Defi Quotidien</h2>
+              <h2 className="text-xl font-bold mb-2">Défi Quotidien</h2>
               <p className="text-white/90">
                 10 questions mixtes pour tester vos connaissances
               </p>
@@ -124,7 +124,7 @@ export default function HomePage() {
                 <BookOpen className="w-6 h-6 text-green-600" />
               </div>
               <h3 className="font-medium text-gray-900">Contexte</h3>
-              <p className="text-xs text-gray-500 mt-1">Culture et geographie</p>
+              <p className="text-xs text-gray-500 mt-1">Culture et géographie</p>
             </CardContent>
           </Card>
         </Link>
@@ -136,7 +136,7 @@ export default function HomePage() {
                 <BookOpen className="w-6 h-6 text-blue-600" />
               </div>
               <h3 className="font-medium text-gray-900">Versets</h3>
-              <p className="text-xs text-gray-500 mt-1">Memorisation</p>
+              <p className="text-xs text-gray-500 mt-1">Mémorisation</p>
             </CardContent>
           </Card>
         </Link>
@@ -180,13 +180,13 @@ export default function HomePage() {
         <Card className="mt-8 border-2 border-primary-200">
           <CardContent className="p-6 text-center">
             <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              Creez un compte pour sauvegarder
+              Créez un compte pour sauvegarder
             </h2>
             <p className="text-gray-600 mb-4">
-              Votre progression sera perdue si vous ne creez pas de compte
+              Votre progression sera perdue si vous ne créez pas de compte
             </p>
             <Link href="/inscription">
-              <Button>Creer un compte gratuit</Button>
+              <Button>Créer un compte gratuit</Button>
             </Link>
           </CardContent>
         </Card>

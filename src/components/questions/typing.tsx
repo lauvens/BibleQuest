@@ -108,7 +108,7 @@ export function Typing({ content, onAnswer, disabled }: TypingProps) {
         />
         <div className="flex items-center justify-between text-sm">
           <span className="text-gray-500">
-            Precision: <span className={cn({
+            Précision: <span className={cn({
               "text-green-600": accuracy >= 80,
               "text-yellow-600": accuracy >= 50 && accuracy < 80,
               "text-red-600": accuracy < 50,
@@ -124,7 +124,7 @@ export function Typing({ content, onAnswer, disabled }: TypingProps) {
           disabled={disabled || !userInput.trim()}
           className="w-full bg-primary-600 text-white py-3 rounded-xl font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          Verifier
+          Vérifier
         </button>
       ) : (
         <div className={cn(
@@ -137,7 +137,7 @@ export function Typing({ content, onAnswer, disabled }: TypingProps) {
           {accuracy >= 80 ? (
             <>
               <Check className="w-6 h-6" />
-              <span className="font-medium">Excellent! {accuracy}% de precision</span>
+              <span className="font-medium">Excellent! {accuracy}% de précision</span>
             </>
           ) : (
             <>

@@ -65,7 +65,7 @@ export default function ClassementPage() {
         {[
           { value: "weekly", label: "Cette semaine" },
           { value: "monthly", label: "Ce mois" },
-          { value: "allTime", label: "Tout le temps" },
+          { value: "allTime", label: "Tout temps" },
         ].map((tab) => (
           <button
             key={tab.value}
@@ -175,7 +175,7 @@ export default function ClassementPage() {
         <Card className="mt-6 border-2 border-primary-200">
           <CardContent className="p-6 text-center">
             <p className="text-gray-600 mb-4">
-              Creez un compte pour apparaitre dans le classement!
+              Créez un compte pour apparaître dans le classement!
             </p>
             <a
               href="/inscription"

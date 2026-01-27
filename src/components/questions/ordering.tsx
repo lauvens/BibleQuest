@@ -134,7 +134,7 @@ export function Ordering({ content, onAnswer, disabled }: OrderingProps) {
 
       {!showResult && (
         <Button onClick={handleSubmit} disabled={disabled} className="w-full">
-          Verifier l&apos;ordre
+          Vérifier l&apos;ordre
         </Button>
       )}
     </div>

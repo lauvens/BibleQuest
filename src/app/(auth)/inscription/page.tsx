@@ -56,7 +56,7 @@ export default function InscriptionPage() {
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8">
       <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">
-        Creer un compte
+        Créer un compte
       </h1>
       <p className="text-center text-gray-600 mb-6">
         Commencez votre aventure biblique
@@ -110,7 +110,7 @@ export default function InscriptionPage() {
             minLength={6}
             required
           />
-          <p className="text-xs text-gray-500 mt-1">Minimum 6 caracteres</p>
+          <p className="text-xs text-gray-500 mt-1">Minimum 6 caractères</p>
         </div>
 
         <button
@@ -118,7 +118,7 @@ export default function InscriptionPage() {
           disabled={loading}
           className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {loading ? "Creation..." : "Creer mon compte"}
+          {loading ? "Création..." : "Créer mon compte"}
         </button>
       </form>
 
@@ -158,7 +158,7 @@ export default function InscriptionPage() {
       </button>
 
       <p className="text-center text-sm text-gray-600 mt-6">
-        Deja un compte?{" "}
+        Déjà un compte?{" "}
         <Link href="/connexion" className="text-primary-600 hover:underline font-medium">
           Se connecter
         </Link>

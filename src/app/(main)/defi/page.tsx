@@ -16,7 +16,7 @@ const challengeQuestions: { type: QuestionType; content: QuestionContent }[] = [
   {
     type: "multiple_choice",
     content: {
-      question: "Quel prophete a ete avale par un grand poisson?",
+      question: "Quel prophète a été avalé par un grand poisson?",
       options: ["Elie", "Jonas", "Elisee", "Daniel"],
       correct: 1,
     },
@@ -24,7 +24,7 @@ const challengeQuestions: { type: QuestionType; content: QuestionContent }[] = [
   {
     type: "true_false",
     content: {
-      statement: "Moise a recu les Dix Commandements sur le Mont Sinai.",
+      statement: "Moïse a reçu les Dix Commandements sur le Mont Sinaï.",
       correct: true,
     },
   },
@@ -47,14 +47,14 @@ const challengeQuestions: { type: QuestionType; content: QuestionContent }[] = [
   {
     type: "true_false",
     content: {
-      statement: "Le livre des Psaumes a ete ecrit uniquement par David.",
+      statement: "Le livre des Psaumes a été écrit uniquement par David.",
       correct: false,
     },
   },
   {
     type: "multiple_choice",
     content: {
-      question: "Qui etait le pere de Salomon?",
+      question: "Qui était le père de Salomon?",
       options: ["Saul", "David", "Samuel", "Nathan"],
       correct: 1,
     },
@@ -62,23 +62,23 @@ const challengeQuestions: { type: QuestionType; content: QuestionContent }[] = [
   {
     type: "multiple_choice",
     content: {
-      question: "Dans quelle ville Jesus est-il ne?",
-      options: ["Nazareth", "Jerusalem", "Bethleem", "Capernaum"],
+      question: "Dans quelle ville Jésus est-il né?",
+      options: ["Nazareth", "Jérusalem", "Bethléem", "Capharnaüm"],
       correct: 2,
     },
   },
   {
     type: "true_false",
     content: {
-      statement: "Paul etait l'un des 12 apotres originaux.",
+      statement: "Paul était l'un des 12 apôtres originaux.",
       correct: false,
     },
   },
   {
     type: "multiple_choice",
     content: {
-      question: "Quel est le premier livre de la Bible?",
-      options: ["Exode", "Genese", "Levitique", "Nombres"],
+      question: "Quel est le premier livre de la Bible ?",
+      options: ["Exode", "Genèse", "Lévitique", "Nombres"],
       correct: 1,
     },
   },
@@ -144,7 +144,7 @@ export default function DefiPage() {
         <Card className="overflow-hidden">
           <div className="bg-gradient-to-r from-primary-500 to-secondary-500 p-8 text-white text-center">
             <Target className="w-16 h-16 mx-auto mb-4" />
-            <h1 className="text-3xl font-bold mb-2">Defi Quotidien</h1>
+            <h1 className="text-3xl font-bold mb-2">Défi Quotidien</h1>
             <p className="text-white/90">
               10 questions pour tester vos connaissances
             </p>
@@ -158,16 +158,16 @@ export default function DefiPage() {
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-xl">
                 <Zap className="w-6 h-6 text-xp mx-auto mb-2" />
-                <p className="text-sm text-gray-600">Jusqu&apos;a 50 XP</p>
+                <p className="text-sm text-gray-600">Jusqu&apos;à 50 XP</p>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-xl">
                 <Trophy className="w-6 h-6 text-gold-500 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">Jusqu&apos;a 30 pieces</p>
+                <p className="text-sm text-gray-600">Jusqu&apos;à 30 pièces</p>
               </div>
             </div>
 
             <div className="flex items-center justify-between mb-6">
-              <span className="text-gray-600">Vos coeurs:</span>
+              <span className="text-gray-600">Vos cœurs:</span>
               <HeartsDisplay hearts={hearts} />
             </div>
 
@@ -177,12 +177,12 @@ export default function DefiPage() {
               className="w-full"
               size="lg"
             >
-              {hearts <= 0 ? "Pas assez de coeurs" : "Commencer le defi"}
+              {hearts <= 0 ? "Pas assez de cœurs" : "Commencer le défi"}
             </Button>
 
             {hearts <= 0 && (
               <p className="text-center text-sm text-gray-500 mt-4">
-                Vos coeurs se regenerent toutes les 30 minutes
+                Vos cœurs se régénèrent toutes les 30 minutes
               </p>
             )}
           </CardContent>
@@ -200,10 +200,10 @@ export default function DefiPage() {
               <Trophy className="w-10 h-10 text-yellow-500" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Defi termine!
+              Défi terminé!
             </h1>
             <p className="text-gray-600 mb-4">
-              Vous avez obtenu {finalScore}% de bonnes reponses
+              Vous avez obtenu {finalScore}% de bonnes réponses
             </p>
 
             <div className="flex items-center justify-center gap-6 mb-6">
@@ -217,7 +217,7 @@ export default function DefiPage() {
                 <p className="text-2xl font-bold text-gold-500">
                   +{15 + Math.round(15 * (finalScore / 100))}
                 </p>
-                <p className="text-sm text-gray-500">Pieces</p>
+                <p className="text-sm text-gray-500">Pièces</p>
               </div>
             </div>
 
@@ -237,7 +237,7 @@ export default function DefiPage() {
         <div className="max-w-2xl mx-auto flex items-center gap-4">
           <div className="flex items-center gap-2 text-primary-600">
             <Target className="w-5 h-5" />
-            <span className="font-semibold">Defi</span>
+            <span className="font-semibold">Défi</span>
           </div>
 
           <div className="flex-1">

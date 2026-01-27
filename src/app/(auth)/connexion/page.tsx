@@ -144,7 +144,7 @@ export default function ConnexionPage() {
 
       <p className="text-center text-sm text-gray-500 mt-2">
         <Link href="/" className="hover:underline">
-          Continuer en tant qu&apos;invite
+          Continuer en tant qu&apos;invité
         </Link>
       </p>
     </div>

@@ -91,7 +91,7 @@ export function QuestionRenderer({
     default:
       return (
         <div className="text-center text-gray-500">
-          Type de question non supporte
+          Type de question non supporté
         </div>
       );
   }

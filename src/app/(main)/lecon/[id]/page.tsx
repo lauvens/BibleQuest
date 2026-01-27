@@ -150,10 +150,10 @@ export default function LeconPage() {
                   <Heart className="w-10 h-10 text-red-500" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                  Plus de coeurs!
+                  Plus de cœurs!
                 </h1>
                 <p className="text-gray-600 mb-6">
-                  Attendez que vos coeurs se regenerent ou achetez-en dans la boutique.
+                  Attendez que vos cœurs se régénèrent ou achetez-en dans la boutique.
                 </p>
               </>
             ) : passed ? (
@@ -162,10 +162,10 @@ export default function LeconPage() {
                   <Trophy className="w-10 h-10 text-yellow-500" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                  Felicitations!
+                  Félicitations!
                 </h1>
                 <p className="text-gray-600 mb-4">
-                  Vous avez termine la lecon avec {finalScore}%
+                  Vous avez terminé la leçon avec {finalScore}%
                 </p>
                 <div className="flex items-center justify-center gap-4 mb-6">
                   <div className="text-center">
@@ -178,7 +178,7 @@ export default function LeconPage() {
                     <p className="text-2xl font-bold text-gold-500">
                       +{Math.round(lesson.coins * (finalScore / 100))}
                     </p>
-                    <p className="text-sm text-gray-500">Pieces</p>
+                    <p className="text-sm text-gray-500">Pièces</p>
                   </div>
                 </div>
                 <div className="flex justify-center gap-1 mb-6">
@@ -205,7 +205,7 @@ export default function LeconPage() {
                   <X className="w-10 h-10 text-gray-500" />
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">
-                  Pas tout a fait...
+                  Pas tout à fait...
                 </h1>
                 <p className="text-gray-600 mb-6">
                   Vous avez obtenu {finalScore}%. Il faut au moins 70% pour valider.
@@ -227,7 +227,7 @@ export default function LeconPage() {
                     setIsComplete(false);
                   }}
                 >
-                  Reessayer
+                  Réessayer
                 </Button>
               )}
             </div>
@@ -277,10 +277,10 @@ export default function LeconPage() {
           <Card className="w-full max-w-sm">
             <CardContent className="p-6 text-center">
               <h2 className="text-xl font-bold text-gray-900 mb-2">
-                Quitter la lecon?
+                Quitter la leçon?
               </h2>
               <p className="text-gray-600 mb-6">
-                Votre progression ne sera pas sauvegardee.
+                Votre progression ne sera pas sauvegardée.
               </p>
               <div className="space-y-3">
                 <Button
@@ -295,7 +295,7 @@ export default function LeconPage() {
                   className="w-full"
                   onClick={() => setShowExitConfirm(false)}
                 >
-                  Continuer la lecon
+                  Continuer la leçon
                 </Button>
               </div>
             </CardContent>

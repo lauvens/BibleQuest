@@ -24,7 +24,7 @@ const categories = [
     name: "Histoire Biblique",
     icon: "scroll",
     color: "#f59e0b",
-    description: "Decouvrez la chronologie et les evenements majeurs de la Bible",
+    description: "Découvrez la chronologie et les événements majeurs de la Bible",
     units: [
       {
         id: "u1",
@@ -61,11 +61,11 @@ const categories = [
     name: "Contexte Culturel",
     icon: "map",
     color: "#10b981",
-    description: "Explorez la geographie et la culture de l'epoque biblique",
+    description: "Explorez la géographie et la culture de l'époque biblique",
     units: [
       {
         id: "u4",
-        name: "Geographie",
+        name: "Géographie",
         progress: 50,
         lessons: [
           { id: "l7", name: "La Terre Promise", completed: true },
@@ -80,7 +80,7 @@ const categories = [
     name: "Versets Cles",
     icon: "book-open",
     color: "#3b82f6",
-    description: "Memorisez les versets les plus importants",
+    description: "Mémorisez les versets les plus importants",
     units: [
       {
         id: "u5",
@@ -99,11 +99,11 @@ const categories = [
     name: "Doctrines",
     icon: "church",
     color: "#8b5cf6",
-    description: "Comprenez les fondements de la foi chretienne",
+    description: "Comprenez les fondements de la foi chrétienne",
     units: [
       {
         id: "u6",
-        name: "La Trinite",
+        name: "La Trinité",
         progress: 0,
         locked: true,
         lessons: [],
@@ -203,8 +203,8 @@ function ApprendreContent() {
                         </h3>
                         <p className="text-sm text-gray-500">
                           {unit.locked
-                            ? "Completez l'unite precedente pour debloquer"
-                            : `${unit.lessons.filter((l) => l.completed).length}/${unit.lessons.length} lecons`}
+                            ? "Complétez l'unité précédente pour débloquer"
+                            : `${unit.lessons.filter((l) => l.completed).length}/${unit.lessons.length} leçons`}
                         </p>
                       </div>
                     </div>
@@ -260,10 +260,10 @@ function ApprendreContent() {
         <div className="text-center py-12">
           <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Choisissez une categorie
+            Choisissez une catégorie
           </h2>
           <p className="text-gray-600">
-            Selectionnez une categorie ci-dessus pour commencer a apprendre
+            Sélectionnez une catégorie ci-dessus pour commencer à apprendre
           </p>
         </div>
       )}

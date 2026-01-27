@@ -93,9 +93,9 @@ export function Timed({ content, onAnswer, disabled }: TimedProps) {
 
       {timedOut ? (
         <div className="text-center p-6 bg-red-50 rounded-xl">
-          <p className="text-xl font-bold text-red-600 mb-2">Temps ecoule!</p>
+          <p className="text-xl font-bold text-red-600 mb-2">Temps écoulé!</p>
           <p className="text-gray-600">
-            La bonne reponse etait: {question.options[question.correct]}
+            La bonne réponse était: {question.options[question.correct]}
           </p>
         </div>
       ) : (

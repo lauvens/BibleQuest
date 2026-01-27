@@ -22,16 +22,16 @@ import { createClient } from "@/lib/supabase/client";
 // Sample achievements
 const achievements = [
   { id: "1", name: "Premier Pas", icon: "footprints", unlocked: true },
-  { id: "2", name: "Semaine Fidele", icon: "flame", unlocked: true },
+  { id: "2", name: "Semaine Fidèle", icon: "flame", unlocked: true },
   { id: "3", name: "Sans Faute", icon: "star", unlocked: false },
-  { id: "4", name: "Erudit", icon: "graduation-cap", unlocked: false },
+  { id: "4", name: "Érudit", icon: "graduation-cap", unlocked: false },
 ];
 
 // Sample stats
 const stats = [
-  { label: "Lecons terminees", value: 12 },
-  { label: "Questions repondues", value: 156 },
-  { label: "Precision moyenne", value: "78%" },
+  { label: "Leçons terminées", value: 12 },
+  { label: "Questions répondues", value: 156 },
+  { label: "Précision moyenne", value: "78%" },
   { label: "Temps total", value: "4h 32m" },
 ];
 
@@ -70,15 +70,15 @@ export default function ProfilPage() {
               <User className="w-10 h-10 text-gray-400" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Mode Invite
+              Mode Invité
             </h1>
             <p className="text-gray-600 mb-6">
-              Creez un compte pour sauvegarder votre progression, debloquer des
-              succes et apparaitre dans le classement!
+              Créez un compte pour sauvegarder votre progression, débloquer des
+              succès et apparaître dans le classement!
             </p>
             <div className="space-y-3">
               <Link href="/inscription">
-                <Button className="w-full">Creer un compte</Button>
+                <Button className="w-full">Créer un compte</Button>
               </Link>
               <Link href="/connexion">
                 <Button variant="outline" className="w-full">
@@ -148,11 +148,11 @@ export default function ProfilPage() {
                 <Flame className="w-6 h-6" />
                 <span className="text-2xl font-bold">{currentStreak} jours</span>
               </div>
-              <p className="text-white/80">Serie actuelle</p>
+              <p className="text-white/80">Série actuelle</p>
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold">{longestStreak}</p>
-              <p className="text-white/80">Meilleure serie</p>
+              <p className="text-white/80">Meilleure série</p>
             </div>
           </div>
         </CardContent>
@@ -173,7 +173,7 @@ export default function ProfilPage() {
 
       {/* Achievements */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Succes</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Succès</h2>
         <Link
           href="/profil/succes"
           className="text-primary-600 hover:underline text-sm font-medium"
@@ -227,7 +227,7 @@ export default function ProfilPage() {
           onClick={handleLogout}
         >
           <LogOut className="w-5 h-5 mr-3" />
-          Se deconnecter
+          Se déconnecter
         </Button>
       </div>
     </div>
