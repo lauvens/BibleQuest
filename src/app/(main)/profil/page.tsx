@@ -55,9 +55,13 @@ export default function ProfilPage() {
   const supabase = createClient();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut({ scope: "local" });
+    } catch {
+      // Ignore signOut errors
+    }
     clearUser();
-    router.push("/");
+    router.push("/connexion");
     router.refresh();
   };
 

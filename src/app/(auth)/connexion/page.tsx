@@ -11,60 +11,78 @@ export default function ConnexionPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const supabase = createClient();
 
-    if (error) {
-      setError(error.message);
+      // Sign out any stale session first to avoid conflicts
+      await supabase.auth.signOut();
+
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      } else {
+        router.push("/");
+        router.refresh();
+      }
+    } catch {
+      setError("Une erreur inattendue est survenue");
       setLoading(false);
-    } else {
-      router.push("/");
-      router.refresh();
     }
   };
 
   const handleGoogleLogin = async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
+    try {
+      const supabase = createClient();
 
-    if (error) {
-      setError(error.message);
+      await supabase.auth.signOut();
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+      }
+    } catch {
+      setError("Une erreur inattendue est survenue");
       setLoading(false);
     }
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8">
-      <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">
+    <div className="bg-parchment-50 rounded-2xl shadow-elevated p-8 border border-parchment-300">
+      <h1 className="text-2xl font-bold text-center text-primary-800 mb-2">
         Connexion
       </h1>
-      <p className="text-center text-gray-600 mb-6">
+      <p className="text-center text-primary-500 mb-6">
         Continuez votre parcours biblique
       </p>
 
       {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
+        <div className="bg-error-50 text-error-600 p-3 rounded-xl mb-4 text-sm border border-error-200">
           {error}
         </div>
       )}
 
       <form onSubmit={handleEmailLogin} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-primary-700 mb-1">
             Email
           </label>
           <input
@@ -72,13 +90,13 @@ export default function ConnexionPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="input"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="password" className="block text-sm font-medium text-primary-700 mb-1">
             Mot de passe
           </label>
           <input
@@ -86,7 +104,7 @@ export default function ConnexionPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="input"
             required
           />
         </div>
@@ -94,7 +112,7 @@ export default function ConnexionPage() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="btn-primary w-full"
         >
           {loading ? "Connexion..." : "Se connecter"}
         </button>
@@ -102,17 +120,17 @@ export default function ConnexionPage() {
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300" />
+          <div className="w-full border-t border-parchment-300" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-gray-500">ou</span>
+          <span className="px-2 bg-parchment-50 text-primary-400">ou</span>
         </div>
       </div>
 
       <button
         onClick={handleGoogleLogin}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="btn-outline w-full flex items-center justify-center gap-2"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path
@@ -135,14 +153,14 @@ export default function ConnexionPage() {
         Continuer avec Google
       </button>
 
-      <p className="text-center text-sm text-gray-600 mt-6">
+      <p className="text-center text-sm text-primary-500 mt-6">
         Pas encore de compte?{" "}
-        <Link href="/inscription" className="text-primary-600 hover:underline font-medium">
+        <Link href="/inscription" className="text-olive-600 hover:underline font-medium">
           S&apos;inscrire
         </Link>
       </p>
 
-      <p className="text-center text-sm text-gray-500 mt-2">
+      <p className="text-center text-sm text-primary-400 mt-2">
         <Link href="/" className="hover:underline">
           Continuer en tant qu&apos;invité
         </Link>
