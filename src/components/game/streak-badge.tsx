@@ -6,25 +6,43 @@ import { cn } from "@/lib/utils";
 interface StreakBadgeProps {
   streak: number;
   className?: string;
+  compact?: boolean;
 }
 
-export function StreakBadge({ streak, className }: StreakBadgeProps) {
+export function StreakBadge({ streak, className, compact = false }: StreakBadgeProps) {
   const isActive = streak > 0;
+
+  if (compact) {
+    return (
+      <div className={cn("stat-card", className)}>
+        <div className={cn("stat-icon", {
+          "bg-gold-100 text-gold-600": isActive,
+          "bg-parchment-200 text-primary-400": !isActive,
+        })}>
+          <Flame className={cn("w-5 h-5", { "fill-current": isActive })} />
+        </div>
+        <div>
+          <p className="text-xs text-primary-500">Série</p>
+          <p className="font-bold text-primary-800">{streak} jours</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
       className={cn(
-        "flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium",
+        "flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-200",
         {
-          "bg-orange-100 text-orange-600": isActive,
-          "bg-gray-100 text-gray-400": !isActive,
+          "bg-gold-100 text-gold-700 border border-gold-300": isActive,
+          "bg-parchment-200 text-primary-400 border border-parchment-300": !isActive,
         },
         className
       )}
     >
       <Flame
-        className={cn("w-5 h-5", {
-          "fill-orange-500": isActive,
+        className={cn("w-5 h-5 transition-colors", {
+          "fill-gold-500 text-gold-600": isActive,
         })}
       />
       <span>{streak}</span>

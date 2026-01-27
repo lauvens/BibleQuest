@@ -7,21 +7,37 @@ interface HeartsDisplayProps {
   hearts: number;
   maxHearts?: number;
   className?: string;
+  compact?: boolean;
 }
 
 export function HeartsDisplay({
   hearts,
   maxHearts = 5,
   className,
+  compact = false,
 }: HeartsDisplayProps) {
+  if (compact) {
+    return (
+      <div className={cn("stat-card", className)}>
+        <div className="stat-icon-hearts">
+          <Heart className="w-5 h-5 fill-current" />
+        </div>
+        <div>
+          <p className="text-xs text-primary-500">Vies</p>
+          <p className="font-bold text-primary-800">{hearts}/{maxHearts}</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={cn("flex items-center gap-1", className)}>
       {Array.from({ length: maxHearts }).map((_, i) => (
         <Heart
           key={i}
-          className={cn("w-6 h-6 transition-colors", {
-            "fill-heart text-heart": i < hearts,
-            "fill-gray-200 text-gray-200": i >= hearts,
+          className={cn("w-6 h-6 transition-all duration-300", {
+            "fill-error-500 text-error-500 drop-shadow-sm": i < hearts,
+            "fill-parchment-300 text-parchment-300": i >= hearts,
           })}
         />
       ))}

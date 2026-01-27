@@ -6,19 +6,25 @@ import { HeartsDisplay } from "@/components/game/hearts-display";
 import { StreakBadge } from "@/components/game/streak-badge";
 import { CurrencyDisplay } from "@/components/game/currency-display";
 import { Button } from "@/components/ui/button";
+import { BookOpen } from "lucide-react";
 
 export function Navbar() {
-  const { isGuest, getActualHearts, currentStreak, coins, gems } = useUserStore();
+  const { isGuest, getActualHearts, currentStreak, coins, gems, username } = useUserStore();
   const hearts = getActualHearts();
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
+    <header className="sticky top-0 z-50 bg-parchment-50/95 backdrop-blur-sm border-b border-parchment-300 shadow-soft">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl font-bold text-primary-600">BibleQuest</span>
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center shadow-soft group-hover:shadow-card transition-shadow">
+            <BookOpen className="w-5 h-5 text-white" />
+          </div>
+          <span className="text-xl font-bold text-primary-700 hidden sm:block">
+            BibleQuest
+          </span>
         </Link>
 
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-5">
           <HeartsDisplay hearts={hearts} />
           <StreakBadge streak={currentStreak} />
           <CurrencyDisplay coins={coins} gems={gems} />
@@ -38,8 +44,10 @@ export function Navbar() {
             </>
           ) : (
             <Link href="/profil">
-              <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-                <span className="text-primary-600 font-medium">U</span>
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-olive-400 to-olive-600 flex items-center justify-center shadow-soft hover:shadow-card transition-all">
+                <span className="text-white font-semibold">
+                  {username?.charAt(0).toUpperCase() || "U"}
+                </span>
               </div>
             </Link>
           )}

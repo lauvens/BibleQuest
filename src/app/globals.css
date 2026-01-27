@@ -4,24 +4,242 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Couleurs du thème BibleQuest */
+    --color-primary: 166 124 91;      /* Brun chaud */
+    --color-parchment: 253 249 243;   /* Beige parchemin */
+    --color-gold: 255 217 102;        /* Or doux */
+    --color-olive: 122 154 85;        /* Vert olive */
+    --color-success: 34 197 94;       /* Vert succès */
+    --color-error: 226 93 78;         /* Rouge désaturé */
+    --color-info: 14 165 233;         /* Bleu info */
+
+    /* Fond et texte */
+    --background: 253 249 243;
+    --foreground: 74 52 38;
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+  * {
+    @apply border-primary-200;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-parchment-100 text-primary-900 antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Sélection de texte avec les couleurs du thème */
+  ::selection {
+    @apply bg-gold-300 text-primary-900;
+  }
+
+  /* Scrollbar personnalisée */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-parchment-200;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary-300 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary-400;
   }
 }
 
-@layer base {
-  body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+@layer components {
+  /* Boutons CTA principaux */
+  .btn-primary {
+    @apply bg-olive-500 text-white font-semibold py-3 px-6 rounded-xl
+           hover:bg-olive-600 active:bg-olive-700
+           transition-all duration-200 ease-out
+           shadow-soft hover:shadow-card
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-primary-500 text-white font-semibold py-3 px-6 rounded-xl
+           hover:bg-primary-600 active:bg-primary-700
+           transition-all duration-200 ease-out
+           shadow-soft hover:shadow-card
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-outline {
+    @apply bg-transparent text-primary-600 font-semibold py-3 px-6 rounded-xl
+           border-2 border-primary-300
+           hover:bg-primary-50 hover:border-primary-400
+           transition-all duration-200 ease-out
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-gold {
+    @apply bg-gold-gradient text-primary-900 font-bold py-3 px-6 rounded-xl
+           hover:brightness-105 active:brightness-95
+           transition-all duration-200 ease-out
+           shadow-soft hover:shadow-card;
+  }
+
+  /* Cartes */
+  .card {
+    @apply bg-parchment-50 rounded-2xl p-6 shadow-card
+           border border-parchment-300
+           transition-all duration-200;
+  }
+
+  .card-interactive {
+    @apply card cursor-pointer
+           hover:shadow-elevated hover:border-primary-300
+           hover:-translate-y-0.5;
+  }
+
+  .card-lesson {
+    @apply bg-parchment-50 rounded-2xl p-4 shadow-soft
+           border-2 border-parchment-300
+           hover:border-olive-400 hover:shadow-card
+           transition-all duration-200 cursor-pointer;
+  }
+
+  /* Badges et récompenses */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full
+           text-xs font-semibold;
+  }
+
+  .badge-gold {
+    @apply badge bg-gold-100 text-gold-800 border border-gold-300;
+  }
+
+  .badge-success {
+    @apply badge bg-success-100 text-success-800 border border-success-300;
+  }
+
+  .badge-info {
+    @apply badge bg-info-100 text-info-800 border border-info-300;
+  }
+
+  /* Progression */
+  .progress-bar {
+    @apply h-3 bg-parchment-300 rounded-full overflow-hidden;
+  }
+
+  .progress-bar-fill {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+  }
+
+  .progress-xp {
+    @apply progress-bar-fill bg-gradient-to-r from-olive-400 to-olive-500;
+  }
+
+  .progress-gold {
+    @apply progress-bar-fill bg-gold-gradient;
+  }
+
+  /* Inputs */
+  .input {
+    @apply w-full px-4 py-3 rounded-xl
+           bg-parchment-50 border-2 border-parchment-300
+           text-primary-900 placeholder-primary-400
+           focus:border-olive-400 focus:ring-2 focus:ring-olive-200
+           focus:outline-none
+           transition-all duration-200;
+  }
+
+  /* Navigation */
+  .nav-item {
+    @apply flex flex-col items-center gap-1 p-2 rounded-xl
+           text-primary-500 transition-all duration-200
+           hover:bg-parchment-200 hover:text-primary-700;
+  }
+
+  .nav-item-active {
+    @apply nav-item text-olive-600 bg-olive-50;
+  }
+
+  /* Texte spirituel / Versets */
+  .verse-text {
+    @apply font-serif text-lg leading-relaxed text-primary-800
+           italic;
+  }
+
+  .verse-reference {
+    @apply text-sm font-sans font-medium text-primary-500
+           not-italic;
+  }
+
+  /* Statistiques de gamification */
+  .stat-card {
+    @apply flex items-center gap-3 p-3 rounded-xl
+           bg-parchment-100 border border-parchment-300;
+  }
+
+  .stat-icon {
+    @apply w-10 h-10 rounded-full flex items-center justify-center
+           text-lg;
+  }
+
+  .stat-icon-hearts {
+    @apply stat-icon bg-error-100 text-error-500;
+  }
+
+  .stat-icon-xp {
+    @apply stat-icon bg-olive-100 text-olive-600;
+  }
+
+  .stat-icon-streak {
+    @apply stat-icon bg-gold-100 text-gold-600;
+  }
+
+  .stat-icon-gems {
+    @apply stat-icon bg-info-100 text-info-500;
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Animation de pulsation pour les récompenses */
+  .pulse-gold {
+    animation: pulse-gold 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-gold {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(245, 195, 44, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(245, 195, 44, 0);
+    }
+  }
+
+  /* Animation de succès */
+  .animate-success {
+    animation: success-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes success-pop {
+    0% {
+      transform: scale(0.8);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Fond parchemin subtil */
+  .bg-parchment-subtle {
+    background: linear-gradient(180deg, #fdf9f3 0%, #faf3e8 50%, #f5e9d6 100%);
   }
 }

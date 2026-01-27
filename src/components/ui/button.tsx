@@ -2,7 +2,7 @@ import { forwardRef, ButtonHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "ghost" | "danger";
+  variant?: "primary" | "secondary" | "outline" | "ghost" | "gold" | "danger";
   size?: "sm" | "md" | "lg";
 }
 
@@ -11,22 +11,30 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         className={cn(
-          "inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed",
+          "inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-soft hover:shadow-card",
           {
-            "bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500":
+            // CTA principal - Vert olive (confiance, croissance)
+            "bg-olive-500 text-white hover:bg-olive-600 active:bg-olive-700 focus:ring-olive-400":
               variant === "primary",
-            "bg-secondary-600 text-white hover:bg-secondary-700 focus:ring-secondary-500":
+            // Secondaire - Brun chaud (sagesse, stabilité)
+            "bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 focus:ring-primary-400":
               variant === "secondary",
-            "border-2 border-gray-300 bg-transparent hover:bg-gray-50 focus:ring-gray-500":
+            // Outline - Bordure brun
+            "border-2 border-primary-300 bg-transparent text-primary-700 hover:bg-primary-50 hover:border-primary-400 focus:ring-primary-300 shadow-none":
               variant === "outline",
-            "bg-transparent hover:bg-gray-100 focus:ring-gray-500":
+            // Ghost - Transparent
+            "bg-transparent text-primary-600 hover:bg-parchment-200 focus:ring-primary-300 shadow-none":
               variant === "ghost",
-            "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500":
+            // Or - Pour les récompenses et actions spéciales
+            "bg-gradient-to-r from-gold-400 to-gold-500 text-primary-900 hover:from-gold-500 hover:to-gold-600 focus:ring-gold-400":
+              variant === "gold",
+            // Danger - Rouge désaturé
+            "bg-error-500 text-white hover:bg-error-600 active:bg-error-700 focus:ring-error-400":
               variant === "danger",
           },
           {
-            "px-3 py-1.5 text-sm": size === "sm",
-            "px-4 py-2 text-base": size === "md",
+            "px-3 py-1.5 text-sm rounded-lg": size === "sm",
+            "px-5 py-2.5 text-base": size === "md",
             "px-6 py-3 text-lg": size === "lg",
           },
           className
