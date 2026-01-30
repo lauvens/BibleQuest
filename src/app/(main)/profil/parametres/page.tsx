@@ -1,5 +1,8 @@
 "use client";
 
+// Disable static pre-rendering - this page requires client-side auth
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -77,17 +80,24 @@ export default function ParametresPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   useEffect(() => {
-    if (!userId || isGuest) return;
+    if (isGuest) {
+      router.push("/connexion");
+      return;
+    }
+    if (!userId) return;
     setLoadingCosmetics(true);
     getUserCosmetics(userId)
       .then((data) => setOwnedCosmetics(data as OwnedCosmetic[]))
-      .catch(() => showToast("Impossible de charger les cosmétiques.", "error"))
+      .catch(() => {})
       .finally(() => setLoadingCosmetics(false));
-  }, [userId, isGuest]);
+  }, [userId, isGuest, router]);
 
-  if (isGuest) {
-    router.push("/connexion");
-    return null;
+  if (isGuest || !userId) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-8 text-center">
+        <p className="text-primary-500">Redirection...</p>
+      </div>
+    );
   }
 
   const handleSaveUsername = async () => {
