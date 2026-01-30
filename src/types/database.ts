@@ -341,6 +341,26 @@ export interface Database {
           text?: string;
         };
       };
+      user_verses: {
+        Row: {
+          id: string;
+          user_id: string;
+          verse_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          verse_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          verse_id?: string;
+          created_at?: string;
+        };
+      };
     };
   };
 }

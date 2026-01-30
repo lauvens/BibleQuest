@@ -215,6 +215,124 @@ export async function getDailyVerse() {
   return { text: v.text, reference: `${v.book} ${v.chapter}:${v.verse}` };
 }
 
+// Get all verses with optional pagination
+export async function getAllVerses(limit: number = 50, offset: number = 0) {
+  const { data, error, count } = await supabase()
+    .from("bible_verses")
+    .select("*", { count: "exact" })
+    .order("book")
+    .order("chapter")
+    .order("verse")
+    .range(offset, offset + limit - 1);
+  if (error) throw error;
+  return { verses: data as Tables["bible_verses"]["Row"][], total: count ?? 0 };
+}
+
+// Search verses by text content
+export async function searchVerses(query: string, limit: number = 50) {
+  const { data, error } = await supabase()
+    .from("bible_verses")
+    .select("*")
+    .ilike("text", `%${query}%`)
+    .order("book")
+    .order("chapter")
+    .order("verse")
+    .limit(limit);
+  if (error) throw error;
+  return data as Tables["bible_verses"]["Row"][];
+}
+
+// Get verses by book name
+export async function getVersesByBook(book: string, limit: number = 50) {
+  const { data, error } = await supabase()
+    .from("bible_verses")
+    .select("*")
+    .eq("book", book)
+    .order("chapter")
+    .order("verse")
+    .limit(limit);
+  if (error) throw error;
+  return data as Tables["bible_verses"]["Row"][];
+}
+
+// Get unique book names
+export async function getUniqueBooks() {
+  const { data, error } = await supabase()
+    .from("bible_verses")
+    .select("book")
+    .order("book");
+  if (error) throw error;
+  const books = Array.from(new Set((data ?? []).map((v) => v.book)));
+  return books;
+}
+
+// Get user's favorite verses
+export async function getUserFavorites(userId: string) {
+  const { data, error } = await supabase()
+    .from("user_verses")
+    .select("verse_id, created_at, bible_verses(*)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map((uv) => {
+    const verse = uv.bible_verses as unknown as Tables["bible_verses"]["Row"];
+    return {
+      ...verse,
+      favorited_at: uv.created_at,
+    };
+  });
+}
+
+// Toggle favorite status for a verse
+export async function toggleFavorite(userId: string, verseId: string): Promise<boolean> {
+  // Check if already favorited
+  const { data: existing } = await supabase()
+    .from("user_verses")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("verse_id", verseId)
+    .single();
+
+  if (existing) {
+    // Remove favorite
+    const { error } = await supabase()
+      .from("user_verses")
+      .delete()
+      .eq("user_id", userId)
+      .eq("verse_id", verseId);
+    if (error) throw error;
+    return false; // Not favorited anymore
+  } else {
+    // Add favorite
+    const { error } = await supabase()
+      .from("user_verses")
+      .insert({ user_id: userId, verse_id: verseId });
+    if (error) throw error;
+    return true; // Now favorited
+  }
+}
+
+// Check if a verse is favorited
+export async function isFavorite(userId: string, verseId: string): Promise<boolean> {
+  const { data } = await supabase()
+    .from("user_verses")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("verse_id", verseId)
+    .single();
+  return !!data;
+}
+
+// Get user's favorite verse IDs (for bulk checking)
+export async function getUserFavoriteIds(userId: string): Promise<Set<string>> {
+  const { data, error } = await supabase()
+    .from("user_verses")
+    .select("verse_id")
+    .eq("user_id", userId);
+  if (error) throw error;
+  return new Set((data ?? []).map((uv) => uv.verse_id));
+}
+
 // Update username
 export async function updateUsername(userId: string, username: string) {
   const { error } = await supabase()

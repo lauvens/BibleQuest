@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, Target, Trophy, Flame, Scroll, MapPin, Heart, Cross } from "lucide-react";
+import { BookOpen, Target, Trophy, Flame, Scroll, MapPin, Heart, Cross, Book } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { XpBar } from "@/components/game/xp-bar";
@@ -254,6 +254,14 @@ export default function HomePage() {
               </p>
             </>
           )}
+          <div className="mt-4 text-center">
+            <Link href="/versets">
+              <Button variant="outline" size="sm">
+                <Book className="w-4 h-4 mr-2" />
+                Explorer les versets
+              </Button>
+            </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
