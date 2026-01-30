@@ -361,6 +361,32 @@ export interface Database {
           created_at?: string;
         };
       };
+      bible_books: {
+        Row: {
+          id: string;
+          name: string;
+          abbreviation: string;
+          testament: "old" | "new";
+          order_index: number;
+          chapters: number;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          abbreviation: string;
+          testament: "old" | "new";
+          order_index: number;
+          chapters: number;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          abbreviation?: string;
+          testament?: "old" | "new";
+          order_index?: number;
+          chapters?: number;
+        };
+      };
     };
   };
 }

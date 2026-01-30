@@ -499,3 +499,80 @@ export async function getCategoryWithProgress(
     }),
   };
 }
+
+// ==========================================
+// Bible Reader Queries
+// ==========================================
+
+// Get all Bible books with metadata, ordered canonically
+export async function getBibleBooks() {
+  const { data, error } = await supabase()
+    .from("bible_books")
+    .select("*")
+    .order("order_index");
+  if (error) throw error;
+  return data as Tables["bible_books"]["Row"][];
+}
+
+// Get books filtered by testament
+export async function getBooksByTestament(testament: "old" | "new") {
+  const { data, error } = await supabase()
+    .from("bible_books")
+    .select("*")
+    .eq("testament", testament)
+    .order("order_index");
+  if (error) throw error;
+  return data as Tables["bible_books"]["Row"][];
+}
+
+// Get a single book by name
+export async function getBibleBook(bookName: string) {
+  const { data, error } = await supabase()
+    .from("bible_books")
+    .select("*")
+    .eq("name", bookName)
+    .single();
+  if (error) throw error;
+  return data as Tables["bible_books"]["Row"];
+}
+
+// Get all verses for a specific chapter
+export async function getChapter(
+  book: string,
+  chapter: number,
+  translation: string = "LSG"
+) {
+  const { data, error } = await supabase()
+    .from("bible_verses")
+    .select("*")
+    .eq("book", book)
+    .eq("chapter", chapter)
+    .eq("translation", translation)
+    .order("verse");
+  if (error) throw error;
+  return data as Tables["bible_verses"]["Row"][];
+}
+
+// Get verse count for a chapter
+export async function getVerseCount(book: string, chapter: number) {
+  const { count, error } = await supabase()
+    .from("bible_verses")
+    .select("*", { count: "exact", head: true })
+    .eq("book", book)
+    .eq("chapter", chapter);
+  if (error) throw error;
+  return count ?? 0;
+}
+
+// Get a single verse
+export async function getVerse(book: string, chapter: number, verse: number) {
+  const { data, error } = await supabase()
+    .from("bible_verses")
+    .select("*")
+    .eq("book", book)
+    .eq("chapter", chapter)
+    .eq("verse", verse)
+    .single();
+  if (error) throw error;
+  return data as Tables["bible_verses"]["Row"];
+}

@@ -129,7 +129,7 @@ export default function HomePage() {
       </Card>
 
       {/* Daily Challenge CTA */}
-      <Card className="mb-8 bg-gradient-to-r from-primary-500 to-primary-700 border-0 overflow-hidden relative">
+      <Card className="mb-4 bg-gradient-to-r from-primary-500 to-primary-700 border-0 overflow-hidden relative">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-32 h-32 bg-gold-400 rounded-full -translate-y-1/2 translate-x-1/2" />
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gold-400 rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -137,7 +137,7 @@ export default function HomePage() {
         <CardContent className="p-6 relative">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-bold text-white mb-2">Défi Quotidien</h2>
+              <h2 className="text-xl font-bold text-white mb-2">Defi Quotidien</h2>
               <p className="text-white/80">
                 10 questions mixtes pour tester vos connaissances
               </p>
@@ -146,6 +146,30 @@ export default function HomePage() {
               <Button variant="gold" className="shadow-elevated">
                 <Target className="w-5 h-5 mr-2" />
                 Commencer
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bible Reader CTA */}
+      <Card className="mb-8 bg-gradient-to-r from-gold-500 to-gold-600 border-0 overflow-hidden relative">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-24 h-24 bg-white rounded-full -translate-y-1/2 -translate-x-1/2" />
+          <div className="absolute bottom-0 right-0 w-32 h-32 bg-white rounded-full translate-y-1/2 translate-x-1/2" />
+        </div>
+        <CardContent className="p-6 relative">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-white mb-2">Lire la Bible</h2>
+              <p className="text-white/80">
+                66 livres - Louis Segond 1910
+              </p>
+            </div>
+            <Link href="/bible">
+              <Button variant="outline" className="bg-white/20 border-white/40 text-white hover:bg-white/30">
+                <BookOpen className="w-5 h-5 mr-2" />
+                Ouvrir
               </Button>
             </Link>
           </div>
@@ -254,11 +278,17 @@ export default function HomePage() {
               </p>
             </>
           )}
-          <div className="mt-4 text-center">
+          <div className="mt-4 flex justify-center gap-3">
             <Link href="/versets">
               <Button variant="outline" size="sm">
                 <Book className="w-4 h-4 mr-2" />
-                Explorer les versets
+                Mes versets
+              </Button>
+            </Link>
+            <Link href="/bible">
+              <Button variant="outline" size="sm">
+                <BookOpen className="w-4 h-4 mr-2" />
+                Lire la Bible
               </Button>
             </Link>
           </div>
