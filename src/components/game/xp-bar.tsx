@@ -25,7 +25,7 @@ export function XpBar({ xp, level, className, compact = false }: XpBarProps) {
           <Star className="w-5 h-5 fill-current" />
         </div>
         <div className="flex-1">
-          <p className="text-xs text-primary-500">Niveau {level}</p>
+          <p className="text-xs text-primary-500 dark:text-primary-400">Niveau {level}</p>
           <ProgressBar
             value={xpInCurrentLevel}
             max={xpNeededForLevel}
@@ -48,7 +48,7 @@ export function XpBar({ xp, level, className, compact = false }: XpBarProps) {
           max={xpNeededForLevel}
           color="xp"
         />
-        <p className="text-xs text-primary-500 mt-1.5 font-medium">
+        <p className="text-xs text-primary-500 dark:text-primary-400 mt-1.5 font-medium">
           {xpInCurrentLevel} / {xpNeededForLevel} XP
         </p>
       </div>

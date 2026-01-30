@@ -20,10 +20,10 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 const styleMap: Record<string, { bgColor: string; iconColor: string }> = {
-  history: { bgColor: "bg-primary-100", iconColor: "text-primary-600" },
-  context: { bgColor: "bg-olive-100", iconColor: "text-olive-600" },
-  verses: { bgColor: "bg-info-100", iconColor: "text-info-600" },
-  doctrines: { bgColor: "bg-gold-100", iconColor: "text-gold-700" },
+  history: { bgColor: "bg-primary-100 dark:bg-primary-900/40", iconColor: "text-primary-600 dark:text-primary-400" },
+  context: { bgColor: "bg-olive-100 dark:bg-olive-900/40", iconColor: "text-olive-600 dark:text-olive-400" },
+  verses: { bgColor: "bg-info-100 dark:bg-info-900/40", iconColor: "text-info-600 dark:text-info-400" },
+  doctrines: { bgColor: "bg-gold-100 dark:bg-gold-900/40", iconColor: "text-gold-700 dark:text-gold-400" },
 };
 
 const nameMap: Record<string, { name: string; description: string }> = {
@@ -76,12 +76,12 @@ export default function HomePage() {
     <div className="max-w-4xl mx-auto px-4 py-8">
       {/* Welcome Section */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-primary-800 mb-2">
+        <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50 mb-2">
           {isGuest
             ? "Bienvenue sur BibleQuest!"
             : `Bonjour, ${username || "Utilisateur"}!`}
         </h1>
-        <p className="text-primary-500">
+        <p className="text-primary-500 dark:text-primary-400">
           {isGuest
             ? "Commencez votre voyage biblique dès maintenant"
             : "Continuez votre apprentissage"}
@@ -93,21 +93,21 @@ export default function HomePage() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-gold-100 flex items-center justify-center">
-                <Flame className="w-4 h-4 text-gold-600" />
+              <div className="w-8 h-8 rounded-full bg-gold-100 dark:bg-gold-900/40 flex items-center justify-center">
+                <Flame className="w-4 h-4 text-gold-600 dark:text-gold-400" />
               </div>
-              <span className="text-sm text-primary-500">Série</span>
+              <span className="text-sm text-primary-500 dark:text-primary-400">Serie</span>
             </div>
-            <p className="text-2xl font-bold text-primary-800">{currentStreak} jours</p>
+            <p className="text-2xl font-bold text-primary-800 dark:text-parchment-50">{currentStreak} jours</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-full bg-error-100 flex items-center justify-center">
-                <Heart className="w-4 h-4 text-error-500" />
+              <div className="w-8 h-8 rounded-full bg-error-100 dark:bg-error-900/40 flex items-center justify-center">
+                <Heart className="w-4 h-4 text-error-500 dark:text-error-400" />
               </div>
-              <span className="text-sm text-primary-500">Vies</span>
+              <span className="text-sm text-primary-500 dark:text-primary-400">Vies</span>
             </div>
             <HeartsDisplay hearts={hearts} />
           </CardContent>
@@ -117,7 +117,7 @@ export default function HomePage() {
       {/* XP Progress */}
       <Card className="mb-8">
         <CardContent className="p-6">
-          <h2 className="text-lg font-semibold text-primary-800 mb-4">
+          <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50 mb-4">
             Votre progression
           </h2>
           <XpBar xp={xp} level={level} />
@@ -153,7 +153,7 @@ export default function HomePage() {
       </Card>
 
       {/* Quick Actions */}
-      <h2 className="text-lg font-semibold text-primary-800 mb-4">
+      <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50 mb-4">
         Que voulez-vous apprendre?
       </h2>
       {error && (
@@ -169,7 +169,7 @@ export default function HomePage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {categories.map((category) => {
           const Icon = iconMap[category.icon] || BookOpen;
-          const style = styleMap[category.name_key] || { bgColor: "bg-gray-100", iconColor: "text-gray-600" };
+          const style = styleMap[category.name_key] || { bgColor: "bg-parchment-200 dark:bg-primary-800", iconColor: "text-primary-600 dark:text-primary-400" };
           const names = nameMap[category.name_key] || { name: category.name_key, description: "" };
           return (
             <Link key={category.id} href={`/apprendre?category=${category.name_key}`}>
@@ -178,9 +178,9 @@ export default function HomePage() {
                   <div className={`w-14 h-14 rounded-2xl ${style.bgColor} flex items-center justify-center mb-3 shadow-soft`}>
                     <Icon className={`w-7 h-7 ${style.iconColor}`} />
                   </div>
-                  <h3 className="font-semibold text-primary-800">{names.name}</h3>
-                  <p className="text-xs text-primary-400 mt-1">
-                    {category.lessonCount} leçons
+                  <h3 className="font-semibold text-primary-800 dark:text-parchment-50">{names.name}</h3>
+                  <p className="text-xs text-primary-400 dark:text-primary-500 mt-1">
+                    {category.lessonCount} lecons
                   </p>
                 </CardContent>
               </Card>
@@ -193,20 +193,20 @@ export default function HomePage() {
       <Card className="mt-8">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-primary-800">Classement</h2>
+            <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50">Classement</h2>
             <Link
               href="/classement"
-              className="text-olive-600 hover:text-olive-700 text-sm font-medium"
+              className="text-olive-600 hover:text-olive-700 dark:text-olive-400 dark:hover:text-olive-300 text-sm font-medium"
             >
               Voir tout
             </Link>
           </div>
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-gold-100 flex items-center justify-center">
-              <Trophy className="w-6 h-6 text-gold-600" />
+            <div className="w-12 h-12 rounded-2xl bg-gold-100 dark:bg-gold-900/40 flex items-center justify-center">
+              <Trophy className="w-6 h-6 text-gold-600 dark:text-gold-400" />
             </div>
-            <p className="text-primary-600">
-              Compétez avec d&apos;autres joueurs et grimpez dans le classement!
+            <p className="text-primary-600 dark:text-primary-300">
+              Competez avec d&apos;autres joueurs et grimpez dans le classement!
             </p>
           </div>
         </CardContent>
@@ -214,26 +214,26 @@ export default function HomePage() {
 
       {/* Guest CTA */}
       {isGuest && (
-        <Card className="mt-8 border-2 border-olive-300 bg-olive-50/50">
+        <Card className="mt-8 border-2 border-olive-300 dark:border-olive-700 bg-olive-50/50 dark:bg-olive-900/20">
           <CardContent className="p-6 text-center">
-            <div className="w-16 h-16 rounded-full bg-olive-100 flex items-center justify-center mx-auto mb-4">
-              <BookOpen className="w-8 h-8 text-olive-600" />
+            <div className="w-16 h-16 rounded-full bg-olive-100 dark:bg-olive-900/40 flex items-center justify-center mx-auto mb-4">
+              <BookOpen className="w-8 h-8 text-olive-600 dark:text-olive-400" />
             </div>
-            <h2 className="text-lg font-semibold text-primary-800 mb-2">
-              Créez un compte pour sauvegarder
+            <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50 mb-2">
+              Creez un compte pour sauvegarder
             </h2>
-            <p className="text-primary-500 mb-4">
-              Votre progression sera perdue si vous ne créez pas de compte
+            <p className="text-primary-500 dark:text-primary-400 mb-4">
+              Votre progression sera perdue si vous ne creez pas de compte
             </p>
             <Link href="/inscription">
-              <Button size="lg">Créer un compte gratuit</Button>
+              <Button size="lg">Creer un compte gratuit</Button>
             </Link>
           </CardContent>
         </Card>
       )}
 
       {/* Daily Verse */}
-      <Card className="mt-8 bg-parchment-100 border-parchment-400">
+      <Card className="mt-8 bg-parchment-100 dark:bg-primary-850 border-parchment-400 dark:border-primary-700">
         <CardContent className="p-6">
           {verse ? (
             <>

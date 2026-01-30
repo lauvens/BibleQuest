@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Couleurs du thème BibleQuest */
+    /* Couleurs du thème BibleQuest - Mode clair */
     --color-primary: 166 124 91;      /* Brun chaud */
     --color-parchment: 253 249 243;   /* Beige parchemin */
     --color-gold: 255 217 102;        /* Or doux */
@@ -18,8 +18,23 @@
     --foreground: 74 52 38;
   }
 
+  .dark {
+    /* Couleurs du thème BibleQuest - Mode sombre */
+    --color-primary: 166 124 91;
+    --color-parchment: 43 31 23;      /* primary-900 */
+    --color-gold: 245 195 44;
+    --color-olive: 122 154 85;
+    --color-success: 34 197 94;
+    --color-error: 226 93 78;
+    --color-info: 56 189 248;
+
+    /* Fond et texte */
+    --background: 43 31 23;
+    --foreground: 253 249 243;
+  }
+
   * {
-    @apply border-primary-200;
+    @apply border-primary-200 dark:border-primary-700;
   }
 
   html {
@@ -27,13 +42,14 @@
   }
 
   body {
-    @apply bg-parchment-100 text-primary-900 antialiased;
+    @apply bg-parchment-100 text-primary-900 antialiased
+           dark:bg-primary-900 dark:text-parchment-100;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
   /* Sélection de texte avec les couleurs du thème */
   ::selection {
-    @apply bg-gold-300 text-primary-900;
+    @apply bg-gold-300 text-primary-900 dark:bg-gold-500 dark:text-primary-900;
   }
 
   /* Scrollbar personnalisée */
@@ -43,15 +59,15 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-parchment-200;
+    @apply bg-parchment-200 dark:bg-primary-800;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-primary-300 rounded-full;
+    @apply bg-primary-300 rounded-full dark:bg-primary-600;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary-400;
+    @apply bg-primary-400 dark:bg-primary-500;
   }
 }
 
@@ -60,6 +76,7 @@
   .btn-primary {
     @apply bg-olive-500 text-white font-semibold py-3 px-6 rounded-xl
            hover:bg-olive-600 active:bg-olive-700
+           dark:bg-olive-600 dark:text-parchment-50 dark:hover:bg-olive-500 dark:active:bg-olive-400
            transition-all duration-200 ease-out
            shadow-soft hover:shadow-card
            disabled:opacity-50 disabled:cursor-not-allowed;
@@ -68,6 +85,7 @@
   .btn-secondary {
     @apply bg-primary-500 text-white font-semibold py-3 px-6 rounded-xl
            hover:bg-primary-600 active:bg-primary-700
+           dark:bg-primary-600 dark:text-parchment-50 dark:hover:bg-primary-500 dark:active:bg-primary-400
            transition-all duration-200 ease-out
            shadow-soft hover:shadow-card
            disabled:opacity-50 disabled:cursor-not-allowed;
@@ -77,6 +95,8 @@
     @apply bg-transparent text-primary-600 font-semibold py-3 px-6 rounded-xl
            border-2 border-primary-300
            hover:bg-primary-50 hover:border-primary-400
+           dark:text-primary-200 dark:border-primary-600
+           dark:hover:bg-primary-800 dark:hover:border-primary-500
            transition-all duration-200 ease-out
            disabled:opacity-50 disabled:cursor-not-allowed;
   }
@@ -84,6 +104,7 @@
   .btn-gold {
     @apply bg-gold-gradient text-primary-900 font-bold py-3 px-6 rounded-xl
            hover:brightness-105 active:brightness-95
+           dark:bg-gradient-to-r dark:from-gold-500 dark:to-gold-600 dark:text-primary-900
            transition-all duration-200 ease-out
            shadow-soft hover:shadow-card;
   }
@@ -92,12 +113,14 @@
   .card {
     @apply bg-parchment-50 rounded-2xl p-6 shadow-card
            border border-parchment-300
+           dark:bg-primary-800 dark:border-primary-800
            transition-all duration-200;
   }
 
   .card-interactive {
     @apply card cursor-pointer
            hover:shadow-elevated hover:border-primary-300
+           dark:hover:border-primary-600
            hover:-translate-y-0.5;
   }
 
@@ -105,6 +128,8 @@
     @apply bg-parchment-50 rounded-2xl p-4 shadow-soft
            border-2 border-parchment-300
            hover:border-olive-400 hover:shadow-card
+           dark:bg-primary-800 dark:border-primary-700
+           dark:hover:border-olive-500
            transition-all duration-200 cursor-pointer;
   }
 
@@ -115,20 +140,24 @@
   }
 
   .badge-gold {
-    @apply badge bg-gold-100 text-gold-800 border border-gold-300;
+    @apply badge bg-gold-100 text-gold-800 border border-gold-300
+           dark:bg-gold-500/20 dark:text-gold-400 dark:border-gold-600;
   }
 
   .badge-success {
-    @apply badge bg-success-100 text-success-800 border border-success-300;
+    @apply badge bg-success-100 text-success-800 border border-success-300
+           dark:bg-success-500/20 dark:text-success-400 dark:border-success-600;
   }
 
   .badge-info {
-    @apply badge bg-info-100 text-info-800 border border-info-300;
+    @apply badge bg-info-100 text-info-800 border border-info-300
+           dark:bg-info-500/20 dark:text-info-400 dark:border-info-600;
   }
 
   /* Progression */
   .progress-bar {
-    @apply h-3 bg-parchment-300 rounded-full overflow-hidden;
+    @apply h-3 bg-parchment-300 rounded-full overflow-hidden
+           dark:bg-primary-700;
   }
 
   .progress-bar-fill {
@@ -136,11 +165,13 @@
   }
 
   .progress-xp {
-    @apply progress-bar-fill bg-gradient-to-r from-olive-400 to-olive-500;
+    @apply progress-bar-fill bg-gradient-to-r from-olive-400 to-olive-500
+           dark:from-olive-500 dark:to-olive-400;
   }
 
   .progress-gold {
-    @apply progress-bar-fill bg-gold-gradient;
+    @apply progress-bar-fill bg-gold-gradient
+           dark:bg-gradient-to-r dark:from-gold-500 dark:to-gold-400;
   }
 
   /* Inputs */
@@ -150,6 +181,9 @@
            text-primary-900 placeholder-primary-400
            focus:border-olive-400 focus:ring-2 focus:ring-olive-200
            focus:outline-none
+           dark:bg-primary-800 dark:border-primary-700
+           dark:text-parchment-100 dark:placeholder-primary-500
+           dark:focus:border-olive-500 dark:focus:ring-olive-500/20
            transition-all duration-200;
   }
 
@@ -157,28 +191,33 @@
   .nav-item {
     @apply flex flex-col items-center gap-1 p-2 rounded-xl
            text-primary-500 transition-all duration-200
-           hover:bg-parchment-200 hover:text-primary-700;
+           hover:bg-parchment-200 hover:text-primary-700
+           dark:text-primary-400 dark:hover:bg-primary-800 dark:hover:text-primary-200;
   }
 
   .nav-item-active {
-    @apply nav-item text-olive-600 bg-olive-50;
+    @apply nav-item text-olive-600 bg-olive-50
+           dark:text-olive-400 dark:bg-olive-500/20;
   }
 
   /* Texte spirituel / Versets */
   .verse-text {
     @apply font-serif text-lg leading-relaxed text-primary-800
+           dark:text-parchment-100
            italic;
   }
 
   .verse-reference {
     @apply text-sm font-sans font-medium text-primary-500
+           dark:text-primary-300
            not-italic;
   }
 
   /* Statistiques de gamification */
   .stat-card {
     @apply flex items-center gap-3 p-3 rounded-xl
-           bg-parchment-100 border border-parchment-300;
+           bg-parchment-100 border border-parchment-300
+           dark:bg-primary-850 dark:border-primary-700;
   }
 
   .stat-icon {
@@ -187,19 +226,23 @@
   }
 
   .stat-icon-hearts {
-    @apply stat-icon bg-error-100 text-error-500;
+    @apply stat-icon bg-error-100 text-error-500
+           dark:bg-error-500/20 dark:text-error-500;
   }
 
   .stat-icon-xp {
-    @apply stat-icon bg-olive-100 text-olive-600;
+    @apply stat-icon bg-olive-100 text-olive-600
+           dark:bg-olive-500/20 dark:text-olive-400;
   }
 
   .stat-icon-streak {
-    @apply stat-icon bg-gold-100 text-gold-600;
+    @apply stat-icon bg-gold-100 text-gold-600
+           dark:bg-gold-500/20 dark:text-gold-500;
   }
 
   .stat-icon-gems {
-    @apply stat-icon bg-info-100 text-info-500;
+    @apply stat-icon bg-info-100 text-info-500
+           dark:bg-info-500/20 dark:text-info-400;
   }
 }
 
@@ -241,5 +284,9 @@
   /* Fond parchemin subtil */
   .bg-parchment-subtle {
     background: linear-gradient(180deg, #fdf9f3 0%, #faf3e8 50%, #f5e9d6 100%);
+  }
+
+  .dark .bg-parchment-subtle {
+    background: linear-gradient(180deg, #2b1f17 0%, #33251b 50%, #3a2a1f 100%);
   }
 }

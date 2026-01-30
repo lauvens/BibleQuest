@@ -87,17 +87,17 @@ export default function BoutiquePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Boutique</h1>
+      <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50 mb-2">Boutique</h1>
 
       {/* Currency display */}
       <div className="flex items-center gap-4 mb-6">
-        <div className="flex items-center gap-2 bg-yellow-50 px-4 py-2 rounded-full">
-          <Coins className="w-5 h-5 text-gold-500" />
-          <span className="font-bold text-gold-600">{coins}</span>
+        <div className="flex items-center gap-2 bg-gold-100 dark:bg-gold-900/40 px-4 py-2 rounded-full">
+          <Coins className="w-5 h-5 text-gold-500 dark:text-gold-400" />
+          <span className="font-bold text-gold-600 dark:text-gold-300">{coins}</span>
         </div>
-        <div className="flex items-center gap-2 bg-purple-50 px-4 py-2 rounded-full">
-          <Gem className="w-5 h-5 text-secondary-500" />
-          <span className="font-bold text-secondary-600">{gems}</span>
+        <div className="flex items-center gap-2 bg-info-100 dark:bg-info-900/40 px-4 py-2 rounded-full">
+          <Gem className="w-5 h-5 text-info-500 dark:text-info-400" />
+          <span className="font-bold text-info-600 dark:text-info-300">{gems}</span>
         </div>
       </div>
 
@@ -114,8 +114,8 @@ export default function BoutiquePage() {
             className={cn(
               "flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-colors",
               {
-                "bg-primary-600 text-white": activeTab === tab.value,
-                "bg-gray-100 text-gray-600 hover:bg-gray-200":
+                "bg-primary-600 dark:bg-primary-500 text-white": activeTab === tab.value,
+                "bg-parchment-200 dark:bg-primary-800 text-primary-600 dark:text-primary-300 hover:bg-parchment-300 dark:hover:bg-primary-700":
                   activeTab !== tab.value,
               }
             )}
@@ -129,8 +129,8 @@ export default function BoutiquePage() {
       {/* Hearts tab */}
       {activeTab === "hearts" && (
         <div className="space-y-4">
-          <p className="text-gray-600 mb-4">
-            Vous avez actuellement {hearts}/5 cœurs. Les cœurs se régénèrent
+          <p className="text-primary-600 dark:text-primary-400 mb-4">
+            Vous avez actuellement {hearts}/5 coeurs. Les coeurs se regenerent
             toutes les 30 minutes.
           </p>
 
@@ -180,11 +180,11 @@ export default function BoutiquePage() {
           {cosmetics.map((item) => (
             <Card key={item.id}>
               <CardContent className="p-4 text-center">
-                <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-3">
-                  <item.icon className="w-8 h-8 text-primary-600" />
+                <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center mx-auto mb-3">
+                  <item.icon className="w-8 h-8 text-primary-600 dark:text-primary-300" />
                 </div>
-                <h3 className="font-medium text-gray-900 mb-1">{item.name}</h3>
-                <p className="text-xs text-gray-500 mb-3 capitalize">
+                <h3 className="font-medium text-primary-800 dark:text-parchment-50 mb-1">{item.name}</h3>
+                <p className="text-xs text-primary-500 dark:text-primary-400 mb-3 capitalize">
                   {item.type}
                 </p>
                 <Button
@@ -211,9 +211,9 @@ export default function BoutiquePage() {
       {/* Gems tab */}
       {activeTab === "gems" && (
         <div className="space-y-4">
-          <p className="text-gray-600 mb-4">
-            Achetez des gemmes pour débloquer des cosmétiques exclusifs et des
-            bonus spéciaux.
+          <p className="text-primary-600 dark:text-primary-400 mb-4">
+            Achetez des gemmes pour debloquer des cosmetiques exclusifs et des
+            bonus speciaux.
           </p>
 
           {gemPackages.map((pkg) => (
@@ -225,15 +225,15 @@ export default function BoutiquePage() {
             >
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-secondary-100 flex items-center justify-center">
-                    <Gem className="w-6 h-6 text-secondary-500" />
+                  <div className="w-12 h-12 rounded-full bg-info-100 dark:bg-info-900/40 flex items-center justify-center">
+                    <Gem className="w-6 h-6 text-info-500 dark:text-info-400" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-lg">{pkg.gems}</span>
-                      <span className="text-gray-500">gemmes</span>
+                      <span className="font-bold text-lg text-primary-800 dark:text-parchment-50">{pkg.gems}</span>
+                      <span className="text-primary-500 dark:text-primary-400">gemmes</span>
                       {pkg.popular && (
-                        <span className="bg-secondary-500 text-white text-xs px-2 py-0.5 rounded-full">
+                        <span className="bg-info-500 dark:bg-info-600 text-white text-xs px-2 py-0.5 rounded-full">
                           Populaire
                         </span>
                       )}
@@ -247,8 +247,8 @@ export default function BoutiquePage() {
             </Card>
           ))}
 
-          <p className="text-xs text-gray-500 text-center mt-4">
-            Les achats en argent réel seront disponibles prochainement via
+          <p className="text-xs text-primary-500 dark:text-primary-400 text-center mt-4">
+            Les achats en argent reel seront disponibles prochainement via
             Stripe.
           </p>
         </div>

@@ -11,14 +11,14 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={cn(
-          "rounded-2xl bg-parchment-50 transition-all duration-200",
+          "rounded-2xl bg-parchment-50 dark:bg-primary-800 transition-all duration-200",
           {
-            "shadow-card border border-parchment-300": variant === "default",
-            "shadow-elevated border border-parchment-200": variant === "elevated",
-            "border-2 border-parchment-300 shadow-none": variant === "outline",
-            "shadow-soft border-2 border-parchment-300 hover:border-olive-400 hover:shadow-card cursor-pointer":
+            "shadow-card border border-parchment-300 dark:border-primary-800": variant === "default",
+            "shadow-elevated border border-parchment-200 dark:border-primary-700": variant === "elevated",
+            "border-2 border-parchment-300 dark:border-primary-700 shadow-none": variant === "outline",
+            "shadow-soft border-2 border-parchment-300 dark:border-primary-700 hover:border-olive-400 dark:hover:border-olive-500 hover:shadow-card cursor-pointer":
               variant === "lesson",
-            "shadow-card border border-parchment-300 hover:shadow-elevated hover:border-primary-300 hover:-translate-y-0.5 cursor-pointer":
+            "shadow-card border border-parchment-300 dark:border-primary-800 hover:shadow-elevated hover:border-primary-300 dark:hover:border-primary-600 hover:-translate-y-0.5 cursor-pointer":
               variant === "interactive",
           },
           className
@@ -51,7 +51,7 @@ const CardTitle = forwardRef<HTMLHeadingElement, HTMLAttributes<HTMLHeadingEleme
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn("text-lg font-semibold text-primary-800", className)}
+      className={cn("text-lg font-semibold text-primary-800 dark:text-parchment-50", className)}
       {...props}
     />
   )
@@ -63,7 +63,7 @@ const CardDescription = forwardRef<HTMLParagraphElement, HTMLAttributes<HTMLPara
   ({ className, ...props }, ref) => (
     <p
       ref={ref}
-      className={cn("text-sm text-primary-500", className)}
+      className={cn("text-sm text-primary-500 dark:text-primary-300", className)}
       {...props}
     />
   )

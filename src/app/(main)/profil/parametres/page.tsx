@@ -29,6 +29,7 @@ import {
   equipCosmetic,
   unequipCosmetic,
 } from "@/lib/supabase/queries";
+import { ThemeSelect } from "@/components/ui/theme-toggle";
 
 interface OwnedCosmetic {
   cosmetic_id: string;
@@ -209,20 +210,20 @@ export default function ParametresPage() {
       <div className="flex items-center gap-3 mb-6">
         <Link
           href="/profil"
-          className="p-2 hover:bg-parchment-200 rounded-lg transition-colors"
+          className="p-2 hover:bg-parchment-200 dark:hover:bg-primary-800/50 rounded-lg transition-colors"
         >
-          <ArrowLeft className="w-5 h-5 text-primary-600" />
+          <ArrowLeft className="w-5 h-5 text-primary-600 dark:text-primary-400" />
         </Link>
-        <h1 className="text-2xl font-bold text-primary-800">Paramètres</h1>
+        <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50">Parametres</h1>
       </div>
 
       {/* Username */}
       <Card className="mb-6">
         <CardContent className="p-6">
-          <h2 className="text-lg font-semibold text-primary-800 mb-1">
+          <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50 mb-1">
             Nom d&apos;utilisateur
           </h2>
-          <p className="text-sm text-primary-500 mb-4">
+          <p className="text-sm text-primary-500 dark:text-primary-400 mb-4">
             Visible par les autres joueurs dans le classement.
           </p>
           <div className="flex gap-3">
@@ -253,28 +254,44 @@ export default function ParametresPage() {
       {/* Email (read-only) */}
       <Card className="mb-6">
         <CardContent className="p-6">
-          <h2 className="text-lg font-semibold text-primary-800 mb-1">Email</h2>
-          <p className="text-sm text-primary-400">{email}</p>
+          <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50 mb-1">Email</h2>
+          <p className="text-sm text-primary-400 dark:text-primary-500">{email}</p>
+        </CardContent>
+      </Card>
+
+      {/* Theme */}
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Palette className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50">
+              Apparence
+            </h2>
+          </div>
+          <p className="text-sm text-primary-500 dark:text-primary-400 mb-4">
+            Choisissez le theme de l&apos;application.
+          </p>
+          <ThemeSelect />
         </CardContent>
       </Card>
 
       {/* Cosmetics */}
       <Card className="mb-6">
         <CardContent className="p-6">
-          <h2 className="text-lg font-semibold text-primary-800 mb-1">
-            Cosmétiques
+          <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50 mb-1">
+            Cosmetiques
           </h2>
-          <p className="text-sm text-primary-500 mb-4">
-            Équipez les cosmétiques achetés dans la boutique.
+          <p className="text-sm text-primary-500 dark:text-primary-400 mb-4">
+            Equipez les cosmetiques achetes dans la boutique.
           </p>
 
           {loadingCosmetics ? (
-            <p className="text-sm text-primary-400">Chargement...</p>
+            <p className="text-sm text-primary-400 dark:text-primary-500">Chargement...</p>
           ) : ownedCosmetics.length === 0 ? (
             <div className="text-center py-6">
-              <Crown className="w-10 h-10 text-primary-300 mx-auto mb-3" />
-              <p className="text-primary-500 mb-3">
-                Vous n&apos;avez pas encore de cosmétiques.
+              <Crown className="w-10 h-10 text-primary-300 dark:text-primary-600 mx-auto mb-3" />
+              <p className="text-primary-500 dark:text-primary-400 mb-3">
+                Vous n&apos;avez pas encore de cosmetiques.
               </p>
               <Link href="/boutique">
                 <Button variant="outline" size="sm">
@@ -291,8 +308,8 @@ export default function ParametresPage() {
                 return (
                   <div key={type}>
                     <div className="flex items-center gap-2 mb-3">
-                      <Icon className="w-4 h-4 text-primary-500" />
-                      <h3 className="font-medium text-primary-700">{label}</h3>
+                      <Icon className="w-4 h-4 text-primary-500 dark:text-primary-400" />
+                      <h3 className="font-medium text-primary-700 dark:text-primary-300">{label}</h3>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       {items.map((uc) => (
@@ -300,8 +317,8 @@ export default function ParametresPage() {
                           key={uc.cosmetic_id}
                           className={`relative p-4 rounded-xl border-2 text-center transition-colors ${
                             uc.is_equipped
-                              ? "border-olive-500 bg-olive-50"
-                              : "border-parchment-300 bg-parchment-50 hover:border-primary-300"
+                              ? "border-olive-500 bg-olive-50 dark:bg-olive-900/30 dark:border-olive-600"
+                              : "border-parchment-300 bg-parchment-50 hover:border-primary-300 dark:border-primary-700 dark:bg-primary-800 dark:hover:border-primary-500"
                           }`}
                         >
                           {uc.is_equipped && (
@@ -309,16 +326,16 @@ export default function ParametresPage() {
                               <Check className="w-3 h-3 text-white" />
                             </div>
                           )}
-                          <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-2">
-                            <Icon className="w-6 h-6 text-primary-600" />
+                          <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center mx-auto mb-2">
+                            <Icon className="w-6 h-6 text-primary-600 dark:text-primary-300" />
                           </div>
-                          <p className="text-sm font-medium text-primary-800 mb-2">
+                          <p className="text-sm font-medium text-primary-800 dark:text-parchment-50 mb-2">
                             {uc.cosmetics.name}
                           </p>
                           {uc.is_equipped ? (
                             <button
                               onClick={() => handleUnequip(uc.cosmetic_id)}
-                              className="text-xs text-primary-500 hover:text-error-600 transition-colors"
+                              className="text-xs text-primary-500 dark:text-primary-400 hover:text-error-600 dark:hover:text-error-400 transition-colors"
                             >
                               Retirer
                             </button>
@@ -327,9 +344,9 @@ export default function ParametresPage() {
                               onClick={() =>
                                 handleEquip(uc.cosmetic_id, uc.cosmetics.type)
                               }
-                              className="text-xs font-medium text-olive-600 hover:underline"
+                              className="text-xs font-medium text-olive-600 dark:text-olive-400 hover:underline"
                             >
-                              Équiper
+                              Equiper
                             </button>
                           )}
                         </div>
@@ -347,10 +364,10 @@ export default function ParametresPage() {
       <Card className="mb-6">
         <CardContent className="p-6">
           <div className="flex items-center justify-between mb-1">
-            <h2 className="text-lg font-semibold text-primary-800">
+            <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50">
               Mot de passe
             </h2>
-            <KeyRound className="w-5 h-5 text-primary-400" />
+            <KeyRound className="w-5 h-5 text-primary-400 dark:text-primary-500" />
           </div>
           {!changingPassword ? (
             <Button
@@ -379,8 +396,8 @@ export default function ParametresPage() {
                 placeholder="Confirmer le mot de passe"
                 minLength={8}
               />
-              <p className="text-xs text-primary-400">
-                Minimum 8 caractères, 1 majuscule, 1 chiffre
+              <p className="text-xs text-primary-400 dark:text-primary-500">
+                Minimum 8 caracteres, 1 majuscule, 1 chiffre
               </p>
               <div className="flex gap-3">
                 <Button
@@ -408,13 +425,13 @@ export default function ParametresPage() {
       </Card>
 
       {/* Danger zone */}
-      <Card className="border-error-200">
+      <Card className="border-error-200 dark:border-error-800">
         <CardContent className="p-6">
-          <h2 className="text-lg font-semibold text-error-600 mb-1">
+          <h2 className="text-lg font-semibold text-error-600 dark:text-error-400 mb-1">
             Zone dangereuse
           </h2>
-          <p className="text-sm text-primary-500 mb-4">
-            La suppression de votre compte est irréversible.
+          <p className="text-sm text-primary-500 dark:text-primary-400 mb-4">
+            La suppression de votre compte est irreversible.
           </p>
           {!showDeleteConfirm ? (
             <Button
@@ -426,9 +443,9 @@ export default function ParametresPage() {
               Supprimer mon compte
             </Button>
           ) : (
-            <div className="bg-error-50 border border-error-200 rounded-xl p-4">
-              <p className="text-sm text-error-700 mb-3">
-                Êtes-vous sûr ? Toute votre progression sera perdue.
+            <div className="bg-error-50 dark:bg-error-900/30 border border-error-200 dark:border-error-800 rounded-xl p-4">
+              <p className="text-sm text-error-700 dark:text-error-400 mb-3">
+                Etes-vous sur ? Toute votre progression sera perdue.
               </p>
               <div className="flex gap-3">
                 <Button variant="danger" size="sm" onClick={handleDeleteAccount}>

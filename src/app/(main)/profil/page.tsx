@@ -112,15 +112,15 @@ export default function ProfilPage() {
       <div className="max-w-2xl mx-auto px-4 py-8">
         <Card>
           <CardContent className="p-8 text-center">
-            <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-              <User className="w-10 h-10 text-gray-400" />
+            <div className="w-20 h-20 rounded-full bg-parchment-200 dark:bg-primary-800 flex items-center justify-center mx-auto mb-4">
+              <User className="w-10 h-10 text-primary-400 dark:text-primary-500" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Mode Invité
+            <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50 mb-2">
+              Mode Invite
             </h1>
-            <p className="text-gray-600 mb-6">
-              Créez un compte pour sauvegarder votre progression, débloquer des
-              succès et apparaître dans le classement!
+            <p className="text-primary-600 dark:text-primary-400 mb-6">
+              Creez un compte pour sauvegarder votre progression, debloquer des
+              succes et apparaitre dans le classement!
             </p>
             <div className="space-y-3">
               <Link href="/inscription">
@@ -138,7 +138,7 @@ export default function ProfilPage() {
         {/* Guest stats preview */}
         <Card className="mt-6">
           <CardContent className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50 mb-4">
               Votre session
             </h2>
             <XpBar xp={xp} level={level} className="mb-4" />
@@ -180,20 +180,20 @@ export default function ProfilPage() {
         <CardContent className="p-6">
           <div className="flex items-start justify-between mb-6">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center">
-                <span className="text-2xl font-bold text-primary-600">
+              <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center">
+                <span className="text-2xl font-bold text-primary-600 dark:text-primary-300">
                   {(username || "U").charAt(0).toUpperCase()}
                 </span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">
+                <h1 className="text-xl font-bold text-primary-800 dark:text-parchment-50">
                   {username || "Utilisateur"}
                 </h1>
-                <p className="text-gray-500">{email}</p>
+                <p className="text-primary-500 dark:text-primary-400">{email}</p>
               </div>
             </div>
-            <Link href="/profil/parametres" className="p-2 hover:bg-parchment-200 rounded-lg transition-colors">
-              <Settings className="w-5 h-5 text-primary-500" />
+            <Link href="/profil/parametres" className="p-2 hover:bg-parchment-200 dark:hover:bg-primary-800/50 rounded-lg transition-colors">
+              <Settings className="w-5 h-5 text-primary-500 dark:text-primary-400" />
             </Link>
           </div>
 
@@ -226,13 +226,13 @@ export default function ProfilPage() {
       </Card>
 
       {/* Stats grid */}
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Statistiques</h2>
+      <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50 mb-4">Statistiques</h2>
       <div className="grid grid-cols-3 gap-4 mb-6">
         {displayStats.map((stat) => (
           <Card key={stat.label}>
             <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              <p className="text-sm text-gray-500">{stat.label}</p>
+              <p className="text-2xl font-bold text-primary-800 dark:text-parchment-50">{stat.value}</p>
+              <p className="text-sm text-primary-500 dark:text-primary-400">{stat.label}</p>
             </CardContent>
           </Card>
         ))}
@@ -240,10 +240,10 @@ export default function ProfilPage() {
 
       {/* Achievements */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold text-gray-900">Succès</h2>
+        <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50">Succes</h2>
         <Link
           href="/profil/succes"
-          className="text-primary-600 hover:underline text-sm font-medium"
+          className="text-primary-600 dark:text-primary-400 hover:underline text-sm font-medium"
         >
           Voir tout
         </Link>
@@ -264,19 +264,19 @@ export default function ProfilPage() {
                 <div
                   className={`w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center ${
                     achievement.unlocked
-                      ? "bg-yellow-100"
-                      : "bg-gray-100"
+                      ? "bg-gold-100 dark:bg-gold-900/40"
+                      : "bg-parchment-200 dark:bg-primary-800"
                   }`}
                 >
                   <Trophy
                     className={`w-6 h-6 ${
                       achievement.unlocked
-                        ? "text-yellow-500"
-                        : "text-gray-400"
+                        ? "text-gold-500 dark:text-gold-400"
+                        : "text-primary-400 dark:text-primary-600"
                     }`}
                   />
                 </div>
-                <p className="text-xs text-gray-600">{achievement.name}</p>
+                <p className="text-xs text-primary-600 dark:text-primary-400">{achievement.name}</p>
               </div>
             ))}
           </div>
@@ -293,11 +293,11 @@ export default function ProfilPage() {
         </Link>
         <Button
           variant="outline"
-          className="w-full justify-start text-red-600 hover:bg-red-50"
+          className="w-full justify-start text-error-600 dark:text-error-400 hover:bg-error-50 dark:hover:bg-error-900/30"
           onClick={handleLogout}
         >
           <LogOut className="w-5 h-5 mr-3" />
-          Se déconnecter
+          Se deconnecter
         </Button>
       </div>
     </div>

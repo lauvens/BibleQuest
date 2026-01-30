@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -19,8 +20,9 @@ const config: Config = {
           500: '#a67c5b',  // Brun chocolat doux
           600: '#8b6344',
           700: '#6f4e36',
-          800: '#5a3f2d',
-          900: '#4a3426',
+          800: '#3a2a1f',  // Dark mode card bg
+          850: '#33251b',  // Dark mode stat card bg
+          900: '#2b1f17',  // Dark mode page bg
         },
         // Fond - Beige clair / Parchemin (douceur, confort, manuscrits anciens)
         parchment: {

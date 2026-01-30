@@ -86,23 +86,23 @@ export default function ConnexionPage() {
   };
 
   return (
-    <div className="bg-parchment-50 rounded-2xl shadow-elevated p-8 border border-parchment-300">
-      <h1 className="text-2xl font-bold text-center text-primary-800 mb-2">
+    <div className="bg-parchment-50 dark:bg-primary-800 rounded-2xl shadow-elevated p-8 border border-parchment-300 dark:border-primary-800">
+      <h1 className="text-2xl font-bold text-center text-primary-800 dark:text-parchment-50 mb-2">
         Connexion
       </h1>
-      <p className="text-center text-primary-500 mb-6">
+      <p className="text-center text-primary-500 dark:text-primary-300 mb-6">
         Continuez votre parcours biblique
       </p>
 
       {error && (
-        <div className="bg-error-50 text-error-600 p-3 rounded-xl mb-4 text-sm border border-error-200">
+        <div className="bg-error-50 dark:bg-error-500/20 text-error-600 dark:text-error-500 p-3 rounded-xl mb-4 text-sm border border-error-200 dark:border-error-600">
           {error}
         </div>
       )}
 
       <form onSubmit={handleEmailLogin} className="space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-primary-700 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-primary-700 dark:text-primary-200 mb-1">
             Email
           </label>
           <input
@@ -116,7 +116,7 @@ export default function ConnexionPage() {
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-primary-700 mb-1">
+          <label htmlFor="password" className="block text-sm font-medium text-primary-700 dark:text-primary-200 mb-1">
             Mot de passe
           </label>
           <input
@@ -140,10 +140,10 @@ export default function ConnexionPage() {
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-parchment-300" />
+          <div className="w-full border-t border-parchment-300 dark:border-primary-700" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-parchment-50 text-primary-400">ou</span>
+          <span className="px-2 bg-parchment-50 dark:bg-primary-800 text-primary-400">ou</span>
         </div>
       </div>
 
@@ -173,16 +173,16 @@ export default function ConnexionPage() {
         Continuer avec Google
       </button>
 
-      <p className="text-center text-sm text-primary-500 mt-6">
+      <p className="text-center text-sm text-primary-500 dark:text-primary-400 mt-6">
         Pas encore de compte?{" "}
-        <Link href="/inscription" className="text-olive-600 hover:underline font-medium">
+        <Link href="/inscription" className="text-olive-600 dark:text-olive-400 hover:underline font-medium">
           S&apos;inscrire
         </Link>
       </p>
 
-      <p className="text-center text-sm text-primary-400 mt-2">
+      <p className="text-center text-sm text-primary-400 dark:text-primary-500 mt-2">
         <Link href="/" className="hover:underline">
-          Continuer en tant qu&apos;invité
+          Continuer en tant qu&apos;invite
         </Link>
       </p>
     </div>

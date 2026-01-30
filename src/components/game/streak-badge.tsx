@@ -24,8 +24,8 @@ export const StreakBadge = memo(function StreakBadge({ streak, className, compac
           <Flame className={cn("w-5 h-5", { "fill-current": isActive })} />
         </div>
         <div>
-          <p className="text-xs text-primary-500">Série</p>
-          <p className="font-bold text-primary-800">{streak} jours</p>
+          <p className="text-xs text-primary-500 dark:text-primary-400">Serie</p>
+          <p className="font-bold text-primary-800 dark:text-parchment-100">{streak} jours</p>
         </div>
       </div>
     );
@@ -36,8 +36,8 @@ export const StreakBadge = memo(function StreakBadge({ streak, className, compac
       className={cn(
         "flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-all duration-200",
         {
-          "bg-gold-100 text-gold-700 border border-gold-300": isActive,
-          "bg-parchment-200 text-primary-400 border border-parchment-300": !isActive,
+          "bg-gold-100 dark:bg-gold-900/40 text-gold-700 dark:text-gold-300 border border-gold-300 dark:border-gold-700": isActive,
+          "bg-parchment-200 dark:bg-primary-800/50 text-primary-400 dark:text-primary-500 border border-parchment-300 dark:border-primary-700": !isActive,
         },
         className
       )}

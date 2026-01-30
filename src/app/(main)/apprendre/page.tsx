@@ -123,7 +123,7 @@ function ApprendreContent() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Apprendre</h1>
+      <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50 mb-6">Apprendre</h1>
 
       {error && (
         <div className="bg-error-50 border border-error-200 text-error-600 p-4 rounded-xl mb-6 text-center">
@@ -143,7 +143,7 @@ function ApprendreContent() {
             className={cn(
               "p-4 rounded-xl border-2 transition-all text-center",
               {
-                "border-gray-200 hover:border-gray-300":
+                "border-parchment-300 dark:border-primary-700 hover:border-primary-300 dark:hover:border-primary-500":
                   selectedCategory !== category.name_key,
                 "ring-2 ring-offset-2": selectedCategory === category.name_key,
               }
@@ -174,14 +174,14 @@ function ApprendreContent() {
 
       {/* Selected category content */}
       {loading ? (
-        <div className="text-center py-12 text-gray-500">Chargement...</div>
+        <div className="text-center py-12 text-primary-500 dark:text-primary-400">Chargement...</div>
       ) : selectedCategory && categoryInfo ? (
         <div>
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">
+            <h2 className="text-xl font-bold text-primary-800 dark:text-parchment-50 mb-1">
               {categoryInfo.name}
             </h2>
-            <p className="text-gray-600">{categoryInfo.description}</p>
+            <p className="text-primary-600 dark:text-primary-400">{categoryInfo.description}</p>
           </div>
 
           {/* Units */}
@@ -207,17 +207,17 @@ function ApprendreContent() {
                           {unitIndex + 1}
                         </div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">
+                          <h3 className="font-semibold text-primary-800 dark:text-parchment-50">
                             {unit.name}
                           </h3>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-primary-500 dark:text-primary-400">
                             {locked
-                              ? "Complétez l'unité précédente pour débloquer"
-                              : `${unit.lessons.filter((l) => l.completed).length}/${unit.lessons.length} leçons`}
+                              ? "Completez l'unite precedente pour debloquer"
+                              : `${unit.lessons.filter((l) => l.completed).length}/${unit.lessons.length} lecons`}
                           </p>
                         </div>
                       </div>
-                      {locked && <Lock className="w-5 h-5 text-gray-400" />}
+                      {locked && <Lock className="w-5 h-5 text-primary-400 dark:text-primary-600" />}
                     </div>
 
                     {!locked && (
@@ -236,21 +236,21 @@ function ApprendreContent() {
                               className={cn(
                                 "flex items-center gap-2 p-3 rounded-lg border transition-colors",
                                 {
-                                  "border-green-200 bg-green-50": lesson.completed,
-                                  "border-gray-200 hover:border-primary-300 hover:bg-primary-50":
+                                  "border-success-200 dark:border-success-800 bg-success-50 dark:bg-success-900/30": lesson.completed,
+                                  "border-parchment-300 dark:border-primary-700 hover:border-primary-300 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/30":
                                     !lesson.completed,
                                 }
                               )}
                             >
                               {lesson.completed ? (
-                                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                                <CheckCircle className="w-5 h-5 text-success-600 dark:text-success-400 flex-shrink-0" />
                               ) : (
-                                <div className="w-5 h-5 rounded-full border-2 border-gray-300 flex-shrink-0" />
+                                <div className="w-5 h-5 rounded-full border-2 border-primary-300 dark:border-primary-600 flex-shrink-0" />
                               )}
                               <span
                                 className={cn("text-sm font-medium", {
-                                  "text-green-700": lesson.completed,
-                                  "text-gray-700": !lesson.completed,
+                                  "text-success-700 dark:text-success-400": lesson.completed,
+                                  "text-primary-700 dark:text-primary-300": !lesson.completed,
                                 })}
                               >
                                 {lesson.name}
@@ -268,12 +268,12 @@ function ApprendreContent() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">
-            Choisissez une catégorie
+          <BookOpen className="w-16 h-16 text-primary-300 dark:text-primary-600 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-primary-800 dark:text-parchment-50 mb-2">
+            Choisissez une categorie
           </h2>
-          <p className="text-gray-600">
-            Sélectionnez une catégorie ci-dessus pour commencer à apprendre
+          <p className="text-primary-600 dark:text-primary-400">
+            Selectionnez une categorie ci-dessus pour commencer a apprendre
           </p>
         </div>
       )}
