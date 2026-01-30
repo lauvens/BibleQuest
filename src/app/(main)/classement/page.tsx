@@ -1,30 +1,40 @@
 "use client";
 
-import { useState } from "react";
-import { Trophy, Medal, Crown, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Trophy, Medal, Crown, TrendingUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/lib/store/user-store";
+import { getLeaderboard } from "@/lib/supabase/queries";
 
-// Sample leaderboard data
-const leaderboardData = [
-  { rank: 1, username: "BiblioPhile", xp: 2450, change: "up", avatar: "B" },
-  { rank: 2, username: "FaithSeeker", xp: 2280, change: "up", avatar: "F" },
-  { rank: 3, username: "ScriptureStudent", xp: 2150, change: "down", avatar: "S" },
-  { rank: 4, username: "WordLover", xp: 1980, change: "same", avatar: "W" },
-  { rank: 5, username: "GraceWalker", xp: 1850, change: "up", avatar: "G" },
-  { rank: 6, username: "TruthHunter", xp: 1720, change: "down", avatar: "T" },
-  { rank: 7, username: "SpiritGuided", xp: 1650, change: "same", avatar: "S" },
-  { rank: 8, username: "PsalmSinger", xp: 1580, change: "up", avatar: "P" },
-  { rank: 9, username: "ProverbsReader", xp: 1490, change: "down", avatar: "P" },
-  { rank: 10, username: "GospelBearer", xp: 1420, change: "same", avatar: "G" },
-];
+interface LeaderboardEntry {
+  id: string;
+  username: string | null;
+  avatar_url: string | null;
+  xp: number;
+}
 
 type TimeRange = "weekly" | "monthly" | "allTime";
 
 export default function ClassementPage() {
   const [timeRange, setTimeRange] = useState<TimeRange>("weekly");
-  const { username, xp, isGuest } = useUserStore();
+  const { id: userId, username, xp, isGuest } = useUserStore();
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  const loadLeaderboard = () => {
+    setLoading(true);
+    setError(false);
+    getLeaderboard(20)
+      .then((data) => setLeaderboard(data as LeaderboardEntry[]))
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadLeaderboard();
+  }, [timeRange]);
 
   const getRankIcon = (rank: number) => {
     switch (rank) {
@@ -39,19 +49,8 @@ export default function ClassementPage() {
     }
   };
 
-  const getChangeIcon = (change: string) => {
-    switch (change) {
-      case "up":
-        return <TrendingUp className="w-4 h-4 text-green-500" />;
-      case "down":
-        return <TrendingDown className="w-4 h-4 text-red-500" />;
-      default:
-        return <Minus className="w-4 h-4 text-gray-400" />;
-    }
-  };
-
-  // Calculate user's hypothetical rank
-  const userRank = leaderboardData.findIndex((p) => p.xp < xp) + 1 || leaderboardData.length + 1;
+  const userRank = leaderboard.findIndex((p) => p.id === userId) + 1;
+  const userRankFallback = userRank > 0 ? userRank : (leaderboard.findIndex((p) => p.xp < xp) + 1 || leaderboard.length + 1);
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -84,71 +83,98 @@ export default function ClassementPage() {
         ))}
       </div>
 
-      {/* Top 3 podium */}
-      <div className="flex items-end justify-center gap-4 mb-8">
-        {/* 2nd place */}
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-2 text-xl font-bold text-gray-600">
-            {leaderboardData[1].avatar}
-          </div>
-          <p className="font-medium text-sm">{leaderboardData[1].username}</p>
-          <p className="text-xs text-gray-500">{leaderboardData[1].xp} XP</p>
-          <div className="w-16 h-20 bg-gray-200 rounded-t-lg mt-2 flex items-center justify-center">
-            <Medal className="w-8 h-8 text-gray-400" />
-          </div>
-        </div>
-
-        {/* 1st place */}
-        <div className="text-center">
-          <div className="w-20 h-20 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-2 text-2xl font-bold text-yellow-600 ring-4 ring-yellow-400">
-            {leaderboardData[0].avatar}
-          </div>
-          <p className="font-medium">{leaderboardData[0].username}</p>
-          <p className="text-sm text-gray-500">{leaderboardData[0].xp} XP</p>
-          <div className="w-20 h-28 bg-yellow-100 rounded-t-lg mt-2 flex items-center justify-center">
-            <Crown className="w-10 h-10 text-yellow-500" />
-          </div>
-        </div>
-
-        {/* 3rd place */}
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-2 text-xl font-bold text-amber-600">
-            {leaderboardData[2].avatar}
-          </div>
-          <p className="font-medium text-sm">{leaderboardData[2].username}</p>
-          <p className="text-xs text-gray-500">{leaderboardData[2].xp} XP</p>
-          <div className="w-16 h-16 bg-amber-100 rounded-t-lg mt-2 flex items-center justify-center">
-            <Medal className="w-8 h-8 text-amber-600" />
-          </div>
-        </div>
-      </div>
-
-      {/* Full leaderboard */}
-      <Card>
-        <CardContent className="p-0">
-          {leaderboardData.slice(3).map((player, index) => (
-            <div
-              key={player.rank}
-              className={cn(
-                "flex items-center gap-4 p-4",
-                {
-                  "border-b border-gray-100": index < leaderboardData.length - 4,
-                }
-              )}
-            >
-              {getRankIcon(player.rank)}
-              <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center font-medium text-primary-600">
-                {player.avatar}
+      {error ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p className="text-error-600 mb-2">Impossible de charger le classement.</p>
+            <button onClick={loadLeaderboard} className="text-sm font-medium text-primary-600 hover:underline">
+              Réessayer
+            </button>
+          </CardContent>
+        </Card>
+      ) : loading ? (
+        <div className="text-center py-12 text-gray-500">Chargement...</div>
+      ) : leaderboard.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center">
+            <TrendingUp className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+            <p className="text-gray-600">Aucun joueur dans le classement pour le moment.</p>
+            <p className="text-gray-500 text-sm mt-2">Complétez des leçons pour apparaître ici!</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          {/* Top 3 podium */}
+          {leaderboard.length >= 3 && (
+            <div className="flex items-end justify-center gap-4 mb-8">
+              {/* 2nd place */}
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mx-auto mb-2 text-xl font-bold text-gray-600">
+                  {(leaderboard[1].username || "?").charAt(0).toUpperCase()}
+                </div>
+                <p className="font-medium text-sm">{leaderboard[1].username || "Anonyme"}</p>
+                <p className="text-xs text-gray-500">{leaderboard[1].xp} XP</p>
+                <div className="w-16 h-20 bg-gray-200 rounded-t-lg mt-2 flex items-center justify-center">
+                  <Medal className="w-8 h-8 text-gray-400" />
+                </div>
               </div>
-              <div className="flex-1">
-                <p className="font-medium text-gray-900">{player.username}</p>
-                <p className="text-sm text-gray-500">{player.xp} XP</p>
+
+              {/* 1st place */}
+              <div className="text-center">
+                <div className="w-20 h-20 rounded-full bg-yellow-100 flex items-center justify-center mx-auto mb-2 text-2xl font-bold text-yellow-600 ring-4 ring-yellow-400">
+                  {(leaderboard[0].username || "?").charAt(0).toUpperCase()}
+                </div>
+                <p className="font-medium">{leaderboard[0].username || "Anonyme"}</p>
+                <p className="text-sm text-gray-500">{leaderboard[0].xp} XP</p>
+                <div className="w-20 h-28 bg-yellow-100 rounded-t-lg mt-2 flex items-center justify-center">
+                  <Crown className="w-10 h-10 text-yellow-500" />
+                </div>
               </div>
-              {getChangeIcon(player.change)}
+
+              {/* 3rd place */}
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-2 text-xl font-bold text-amber-600">
+                  {(leaderboard[2].username || "?").charAt(0).toUpperCase()}
+                </div>
+                <p className="font-medium text-sm">{leaderboard[2].username || "Anonyme"}</p>
+                <p className="text-xs text-gray-500">{leaderboard[2].xp} XP</p>
+                <div className="w-16 h-16 bg-amber-100 rounded-t-lg mt-2 flex items-center justify-center">
+                  <Medal className="w-8 h-8 text-amber-600" />
+                </div>
+              </div>
             </div>
-          ))}
-        </CardContent>
-      </Card>
+          )}
+
+          {/* Full leaderboard */}
+          {leaderboard.length > 3 && (
+            <Card>
+              <CardContent className="p-0">
+                {leaderboard.slice(3).map((player, index) => (
+                  <div
+                    key={player.id}
+                    className={cn(
+                      "flex items-center gap-4 p-4",
+                      {
+                        "border-b border-gray-100": index < leaderboard.length - 4,
+                        "bg-primary-50": player.id === userId,
+                      }
+                    )}
+                  >
+                    {getRankIcon(index + 4)}
+                    <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center font-medium text-primary-600">
+                      {(player.username || "?").charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-medium text-gray-900">{player.username || "Anonyme"}</p>
+                      <p className="text-sm text-gray-500">{player.xp} XP</p>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
 
       {/* User's position */}
       {!isGuest && (
@@ -157,7 +183,7 @@ export default function ClassementPage() {
             <p className="text-sm text-gray-500 mb-2">Votre position</p>
             <div className="flex items-center gap-4">
               <span className="w-8 h-8 flex items-center justify-center font-bold text-primary-600">
-                #{userRank}
+                #{userRankFallback}
               </span>
               <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center font-medium text-primary-600">
                 {(username || "U").charAt(0).toUpperCase()}

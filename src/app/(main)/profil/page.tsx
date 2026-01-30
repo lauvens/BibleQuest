@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -18,26 +19,33 @@ import { CurrencyDisplay } from "@/components/game/currency-display";
 import { StreakBadge } from "@/components/game/streak-badge";
 import { useUserStore } from "@/lib/store/user-store";
 import { createClient } from "@/lib/supabase/client";
+import { getUserStats, getUserAchievements } from "@/lib/supabase/queries";
 
-// Sample achievements
-const achievements = [
-  { id: "1", name: "Premier Pas", icon: "footprints", unlocked: true },
-  { id: "2", name: "Semaine Fidèle", icon: "flame", unlocked: true },
+interface AchievementData {
+  id: string;
+  name: string;
+  icon: string;
+  unlocked: boolean;
+}
+
+interface StatsData {
+  lessonsCompleted: number;
+  totalAttempts: number;
+  avgScore: number;
+}
+
+// Hoisted outside component to avoid recreation - rendering-hoist-jsx rule
+const FALLBACK_ACHIEVEMENTS: AchievementData[] = [
+  { id: "1", name: "Premier Pas", icon: "footprints", unlocked: false },
+  { id: "2", name: "Semaine Fidèle", icon: "flame", unlocked: false },
   { id: "3", name: "Sans Faute", icon: "star", unlocked: false },
   { id: "4", name: "Érudit", icon: "graduation-cap", unlocked: false },
-];
-
-// Sample stats
-const stats = [
-  { label: "Leçons terminées", value: 12 },
-  { label: "Questions répondues", value: 156 },
-  { label: "Précision moyenne", value: "78%" },
-  { label: "Temps total", value: "4h 32m" },
 ];
 
 export default function ProfilPage() {
   const router = useRouter();
   const {
+    id: userId,
     isGuest,
     username,
     email,
@@ -53,6 +61,37 @@ export default function ProfilPage() {
 
   const hearts = getActualHearts();
   const supabase = createClient();
+
+  const [achievements, setAchievements] = useState<AchievementData[]>([]);
+  const [stats, setStats] = useState<StatsData | null>(null);
+  const [error, setError] = useState(false);
+
+  const loadProfile = async () => {
+    if (!userId || isGuest) return;
+    setError(false);
+    try {
+      // Parallel fetch - async-parallel rule
+      const [statsData, achievementsData] = await Promise.all([
+        getUserStats(userId),
+        getUserAchievements(userId),
+      ]);
+      setStats(statsData);
+      setAchievements(
+        achievementsData.map((a) => ({
+          id: a.id,
+          name: a.name,
+          icon: a.icon,
+          unlocked: a.unlocked,
+        }))
+      );
+    } catch {
+      setError(true);
+    }
+  };
+
+  useEffect(() => {
+    loadProfile();
+  }, [userId, isGuest]);
 
   const handleLogout = async () => {
     try {
@@ -110,6 +149,27 @@ export default function ProfilPage() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <p className="text-error-600 mb-2">Impossible de charger le profil.</p>
+            <button onClick={loadProfile} className="text-sm font-medium text-primary-600 hover:underline">
+              Réessayer
+            </button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const displayStats = [
+    { label: "Leçons terminées", value: stats?.lessonsCompleted ?? 0 },
+    { label: "Questions répondues", value: stats?.totalAttempts ?? 0 },
+    { label: "Précision moyenne", value: stats ? `${stats.avgScore}%` : "—" },
+  ];
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       {/* Profile header */}
@@ -129,9 +189,9 @@ export default function ProfilPage() {
                 <p className="text-gray-500">{email}</p>
               </div>
             </div>
-            <button className="p-2 hover:bg-gray-100 rounded-lg">
-              <Settings className="w-5 h-5 text-gray-500" />
-            </button>
+            <Link href="/profil/parametres" className="p-2 hover:bg-parchment-200 rounded-lg transition-colors">
+              <Settings className="w-5 h-5 text-primary-500" />
+            </Link>
           </div>
 
           <XpBar xp={xp} level={level} className="mb-4" />
@@ -164,8 +224,8 @@ export default function ProfilPage() {
 
       {/* Stats grid */}
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Statistiques</h2>
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        {stats.map((stat) => (
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        {displayStats.map((stat) => (
           <Card key={stat.label}>
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
@@ -188,7 +248,10 @@ export default function ProfilPage() {
       <Card className="mb-6">
         <CardContent className="p-4">
           <div className="grid grid-cols-4 gap-4">
-            {achievements.map((achievement) => (
+            {(achievements.length > 0
+              ? achievements.slice(0, 4)
+              : FALLBACK_ACHIEVEMENTS
+            ).map((achievement) => (
               <div
                 key={achievement.id}
                 className={`text-center ${

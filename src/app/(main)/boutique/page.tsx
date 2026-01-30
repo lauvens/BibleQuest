@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/lib/store/user-store";
+import { useToast } from "@/components/ui/toast";
 
 type TabType = "hearts" | "cosmetics" | "gems";
 
@@ -61,6 +62,7 @@ const gemPackages = [
 export default function BoutiquePage() {
   const [activeTab, setActiveTab] = useState<TabType>("hearts");
   const { coins, gems, getActualHearts, spendCoins, spendGems } = useUserStore();
+  const { showToast } = useToast();
 
   const hearts = getActualHearts();
 
@@ -77,9 +79,9 @@ export default function BoutiquePage() {
     }
 
     if (success) {
-      alert(`${itemName} acheté avec succès!`);
+      showToast(`${itemName} acheté avec succès!`, "success");
     } else {
-      alert(`Pas assez de ${currency === "coins" ? "pièces" : "gemmes"}!`);
+      showToast(`Pas assez de ${currency === "coins" ? "pièces" : "gemmes"}!`, "error");
     }
   };
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { BookOpen, Target, Trophy, Flame, Scroll, MapPin, Heart, Cross } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,41 +10,28 @@ import { HeartsDisplay } from "@/components/game/hearts-display";
 import { StreakBadge } from "@/components/game/streak-badge";
 import { CurrencyDisplay } from "@/components/game/currency-display";
 import { useUserStore } from "@/lib/store/user-store";
+import { getCategoriesWithCounts, getDailyVerse } from "@/lib/supabase/queries";
 
-const categories = [
-  {
-    slug: "history",
-    name: "Histoire",
-    description: "Chronologie biblique",
-    icon: Scroll,
-    bgColor: "bg-primary-100",
-    iconColor: "text-primary-600",
-  },
-  {
-    slug: "context",
-    name: "Contexte",
-    description: "Culture et géographie",
-    icon: MapPin,
-    bgColor: "bg-olive-100",
-    iconColor: "text-olive-600",
-  },
-  {
-    slug: "verses",
-    name: "Versets",
-    description: "Mémorisation",
-    icon: BookOpen,
-    bgColor: "bg-info-100",
-    iconColor: "text-info-600",
-  },
-  {
-    slug: "doctrines",
-    name: "Doctrines",
-    description: "Fondements de la foi",
-    icon: Cross,
-    bgColor: "bg-gold-100",
-    iconColor: "text-gold-700",
-  },
-];
+const iconMap: Record<string, React.ElementType> = {
+  scroll: Scroll,
+  map: MapPin,
+  "book-open": BookOpen,
+  church: Cross,
+};
+
+const styleMap: Record<string, { bgColor: string; iconColor: string }> = {
+  history: { bgColor: "bg-primary-100", iconColor: "text-primary-600" },
+  context: { bgColor: "bg-olive-100", iconColor: "text-olive-600" },
+  verses: { bgColor: "bg-info-100", iconColor: "text-info-600" },
+  doctrines: { bgColor: "bg-gold-100", iconColor: "text-gold-700" },
+};
+
+const nameMap: Record<string, { name: string; description: string }> = {
+  history: { name: "Histoire", description: "Chronologie biblique" },
+  context: { name: "Contexte", description: "Culture et géographie" },
+  verses: { name: "Versets", description: "Mémorisation" },
+  doctrines: { name: "Doctrines", description: "Fondements de la foi" },
+};
 
 export default function HomePage() {
   const {
@@ -58,6 +46,31 @@ export default function HomePage() {
   } = useUserStore();
 
   const hearts = getActualHearts();
+
+  const [categories, setCategories] = useState<
+    { id: string; name_key: string; icon: string; color: string; lessonCount: number }[]
+  >([]);
+  const [error, setError] = useState(false);
+  const [verse, setVerse] = useState<{ text: string; reference: string } | null>(null);
+
+  const loadData = async () => {
+    setError(false);
+    try {
+      // Parallel fetch - async-parallel rule
+      const [categoriesData, verseData] = await Promise.all([
+        getCategoriesWithCounts(),
+        getDailyVerse().catch(() => null),
+      ]);
+      setCategories(categoriesData);
+      setVerse(verseData);
+    } catch {
+      setError(true);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
@@ -143,22 +156,37 @@ export default function HomePage() {
       <h2 className="text-lg font-semibold text-primary-800 mb-4">
         Que voulez-vous apprendre?
       </h2>
+      {error && (
+        <Card className="mb-4 border-error-200 bg-error-50">
+          <CardContent className="p-4 text-center">
+            <p className="text-error-600 mb-2">Impossible de charger les catégories.</p>
+            <button onClick={loadData} className="text-sm font-medium text-primary-600 hover:underline">
+              Réessayer
+            </button>
+          </CardContent>
+        </Card>
+      )}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {categories.map((category) => (
-          <Link key={category.slug} href={`/apprendre?category=${category.slug}`}>
-            <Card variant="interactive" className="h-full">
-              <CardContent className="p-4 flex flex-col items-center text-center">
-                <div className={`w-14 h-14 rounded-2xl ${category.bgColor} flex items-center justify-center mb-3 shadow-soft`}>
-                  <category.icon className={`w-7 h-7 ${category.iconColor}`} />
-                </div>
-                <h3 className="font-semibold text-primary-800">{category.name}</h3>
-                <p className="text-xs text-primary-400 mt-1">
-                  {category.description}
-                </p>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+        {categories.map((category) => {
+          const Icon = iconMap[category.icon] || BookOpen;
+          const style = styleMap[category.name_key] || { bgColor: "bg-gray-100", iconColor: "text-gray-600" };
+          const names = nameMap[category.name_key] || { name: category.name_key, description: "" };
+          return (
+            <Link key={category.id} href={`/apprendre?category=${category.name_key}`}>
+              <Card variant="interactive" className="h-full">
+                <CardContent className="p-4 flex flex-col items-center text-center">
+                  <div className={`w-14 h-14 rounded-2xl ${style.bgColor} flex items-center justify-center mb-3 shadow-soft`}>
+                    <Icon className={`w-7 h-7 ${style.iconColor}`} />
+                  </div>
+                  <h3 className="font-semibold text-primary-800">{names.name}</h3>
+                  <p className="text-xs text-primary-400 mt-1">
+                    {category.lessonCount} leçons
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          );
+        })}
       </div>
 
       {/* Leaderboard Preview */}
@@ -207,12 +235,25 @@ export default function HomePage() {
       {/* Daily Verse */}
       <Card className="mt-8 bg-parchment-100 border-parchment-400">
         <CardContent className="p-6">
-          <p className="verse-text text-center mb-3">
-            &quot;Ta parole est une lampe à mes pieds, et une lumière sur mon sentier.&quot;
-          </p>
-          <p className="verse-reference text-center">
-            Psaume 119:105
-          </p>
+          {verse ? (
+            <>
+              <p className="verse-text text-center mb-3">
+                &quot;{verse.text}&quot;
+              </p>
+              <p className="verse-reference text-center">
+                {verse.reference}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="verse-text text-center mb-3">
+                &quot;Ta parole est une lampe à mes pieds, et une lumière sur mon sentier.&quot;
+              </p>
+              <p className="verse-reference text-center">
+                Psaume 119:105
+              </p>
+            </>
+          )}
         </CardContent>
       </Card>
     </div>

@@ -12,19 +12,43 @@ export default function InscriptionPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
+
+  const validatePassword = (pw: string): string | null => {
+    if (pw.length < 8) return "Le mot de passe doit contenir au moins 8 caractères.";
+    if (!/[A-Z]/.test(pw)) return "Le mot de passe doit contenir au moins une majuscule.";
+    if (!/[0-9]/.test(pw)) return "Le mot de passe doit contenir au moins un chiffre.";
+    return null;
+  };
+
+  const sanitizeUsername = (name: string) =>
+    name.replace(/[^a-zA-Z0-9À-ÿ_-]/g, "").slice(0, 30);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
+    const cleanUsername = sanitizeUsername(username);
+    if (cleanUsername.length < 3) {
+      setError("Le nom d'utilisateur doit contenir au moins 3 caractères.");
+      setLoading(false);
+      return;
+    }
+
+    const pwError = validatePassword(password);
+    if (pwError) {
+      setError(pwError);
+      setLoading(false);
+      return;
+    }
+
+    const supabase = createClient();
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
-          username,
+          username: cleanUsername,
         },
       },
     });
@@ -40,6 +64,7 @@ export default function InscriptionPage() {
 
   const handleGoogleSignup = async () => {
     setLoading(true);
+    const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -54,37 +79,39 @@ export default function InscriptionPage() {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8">
-      <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">
+    <div className="bg-parchment-50 rounded-2xl shadow-elevated p-8 border border-parchment-300">
+      <h1 className="text-2xl font-bold text-center text-primary-800 mb-2">
         Créer un compte
       </h1>
-      <p className="text-center text-gray-600 mb-6">
+      <p className="text-center text-primary-500 mb-6">
         Commencez votre aventure biblique
       </p>
 
       {error && (
-        <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">
+        <div className="bg-error-50 text-error-600 p-3 rounded-xl mb-4 text-sm border border-error-200">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSignup} className="space-y-4">
         <div>
-          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="username" className="block text-sm font-medium text-primary-700 mb-1">
             Nom d&apos;utilisateur
           </label>
           <input
             id="username"
             type="text"
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            onChange={(e) => setUsername(sanitizeUsername(e.target.value))}
+            className="input"
+            minLength={3}
+            maxLength={30}
             required
           />
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-primary-700 mb-1">
             Email
           </label>
           <input
@@ -92,13 +119,13 @@ export default function InscriptionPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="input"
             required
           />
         </div>
 
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="password" className="block text-sm font-medium text-primary-700 mb-1">
             Mot de passe
           </label>
           <input
@@ -106,17 +133,17 @@ export default function InscriptionPage() {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-            minLength={6}
+            className="input"
+            minLength={8}
             required
           />
-          <p className="text-xs text-gray-500 mt-1">Minimum 6 caractères</p>
+          <p className="text-xs text-primary-400 mt-1">Minimum 8 caractères, 1 majuscule, 1 chiffre</p>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="btn-primary w-full"
         >
           {loading ? "Création..." : "Créer mon compte"}
         </button>
@@ -124,17 +151,17 @@ export default function InscriptionPage() {
 
       <div className="relative my-6">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-300" />
+          <div className="w-full border-t border-parchment-300" />
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-gray-500">ou</span>
+          <span className="px-2 bg-parchment-50 text-primary-400">ou</span>
         </div>
       </div>
 
       <button
         onClick={handleGoogleSignup}
         disabled={loading}
-        className="w-full flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="btn-outline w-full flex items-center justify-center gap-2"
       >
         <svg className="w-5 h-5" viewBox="0 0 24 24">
           <path
@@ -157,9 +184,9 @@ export default function InscriptionPage() {
         S&apos;inscrire avec Google
       </button>
 
-      <p className="text-center text-sm text-gray-600 mt-6">
+      <p className="text-center text-sm text-primary-500 mt-6">
         Déjà un compte?{" "}
-        <Link href="/connexion" className="text-primary-600 hover:underline font-medium">
+        <Link href="/connexion" className="text-olive-600 hover:underline font-medium">
           Se connecter
         </Link>
       </p>

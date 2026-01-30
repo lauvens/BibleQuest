@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Target, Trophy, Clock, Zap } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,100 +10,49 @@ import { HeartsDisplay } from "@/components/game/hearts-display";
 import { QuestionRenderer } from "@/components/questions/question-renderer";
 import { useUserStore } from "@/lib/store/user-store";
 import { QuestionType, QuestionContent } from "@/types";
+import { getRandomQuestions } from "@/lib/supabase/queries";
 
-// Sample daily challenge questions
-const challengeQuestions: { type: QuestionType; content: QuestionContent }[] = [
-  {
-    type: "multiple_choice",
-    content: {
-      question: "Quel prophète a été avalé par un grand poisson?",
-      options: ["Elie", "Jonas", "Elisee", "Daniel"],
-      correct: 1,
-    },
-  },
-  {
-    type: "true_false",
-    content: {
-      statement: "Moïse a reçu les Dix Commandements sur le Mont Sinaï.",
-      correct: true,
-    },
-  },
-  {
-    type: "multiple_choice",
-    content: {
-      question: "Combien d'apotres Jesus avait-il?",
-      options: ["10", "11", "12", "13"],
-      correct: 2,
-    },
-  },
-  {
-    type: "fill_blank",
-    content: {
-      verse: "Car Dieu a tant aime le ___ qu'il a donne son Fils unique.",
-      answer: "monde",
-      reference: "Jean 3:16",
-    },
-  },
-  {
-    type: "true_false",
-    content: {
-      statement: "Le livre des Psaumes a été écrit uniquement par David.",
-      correct: false,
-    },
-  },
-  {
-    type: "multiple_choice",
-    content: {
-      question: "Qui était le père de Salomon?",
-      options: ["Saul", "David", "Samuel", "Nathan"],
-      correct: 1,
-    },
-  },
-  {
-    type: "multiple_choice",
-    content: {
-      question: "Dans quelle ville Jésus est-il né?",
-      options: ["Nazareth", "Jérusalem", "Bethléem", "Capharnaüm"],
-      correct: 2,
-    },
-  },
-  {
-    type: "true_false",
-    content: {
-      statement: "Paul était l'un des 12 apôtres originaux.",
-      correct: false,
-    },
-  },
-  {
-    type: "multiple_choice",
-    content: {
-      question: "Quel est le premier livre de la Bible ?",
-      options: ["Exode", "Genèse", "Lévitique", "Nombres"],
-      correct: 1,
-    },
-  },
-  {
-    type: "fill_blank",
-    content: {
-      verse: "L'Eternel est mon ___; je ne manquerai de rien.",
-      answer: "berger",
-      reference: "Psaume 23:1",
-    },
-  },
-];
+interface LoadedQuestion {
+  type: QuestionType;
+  content: QuestionContent;
+}
 
 export default function DefiPage() {
   const router = useRouter();
   const { getActualHearts, loseHeart, addXp, addCoins, updateStreak } = useUserStore();
 
+  const [questions, setQuestions] = useState<LoadedQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [started, setStarted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
 
   const hearts = getActualHearts();
-  const progress = (currentQuestionIndex / challengeQuestions.length) * 100;
-  const currentQuestion = challengeQuestions[currentQuestionIndex];
+
+  const loadQuestions = () => {
+    setLoading(true);
+    setError(false);
+    getRandomQuestions(10)
+      .then((qs) =>
+        setQuestions(
+          qs.map((q) => ({
+            type: q.type as QuestionType,
+            content: q.content as unknown as QuestionContent,
+          }))
+        )
+      )
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadQuestions();
+  }, []);
+
+  const progress = questions.length > 0 ? (currentQuestionIndex / questions.length) * 100 : 0;
+  const currentQuestion = questions[currentQuestionIndex];
 
   const handleStart = () => {
     updateStreak();
@@ -118,13 +67,12 @@ export default function DefiPage() {
     }
 
     setTimeout(() => {
-      if (currentQuestionIndex < challengeQuestions.length - 1) {
+      if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex((prev) => prev + 1);
       } else {
         const finalCorrect = correctAnswers + (correct ? 1 : 0);
-        const score = Math.round((finalCorrect / challengeQuestions.length) * 100);
+        const score = Math.round((finalCorrect / questions.length) * 100);
 
-        // Daily challenge rewards
         const xpEarned = 25 + Math.round(25 * (score / 100));
         const coinsEarned = 15 + Math.round(15 * (score / 100));
 
@@ -136,7 +84,26 @@ export default function DefiPage() {
     }, 1500);
   };
 
-  const finalScore = Math.round((correctAnswers / challengeQuestions.length) * 100);
+  const finalScore = questions.length > 0 ? Math.round((correctAnswers / questions.length) * 100) : 0;
+
+  if (error) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-8 text-center">
+        <p className="text-error-600 mb-2">Impossible de charger le défi.</p>
+        <button onClick={loadQuestions} className="text-sm font-medium text-primary-600 hover:underline">
+          Réessayer
+        </button>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-8 text-center text-gray-500">
+        Chargement du défi...
+      </div>
+    );
+  }
 
   if (!started) {
     return (
@@ -146,7 +113,7 @@ export default function DefiPage() {
             <Target className="w-16 h-16 mx-auto mb-4" />
             <h1 className="text-3xl font-bold mb-2">Défi Quotidien</h1>
             <p className="text-white/90">
-              10 questions pour tester vos connaissances
+              {questions.length} questions pour tester vos connaissances
             </p>
           </div>
 
@@ -154,7 +121,7 @@ export default function DefiPage() {
             <div className="grid grid-cols-3 gap-4 mb-6">
               <div className="text-center p-4 bg-gray-50 rounded-xl">
                 <Clock className="w-6 h-6 text-gray-600 mx-auto mb-2" />
-                <p className="text-sm text-gray-600">10 questions</p>
+                <p className="text-sm text-gray-600">{questions.length} questions</p>
               </div>
               <div className="text-center p-4 bg-gray-50 rounded-xl">
                 <Zap className="w-6 h-6 text-xp mx-auto mb-2" />
@@ -173,7 +140,7 @@ export default function DefiPage() {
 
             <Button
               onClick={handleStart}
-              disabled={hearts <= 0}
+              disabled={hearts <= 0 || questions.length === 0}
               className="w-full"
               size="lg"
             >
@@ -222,7 +189,7 @@ export default function DefiPage() {
             </div>
 
             <Button onClick={() => router.push("/")} className="w-full">
-              Retour a l&apos;accueil
+              Retour à l&apos;accueil
             </Button>
           </CardContent>
         </Card>
@@ -253,13 +220,15 @@ export default function DefiPage() {
         <Card>
           <CardContent className="p-6">
             <p className="text-sm text-gray-500 mb-4 text-center">
-              Question {currentQuestionIndex + 1} / {challengeQuestions.length}
+              Question {currentQuestionIndex + 1} / {questions.length}
             </p>
-            <QuestionRenderer
-              type={currentQuestion.type}
-              content={currentQuestion.content}
-              onAnswer={handleAnswer}
-            />
+            {currentQuestion && (
+              <QuestionRenderer
+                type={currentQuestion.type}
+                content={currentQuestion.content}
+                onAnswer={handleAnswer}
+              />
+            )}
           </CardContent>
         </Card>
       </div>

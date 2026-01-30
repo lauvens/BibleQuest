@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -10,7 +11,8 @@ interface HeartsDisplayProps {
   compact?: boolean;
 }
 
-export function HeartsDisplay({
+// Memoize to prevent re-renders when parent state changes - rerender-memo rule
+export const HeartsDisplay = memo(function HeartsDisplay({
   hearts,
   maxHearts = 5,
   className,
@@ -43,4 +45,4 @@ export function HeartsDisplay({
       ))}
     </div>
   );
-}
+});

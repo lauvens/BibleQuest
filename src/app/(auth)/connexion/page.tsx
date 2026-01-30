@@ -5,15 +5,26 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_MS = 60_000;
+
 export default function ConnexionPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   const router = useRouter();
+
+  const isLocked = lockedUntil !== null && Date.now() < lockedUntil;
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLocked) {
+      setError("Trop de tentatives. Veuillez patienter 1 minute.");
+      return;
+    }
     setLoading(true);
     setError(null);
 
@@ -29,9 +40,18 @@ export default function ConnexionPage() {
       });
 
       if (error) {
-        setError(error.message);
+        const newAttempts = attempts + 1;
+        setAttempts(newAttempts);
+        if (newAttempts >= MAX_ATTEMPTS) {
+          setLockedUntil(Date.now() + LOCKOUT_MS);
+          setAttempts(0);
+          setError("Trop de tentatives. Veuillez patienter 1 minute.");
+        } else {
+          setError(error.message);
+        }
         setLoading(false);
       } else {
+        setAttempts(0);
         router.push("/");
         router.refresh();
       }

@@ -12,56 +12,12 @@ import { QuestionRenderer } from "@/components/questions/question-renderer";
 import { useUserStore } from "@/lib/store/user-store";
 import { cn } from "@/lib/utils";
 import { QuestionType, QuestionContent } from "@/types";
+import { getLesson, getQuestions, saveProgress, updateUserStats } from "@/lib/supabase/queries";
 
-// Sample lesson data - in production this would come from Supabase
-const sampleQuestions: { type: QuestionType; content: QuestionContent }[] = [
-  {
-    type: "multiple_choice",
-    content: {
-      question: "Qui a construit l'arche selon la Bible?",
-      options: ["Abraham", "Moise", "Noe", "David"],
-      correct: 2,
-    },
-  },
-  {
-    type: "true_false",
-    content: {
-      statement: "David a tue Goliath avec une epee.",
-      correct: false,
-    },
-  },
-  {
-    type: "fill_blank",
-    content: {
-      verse: "Au commencement, Dieu crea ___ et la terre.",
-      answer: "les cieux",
-      reference: "Genese 1:1",
-    },
-  },
-  {
-    type: "multiple_choice",
-    content: {
-      question: "Combien de jours Dieu a-t-il pris pour creer le monde?",
-      options: ["5 jours", "6 jours", "7 jours", "10 jours"],
-      correct: 1,
-    },
-  },
-  {
-    type: "true_false",
-    content: {
-      statement: "Adam et Eve ont ete crees le sixieme jour.",
-      correct: true,
-    },
-  },
-];
-
-const lessonData = {
-  l1: { name: "Au commencement", xp: 15, coins: 10 },
-  l2: { name: "Le jardin d'Eden", xp: 15, coins: 10 },
-  l3: { name: "La chute", xp: 15, coins: 10 },
-  l4: { name: "Abraham", xp: 20, coins: 15 },
-  l5: { name: "Isaac", xp: 20, coins: 15 },
-};
+interface LoadedQuestion {
+  type: QuestionType;
+  content: QuestionContent;
+}
 
 export default function LeconPage() {
   const params = useParams();
@@ -69,6 +25,7 @@ export default function LeconPage() {
   const lessonId = params.id as string;
 
   const {
+    id: userId,
     getActualHearts,
     loseHeart,
     addXp,
@@ -78,25 +35,69 @@ export default function LeconPage() {
     updateGuestProgress,
   } = useUserStore();
 
+  const [questions, setQuestions] = useState<LoadedQuestion[]>([]);
+  const [lessonData, setLessonData] = useState<{ name: string; xp_reward: number; coin_reward: number } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const hearts = getActualHearts();
-  const lesson = lessonData[lessonId as keyof typeof lessonData] || {
-    name: "Lecon",
-    xp: 10,
-    coins: 5,
+
+  const loadLesson = () => {
+    setLoading(true);
+    setError(false);
+    Promise.all([getLesson(lessonId), getQuestions(lessonId)])
+      .then(([lesson, qs]) => {
+        setLessonData({
+          name: lesson.name,
+          xp_reward: lesson.xp_reward,
+          coin_reward: lesson.coin_reward,
+        });
+        setQuestions(
+          qs.map((q) => ({
+            type: q.type as QuestionType,
+            content: q.content as unknown as QuestionContent,
+          }))
+        );
+      })
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
   };
 
-  const progress = (currentQuestionIndex / sampleQuestions.length) * 100;
-  const currentQuestion = sampleQuestions[currentQuestionIndex];
+  useEffect(() => {
+    loadLesson();
+  }, [lessonId]);
 
   useEffect(() => {
-    // Update streak when starting a lesson
     updateStreak();
   }, [updateStreak]);
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-error-600 mb-2">Impossible de charger la leçon.</p>
+          <button onClick={loadLesson} className="text-sm font-medium text-primary-600 hover:underline">
+            Réessayer
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading || !lessonData || questions.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-500">{loading ? "Chargement..." : "Aucune question trouvée."}</p>
+      </div>
+    );
+  }
+
+  const progress = (currentQuestionIndex / questions.length) * 100;
+  const currentQuestion = questions[currentQuestionIndex];
 
   const handleAnswer = (correct: boolean) => {
     if (correct) {
@@ -104,31 +105,32 @@ export default function LeconPage() {
     } else {
       const hasHearts = loseHeart();
       if (!hasHearts && getActualHearts() <= 0) {
-        // No hearts left - end lesson
         setIsComplete(true);
         return;
       }
     }
 
-    // Move to next question or complete
     setTimeout(() => {
-      if (currentQuestionIndex < sampleQuestions.length - 1) {
+      if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex((prev) => prev + 1);
       } else {
-        // Lesson complete
         const score = Math.round(
-          (correctAnswers + (correct ? 1 : 0)) / sampleQuestions.length * 100
+          ((correctAnswers + (correct ? 1 : 0)) / questions.length) * 100
         );
+        const passed = score >= 70;
 
-        // Award XP and coins based on score
-        const xpEarned = Math.round(lesson.xp * (score / 100));
-        const coinsEarned = Math.round(lesson.coins * (score / 100));
+        const xpEarned = Math.round(lessonData.xp_reward * (score / 100));
+        const coinsEarned = Math.round(lessonData.coin_reward * (score / 100));
 
         addXp(xpEarned);
         addCoins(coinsEarned);
 
         if (isGuest) {
-          updateGuestProgress(lessonId, score, score >= 70);
+          updateGuestProgress(lessonId, score, passed);
+        } else if (userId) {
+          // Save to Supabase in background
+          saveProgress(userId, lessonId, score, passed).catch(console.error);
+          updateUserStats(userId, xpEarned, coinsEarned).catch(console.error);
         }
 
         setIsComplete(true);
@@ -136,7 +138,7 @@ export default function LeconPage() {
     }, 1500);
   };
 
-  const finalScore = Math.round((correctAnswers / sampleQuestions.length) * 100);
+  const finalScore = Math.round((correctAnswers / questions.length) * 100);
   const passed = finalScore >= 70;
 
   if (isComplete) {
@@ -170,13 +172,13 @@ export default function LeconPage() {
                 <div className="flex items-center justify-center gap-4 mb-6">
                   <div className="text-center">
                     <p className="text-2xl font-bold text-xp">
-                      +{Math.round(lesson.xp * (finalScore / 100))}
+                      +{Math.round(lessonData.xp_reward * (finalScore / 100))}
                     </p>
                     <p className="text-sm text-gray-500">XP</p>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-gold-500">
-                      +{Math.round(lesson.coins * (finalScore / 100))}
+                      +{Math.round(lessonData.coin_reward * (finalScore / 100))}
                     </p>
                     <p className="text-sm text-gray-500">Pièces</p>
                   </div>

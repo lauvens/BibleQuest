@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -9,7 +10,8 @@ interface StreakBadgeProps {
   compact?: boolean;
 }
 
-export function StreakBadge({ streak, className, compact = false }: StreakBadgeProps) {
+// Memoize to prevent re-renders when parent state changes - rerender-memo rule
+export const StreakBadge = memo(function StreakBadge({ streak, className, compact = false }: StreakBadgeProps) {
   const isActive = streak > 0;
 
   if (compact) {
@@ -48,4 +50,4 @@ export function StreakBadge({ streak, className, compact = false }: StreakBadgeP
       <span>{streak}</span>
     </div>
   );
-}
+});

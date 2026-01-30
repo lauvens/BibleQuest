@@ -1,14 +1,29 @@
 "use client";
 
-import { QuestionType, QuestionContent } from "@/types";
-import { MultipleChoice } from "./multiple-choice";
-import { TrueFalse } from "./true-false";
-import { FillBlank } from "./fill-blank";
-import { Matching } from "./matching";
-import { Ordering } from "./ordering";
-import { Typing } from "./typing";
-import { Timed } from "./timed";
-import { ImageQuestion } from "./image-question";
+import dynamic from "next/dynamic";
+import {
+  QuestionType,
+  QuestionContent,
+  MultipleChoiceContent,
+  TrueFalseContent,
+  FillBlankContent,
+  MatchingContent,
+  OrderingContent,
+  TypingContent,
+  TimedContent,
+  ImageContent,
+} from "@/types";
+
+// Dynamic imports - bundle-dynamic-imports rule
+// Only load the question type component that's actually needed
+const MultipleChoice = dynamic(() => import("./multiple-choice").then((m) => m.MultipleChoice));
+const TrueFalse = dynamic(() => import("./true-false").then((m) => m.TrueFalse));
+const FillBlank = dynamic(() => import("./fill-blank").then((m) => m.FillBlank));
+const Matching = dynamic(() => import("./matching").then((m) => m.Matching));
+const Ordering = dynamic(() => import("./ordering").then((m) => m.Ordering));
+const Typing = dynamic(() => import("./typing").then((m) => m.Typing));
+const Timed = dynamic(() => import("./timed").then((m) => m.Timed));
+const ImageQuestion = dynamic(() => import("./image-question").then((m) => m.ImageQuestion));
 
 interface QuestionRendererProps {
   type: QuestionType;
@@ -27,7 +42,7 @@ export function QuestionRenderer({
     case "multiple_choice":
       return (
         <MultipleChoice
-          content={content as Parameters<typeof MultipleChoice>[0]["content"]}
+          content={content as MultipleChoiceContent}
           onAnswer={onAnswer}
           disabled={disabled}
         />
@@ -35,7 +50,7 @@ export function QuestionRenderer({
     case "true_false":
       return (
         <TrueFalse
-          content={content as Parameters<typeof TrueFalse>[0]["content"]}
+          content={content as TrueFalseContent}
           onAnswer={onAnswer}
           disabled={disabled}
         />
@@ -43,7 +58,7 @@ export function QuestionRenderer({
     case "fill_blank":
       return (
         <FillBlank
-          content={content as Parameters<typeof FillBlank>[0]["content"]}
+          content={content as FillBlankContent}
           onAnswer={onAnswer}
           disabled={disabled}
         />
@@ -51,7 +66,7 @@ export function QuestionRenderer({
     case "matching":
       return (
         <Matching
-          content={content as Parameters<typeof Matching>[0]["content"]}
+          content={content as MatchingContent}
           onAnswer={onAnswer}
           disabled={disabled}
         />
@@ -59,7 +74,7 @@ export function QuestionRenderer({
     case "ordering":
       return (
         <Ordering
-          content={content as Parameters<typeof Ordering>[0]["content"]}
+          content={content as OrderingContent}
           onAnswer={onAnswer}
           disabled={disabled}
         />
@@ -67,7 +82,7 @@ export function QuestionRenderer({
     case "typing":
       return (
         <Typing
-          content={content as Parameters<typeof Typing>[0]["content"]}
+          content={content as TypingContent}
           onAnswer={onAnswer}
           disabled={disabled}
         />
@@ -75,7 +90,7 @@ export function QuestionRenderer({
     case "timed":
       return (
         <Timed
-          content={content as Parameters<typeof Timed>[0]["content"]}
+          content={content as TimedContent}
           onAnswer={onAnswer}
           disabled={disabled}
         />
@@ -83,7 +98,7 @@ export function QuestionRenderer({
     case "image":
       return (
         <ImageQuestion
-          content={content as Parameters<typeof ImageQuestion>[0]["content"]}
+          content={content as ImageContent}
           onAnswer={onAnswer}
           disabled={disabled}
         />

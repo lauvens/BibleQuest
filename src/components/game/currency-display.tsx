@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Coins, Gem } from "lucide-react";
 import { cn, formatNumber } from "@/lib/utils";
 
@@ -10,7 +11,8 @@ interface CurrencyDisplayProps {
   compact?: boolean;
 }
 
-export function CurrencyDisplay({ coins, gems, className, compact = false }: CurrencyDisplayProps) {
+// Memoize to prevent re-renders when parent state changes - rerender-memo rule
+export const CurrencyDisplay = memo(function CurrencyDisplay({ coins, gems, className, compact = false }: CurrencyDisplayProps) {
   if (compact) {
     return (
       <div className={cn("flex gap-2", className)}>
@@ -48,4 +50,4 @@ export function CurrencyDisplay({ coins, gems, className, compact = false }: Cur
       </div>
     </div>
   );
-}
+});
