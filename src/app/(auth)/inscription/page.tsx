@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Mail, CheckCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function InscriptionPage() {
@@ -11,6 +12,7 @@ export default function InscriptionPage() {
   const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const router = useRouter();
 
   const validatePassword = (pw: string): string | null => {
@@ -43,20 +45,26 @@ export default function InscriptionPage() {
     }
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { error, data } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           username: cleanUsername,
         },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
 
     if (error) {
       setError(error.message);
       setLoading(false);
+    } else if (data.user && !data.session) {
+      // Email confirmation required
+      setEmailSent(true);
+      setLoading(false);
     } else {
+      // Email confirmation disabled, user is signed in
       router.push("/");
       router.refresh();
     }
@@ -77,6 +85,43 @@ export default function InscriptionPage() {
       setLoading(false);
     }
   };
+
+  // Show email confirmation message
+  if (emailSent) {
+    return (
+      <div className="bg-parchment-50 dark:bg-primary-800 rounded-2xl shadow-elevated p-8 border border-parchment-300 dark:border-primary-800 text-center">
+        <div className="w-16 h-16 rounded-full bg-olive-100 dark:bg-olive-500/20 flex items-center justify-center mx-auto mb-4">
+          <Mail className="w-8 h-8 text-olive-600 dark:text-olive-400" />
+        </div>
+        <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50 mb-2">
+          Vérifiez votre email
+        </h1>
+        <p className="text-primary-600 dark:text-primary-300 mb-4">
+          Nous avons envoyé un lien de confirmation à
+        </p>
+        <p className="font-semibold text-primary-800 dark:text-parchment-100 mb-6">
+          {email}
+        </p>
+        <div className="bg-gold-50 dark:bg-gold-500/10 border border-gold-200 dark:border-gold-500/30 rounded-xl p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <CheckCircle className="w-5 h-5 text-gold-600 dark:text-gold-400 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-primary-700 dark:text-primary-200 text-left">
+              Cliquez sur le lien dans l&apos;email pour activer votre compte et commencer votre aventure biblique!
+            </p>
+          </div>
+        </div>
+        <p className="text-sm text-primary-400 dark:text-primary-500">
+          Vous n&apos;avez pas reçu l&apos;email?{" "}
+          <button
+            onClick={() => setEmailSent(false)}
+            className="text-olive-600 dark:text-olive-400 hover:underline font-medium"
+          >
+            Réessayer
+          </button>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-parchment-50 dark:bg-primary-800 rounded-2xl shadow-elevated p-8 border border-parchment-300 dark:border-primary-800">

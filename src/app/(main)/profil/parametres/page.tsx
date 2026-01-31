@@ -17,6 +17,10 @@ import {
   Trash2,
   Check,
   X,
+  Bell,
+  Flame,
+  Trophy,
+  Mail,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -80,17 +84,43 @@ export default function ParametresPage() {
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Notification preferences
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [notifyStreakDanger, setNotifyStreakDanger] = useState(true);
+  const [notifyAchievements, setNotifyAchievements] = useState(true);
+  const [notifyWeeklySummary, setNotifyWeeklySummary] = useState(true);
+  const [savingNotifications, setSavingNotifications] = useState(false);
+
   useEffect(() => {
     if (isGuest) {
       router.push("/connexion");
       return;
     }
     if (!userId) return;
+
+    // Load cosmetics
     setLoadingCosmetics(true);
     getUserCosmetics(userId)
       .then((data) => setOwnedCosmetics(data as OwnedCosmetic[]))
       .catch(() => {})
       .finally(() => setLoadingCosmetics(false));
+
+    // Load notification preferences
+    const loadNotificationPrefs = async () => {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("users")
+        .select("email_notifications, notify_streak_danger, notify_achievements, notify_weekly_summary")
+        .eq("id", userId)
+        .single();
+      if (data) {
+        setEmailNotifications(data.email_notifications ?? true);
+        setNotifyStreakDanger(data.notify_streak_danger ?? true);
+        setNotifyAchievements(data.notify_achievements ?? true);
+        setNotifyWeeklySummary(data.notify_weekly_summary ?? true);
+      }
+    };
+    loadNotificationPrefs();
   }, [userId, isGuest, router]);
 
   if (isGuest || !userId) {
@@ -193,6 +223,52 @@ export default function ParametresPage() {
     setShowDeleteConfirm(false);
   };
 
+  const handleSaveNotifications = async (updates: {
+    email_notifications?: boolean;
+    notify_streak_danger?: boolean;
+    notify_achievements?: boolean;
+    notify_weekly_summary?: boolean;
+  }) => {
+    setSavingNotifications(true);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase
+        .from("users")
+        .update(updates)
+        .eq("id", userId);
+      if (error) throw error;
+      showToast("Préférences mises à jour!", "success");
+    } catch {
+      showToast("Erreur lors de la sauvegarde.", "error");
+    } finally {
+      setSavingNotifications(false);
+    }
+  };
+
+  const toggleEmailNotifications = () => {
+    const newValue = !emailNotifications;
+    setEmailNotifications(newValue);
+    handleSaveNotifications({ email_notifications: newValue });
+  };
+
+  const toggleStreakDanger = () => {
+    const newValue = !notifyStreakDanger;
+    setNotifyStreakDanger(newValue);
+    handleSaveNotifications({ notify_streak_danger: newValue });
+  };
+
+  const toggleAchievements = () => {
+    const newValue = !notifyAchievements;
+    setNotifyAchievements(newValue);
+    handleSaveNotifications({ notify_achievements: newValue });
+  };
+
+  const toggleWeeklySummary = () => {
+    const newValue = !notifyWeeklySummary;
+    setNotifyWeeklySummary(newValue);
+    handleSaveNotifications({ notify_weekly_summary: newValue });
+  };
+
   // Group owned cosmetics by type
   const cosmeticsByType = ownedCosmetics.reduce<Record<string, OwnedCosmetic[]>>(
     (acc, uc) => {
@@ -272,6 +348,143 @@ export default function ParametresPage() {
             Choisissez le theme de l&apos;application.
           </p>
           <ThemeSelect />
+        </CardContent>
+      </Card>
+
+      {/* Notifications */}
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-1">
+            <Bell className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+            <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50">
+              Notifications email
+            </h2>
+          </div>
+          <p className="text-sm text-primary-500 dark:text-primary-400 mb-4">
+            Choisissez les emails que vous souhaitez recevoir.
+          </p>
+
+          <div className="space-y-4">
+            {/* Master toggle */}
+            <div className="flex items-center justify-between py-3 border-b border-parchment-200 dark:border-primary-700">
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-primary-500 dark:text-primary-400" />
+                <div>
+                  <p className="font-medium text-primary-800 dark:text-parchment-100">
+                    Activer les emails
+                  </p>
+                  <p className="text-xs text-primary-400 dark:text-primary-500">
+                    Désactiver pour ne plus recevoir d&apos;emails
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={toggleEmailNotifications}
+                disabled={savingNotifications}
+                className={`relative w-12 h-6 rounded-full transition-colors ${
+                  emailNotifications
+                    ? "bg-olive-500"
+                    : "bg-parchment-300 dark:bg-primary-700"
+                }`}
+              >
+                <span
+                  className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                    emailNotifications ? "left-7" : "left-1"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Streak danger */}
+            <div className={`flex items-center justify-between py-2 ${!emailNotifications ? "opacity-50" : ""}`}>
+              <div className="flex items-center gap-3">
+                <Flame className="w-5 h-5 text-gold-500" />
+                <div>
+                  <p className="font-medium text-primary-800 dark:text-parchment-100">
+                    Série en danger
+                  </p>
+                  <p className="text-xs text-primary-400 dark:text-primary-500">
+                    Rappel si vous risquez de perdre votre série
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={toggleStreakDanger}
+                disabled={savingNotifications || !emailNotifications}
+                className={`relative w-12 h-6 rounded-full transition-colors ${
+                  notifyStreakDanger && emailNotifications
+                    ? "bg-olive-500"
+                    : "bg-parchment-300 dark:bg-primary-700"
+                }`}
+              >
+                <span
+                  className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                    notifyStreakDanger && emailNotifications ? "left-7" : "left-1"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Achievements */}
+            <div className={`flex items-center justify-between py-2 ${!emailNotifications ? "opacity-50" : ""}`}>
+              <div className="flex items-center gap-3">
+                <Trophy className="w-5 h-5 text-gold-500" />
+                <div>
+                  <p className="font-medium text-primary-800 dark:text-parchment-100">
+                    Achievements
+                  </p>
+                  <p className="text-xs text-primary-400 dark:text-primary-500">
+                    Notification lors d&apos;un nouvel achievement
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={toggleAchievements}
+                disabled={savingNotifications || !emailNotifications}
+                className={`relative w-12 h-6 rounded-full transition-colors ${
+                  notifyAchievements && emailNotifications
+                    ? "bg-olive-500"
+                    : "bg-parchment-300 dark:bg-primary-700"
+                }`}
+              >
+                <span
+                  className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                    notifyAchievements && emailNotifications ? "left-7" : "left-1"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Weekly summary */}
+            <div className={`flex items-center justify-between py-2 ${!emailNotifications ? "opacity-50" : ""}`}>
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-info-500" />
+                <div>
+                  <p className="font-medium text-primary-800 dark:text-parchment-100">
+                    Résumé hebdomadaire
+                  </p>
+                  <p className="text-xs text-primary-400 dark:text-primary-500">
+                    Recevez un résumé de votre progression
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={toggleWeeklySummary}
+                disabled={savingNotifications || !emailNotifications}
+                className={`relative w-12 h-6 rounded-full transition-colors ${
+                  notifyWeeklySummary && emailNotifications
+                    ? "bg-olive-500"
+                    : "bg-parchment-300 dark:bg-primary-700"
+                }`}
+              >
+                <span
+                  className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                    notifyWeeklySummary && emailNotifications ? "left-7" : "left-1"
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
         </CardContent>
       </Card>
 

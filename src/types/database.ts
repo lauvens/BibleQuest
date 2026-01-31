@@ -45,6 +45,10 @@ export interface Database {
           last_activity_date: string | null;
           role: UserRole;
           created_at: string;
+          email_notifications: boolean;
+          notify_streak_danger: boolean;
+          notify_achievements: boolean;
+          notify_weekly_summary: boolean;
         };
         Insert: {
           id: string;
@@ -65,6 +69,10 @@ export interface Database {
           last_activity_date?: string | null;
           role?: UserRole;
           created_at?: string;
+          email_notifications?: boolean;
+          notify_streak_danger?: boolean;
+          notify_achievements?: boolean;
+          notify_weekly_summary?: boolean;
         };
         Update: {
           id?: string;
@@ -85,6 +93,10 @@ export interface Database {
           last_activity_date?: string | null;
           role?: UserRole;
           created_at?: string;
+          email_notifications?: boolean;
+          notify_streak_danger?: boolean;
+          notify_achievements?: boolean;
+          notify_weekly_summary?: boolean;
         };
       };
       categories: {
