@@ -63,7 +63,7 @@ export function Matching({ content, onAnswer, disabled }: MatchingProps) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 text-center mb-6">
+      <h2 className="text-xl font-semibold text-primary-800 dark:text-parchment-100 text-center mb-6">
         Associez les éléments correspondants
       </h2>
 
@@ -82,21 +82,21 @@ export function Matching({ content, onAnswer, disabled }: MatchingProps) {
                 disabled={disabled || showResult || isMatched}
                 className={cn(
                   "w-full p-3 rounded-lg border-2 text-sm font-medium transition-all",
-                  "text-gray-900 dark:text-gray-100",
+                  "text-primary-800 dark:text-parchment-100",
                   {
-                    "border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600": !isSelected && !isMatched,
-                    "border-primary-500 bg-primary-50 dark:bg-primary-900/30": isSelected,
-                    "border-green-500 bg-green-50 dark:bg-green-900/30": matchResult === true,
-                    "border-red-500 bg-red-50 dark:bg-red-900/30": matchResult === false,
-                    "border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800": isMatched && !showResult,
+                    "border-parchment-300 dark:border-primary-700 hover:border-primary-400 dark:hover:border-primary-500": !isSelected && !isMatched,
+                    "border-primary-500 bg-primary-50 dark:bg-primary-700": isSelected,
+                    "border-olive-500 bg-olive-50 dark:bg-olive-900/30": matchResult === true,
+                    "border-error-500 bg-error-50 dark:bg-error-900/30": matchResult === false,
+                    "border-parchment-400 dark:border-primary-600 bg-parchment-100 dark:bg-primary-850": isMatched && !showResult,
                     "cursor-not-allowed": disabled || isMatched,
                   }
                 )}
               >
                 <div className="flex items-center justify-between">
                   <span>{pair.left}</span>
-                  {matchResult === true && <Check className="w-4 h-4 text-green-600 dark:text-green-400" />}
-                  {matchResult === false && <X className="w-4 h-4 text-red-600 dark:text-red-400" />}
+                  {matchResult === true && <Check className="w-4 h-4 text-olive-600 dark:text-olive-400" />}
+                  {matchResult === false && <X className="w-4 h-4 text-error-600 dark:text-error-400" />}
                 </div>
               </button>
             );
@@ -121,14 +121,14 @@ export function Matching({ content, onAnswer, disabled }: MatchingProps) {
                 disabled={disabled || showResult || isMatched || selectedLeft === null}
                 className={cn(
                   "w-full p-3 rounded-lg border-2 text-sm font-medium transition-all",
-                  "text-gray-900 dark:text-gray-100",
+                  "text-primary-800 dark:text-parchment-100",
                   {
-                    "border-gray-200 dark:border-gray-700": !isMatched && selectedLeft === null,
-                    "border-primary-200 dark:border-primary-700 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20":
+                    "border-parchment-300 dark:border-primary-700": !isMatched && selectedLeft === null,
+                    "border-primary-300 dark:border-primary-600 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-parchment-100 dark:hover:bg-primary-700":
                       !isMatched && selectedLeft !== null,
-                    "border-green-500 bg-green-50 dark:bg-green-900/30": matchResult === true,
-                    "border-red-500 bg-red-50 dark:bg-red-900/30": matchResult === false,
-                    "border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800": isMatched && !showResult,
+                    "border-olive-500 bg-olive-50 dark:bg-olive-900/30": matchResult === true,
+                    "border-error-500 bg-error-50 dark:bg-error-900/30": matchResult === false,
+                    "border-parchment-400 dark:border-primary-600 bg-parchment-100 dark:bg-primary-850": isMatched && !showResult,
                     "cursor-not-allowed": disabled || isMatched,
                   }
                 )}

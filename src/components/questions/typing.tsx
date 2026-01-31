@@ -70,9 +70,9 @@ export function Typing({ content, onAnswer, disabled }: TypingProps) {
         <span
           key={index}
           className={cn("transition-colors", {
-            "text-green-600 dark:text-green-400": hasTyped && isCorrect,
-            "text-red-600 dark:text-red-400": hasTyped && !isCorrect,
-            "text-gray-400 dark:text-gray-500": !hasTyped,
+            "text-olive-600 dark:text-olive-400": hasTyped && isCorrect,
+            "text-error-600 dark:text-error-400": hasTyped && !isCorrect,
+            "text-primary-400 dark:text-primary-500": !hasTyped,
           })}
         >
           {word}{" "}
@@ -84,14 +84,14 @@ export function Typing({ content, onAnswer, disabled }: TypingProps) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{content.reference}</p>
-        <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+        <p className="text-sm text-primary-400 dark:text-primary-400 mb-2">{content.reference}</p>
+        <h2 className="text-lg font-medium text-primary-800 dark:text-parchment-100 mb-4">
           {content.prompt}
         </h2>
       </div>
 
       {/* Reference text */}
-      <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-xl">
+      <div className="p-4 bg-parchment-100 dark:bg-primary-850 rounded-xl">
         <p className="text-lg leading-relaxed">{renderHighlightedText()}</p>
       </div>
 
@@ -104,17 +104,17 @@ export function Typing({ content, onAnswer, disabled }: TypingProps) {
           placeholder="Tapez le verset ici..."
           disabled={disabled || showResult}
           rows={4}
-          className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-primary-500 focus:outline-none resize-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+          className="w-full px-4 py-3 border-2 border-parchment-300 dark:border-primary-700 rounded-xl focus:border-primary-500 focus:outline-none resize-none bg-parchment-50 dark:bg-primary-800 text-primary-800 dark:text-parchment-100"
         />
         <div className="flex items-center justify-between text-sm">
-          <span className="text-gray-500 dark:text-gray-400">
+          <span className="text-primary-500 dark:text-primary-400">
             Précision: <span className={cn({
-              "text-green-600 dark:text-green-400": accuracy >= 80,
-              "text-yellow-600 dark:text-yellow-400": accuracy >= 50 && accuracy < 80,
-              "text-red-600 dark:text-red-400": accuracy < 50,
+              "text-olive-600 dark:text-olive-400": accuracy >= 80,
+              "text-gold-600 dark:text-gold-400": accuracy >= 50 && accuracy < 80,
+              "text-error-600 dark:text-error-400": accuracy < 50,
             })}>{accuracy}%</span>
           </span>
-          <span className="text-gray-400">Ctrl+Enter pour valider</span>
+          <span className="text-primary-400">Ctrl+Enter pour valider</span>
         </div>
       </div>
 
@@ -130,8 +130,8 @@ export function Typing({ content, onAnswer, disabled }: TypingProps) {
         <div className={cn(
           "flex items-center justify-center gap-2 p-4 rounded-xl",
           {
-            "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400": accuracy >= 80,
-            "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400": accuracy < 80,
+            "bg-olive-50 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400": accuracy >= 80,
+            "bg-error-50 dark:bg-error-900/30 text-error-700 dark:text-error-400": accuracy < 80,
           }
         )}>
           {accuracy >= 80 ? (

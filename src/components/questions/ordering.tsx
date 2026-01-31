@@ -78,7 +78,7 @@ export function Ordering({ content, onAnswer, disabled }: OrderingProps) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 text-center mb-6">
+      <h2 className="text-xl font-semibold text-primary-800 dark:text-parchment-100 text-center mb-6">
         {content.prompt}
       </h2>
 
@@ -95,16 +95,16 @@ export function Ordering({ content, onAnswer, disabled }: OrderingProps) {
               onDragEnd={handleDragEnd}
               className={cn(
                 "flex items-center gap-3 p-3 rounded-lg border-2 transition-all",
-                "text-gray-900 dark:text-gray-100",
+                "text-primary-800 dark:text-parchment-100",
                 {
-                  "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 cursor-grab": !showResult,
-                  "border-green-500 bg-green-50 dark:bg-green-900/30": itemCorrect === true,
-                  "border-red-500 bg-red-50 dark:bg-red-900/30": itemCorrect === false,
+                  "border-parchment-300 dark:border-primary-700 hover:border-primary-400 dark:hover:border-primary-500 cursor-grab": !showResult,
+                  "border-olive-500 bg-olive-50 dark:bg-olive-900/30": itemCorrect === true,
+                  "border-error-500 bg-error-50 dark:bg-error-900/30": itemCorrect === false,
                   "opacity-50": draggedIndex === index,
                 }
               )}
             >
-              <GripVertical className="w-5 h-5 text-gray-400 flex-shrink-0" />
+              <GripVertical className="w-5 h-5 text-primary-400 flex-shrink-0" />
               <span className="flex-1 font-medium">{item.text}</span>
 
               {!showResult && (
@@ -112,22 +112,22 @@ export function Ordering({ content, onAnswer, disabled }: OrderingProps) {
                   <button
                     onClick={() => moveItem(index, "up")}
                     disabled={index === 0}
-                    className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30"
+                    className="p-1 text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 disabled:opacity-30"
                   >
                     ↑
                   </button>
                   <button
                     onClick={() => moveItem(index, "down")}
                     disabled={index === items.length - 1}
-                    className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 disabled:opacity-30"
+                    className="p-1 text-primary-400 hover:text-primary-600 dark:hover:text-primary-300 disabled:opacity-30"
                   >
                     ↓
                   </button>
                 </div>
               )}
 
-              {itemCorrect === true && <Check className="w-5 h-5 text-green-600 dark:text-green-400" />}
-              {itemCorrect === false && <X className="w-5 h-5 text-red-600 dark:text-red-400" />}
+              {itemCorrect === true && <Check className="w-5 h-5 text-olive-600 dark:text-olive-400" />}
+              {itemCorrect === false && <X className="w-5 h-5 text-error-600 dark:text-error-400" />}
             </div>
           );
         })}

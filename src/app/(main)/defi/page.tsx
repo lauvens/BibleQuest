@@ -90,7 +90,7 @@ export default function DefiPage() {
     return (
       <div className="max-w-2xl mx-auto px-4 py-8 text-center">
         <p className="text-error-600 dark:text-error-400 mb-2">Impossible de charger le défi.</p>
-        <button onClick={loadQuestions} className="text-sm font-medium text-primary-600 dark:text-primary-400 hover:underline">
+        <button onClick={loadQuestions} className="text-sm font-medium text-primary-600 dark:text-primary-300 hover:underline">
           Réessayer
         </button>
       </div>
@@ -99,7 +99,7 @@ export default function DefiPage() {
 
   if (loading) {
     return (
-      <div className="max-w-2xl mx-auto px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+      <div className="max-w-2xl mx-auto px-4 py-8 text-center text-primary-400 dark:text-primary-400">
         Chargement du défi...
       </div>
     );
@@ -119,22 +119,22 @@ export default function DefiPage() {
 
           <CardContent className="p-6">
             <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                <Clock className="w-6 h-6 text-gray-600 dark:text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-600 dark:text-gray-400">{questions.length} questions</p>
+              <div className="text-center p-4 bg-parchment-100 dark:bg-primary-850 rounded-xl">
+                <Clock className="w-6 h-6 text-primary-500 dark:text-primary-400 mx-auto mb-2" />
+                <p className="text-sm text-primary-600 dark:text-primary-300">{questions.length} questions</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+              <div className="text-center p-4 bg-parchment-100 dark:bg-primary-850 rounded-xl">
                 <Zap className="w-6 h-6 text-xp mx-auto mb-2" />
-                <p className="text-sm text-gray-600 dark:text-gray-400">Jusqu&apos;à 50 XP</p>
+                <p className="text-sm text-primary-600 dark:text-primary-300">Jusqu&apos;à 50 XP</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
+              <div className="text-center p-4 bg-parchment-100 dark:bg-primary-850 rounded-xl">
                 <Trophy className="w-6 h-6 text-gold-500 mx-auto mb-2" />
-                <p className="text-sm text-gray-600 dark:text-gray-400">Jusqu&apos;à 30 pièces</p>
+                <p className="text-sm text-primary-600 dark:text-primary-300">Jusqu&apos;à 30 pièces</p>
               </div>
             </div>
 
             <div className="flex items-center justify-between mb-6">
-              <span className="text-gray-600 dark:text-gray-400">Vos cœurs:</span>
+              <span className="text-primary-600 dark:text-primary-300">Vos cœurs:</span>
               <HeartsDisplay hearts={hearts} />
             </div>
 
@@ -148,7 +148,7 @@ export default function DefiPage() {
             </Button>
 
             {hearts <= 0 && (
-              <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+              <p className="text-center text-sm text-primary-400 dark:text-primary-400 mt-4">
                 Vos cœurs se régénèrent toutes les 30 minutes
               </p>
             )}
@@ -160,16 +160,16 @@ export default function DefiPage() {
 
   if (isComplete) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-parchment-50 dark:bg-primary-900 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
-            <div className="w-20 h-20 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center mx-auto mb-4">
-              <Trophy className="w-10 h-10 text-yellow-500" />
+            <div className="w-20 h-20 rounded-full bg-gold-100 dark:bg-gold-900/30 flex items-center justify-center mx-auto mb-4">
+              <Trophy className="w-10 h-10 text-gold-500" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-100 mb-2">
               Défi terminé!
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+            <p className="text-primary-600 dark:text-primary-300 mb-4">
               Vous avez obtenu {finalScore}% de bonnes réponses
             </p>
 
@@ -178,13 +178,13 @@ export default function DefiPage() {
                 <p className="text-2xl font-bold text-xp">
                   +{25 + Math.round(25 * (finalScore / 100))}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">XP</p>
+                <p className="text-sm text-primary-400 dark:text-primary-400">XP</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-gold-500">
                   +{15 + Math.round(15 * (finalScore / 100))}
                 </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Pièces</p>
+                <p className="text-sm text-primary-400 dark:text-primary-400">Pièces</p>
               </div>
             </div>
 
@@ -198,11 +198,11 @@ export default function DefiPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-parchment-50 dark:bg-primary-900">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+      <div className="sticky top-0 z-50 bg-parchment-50/95 dark:bg-primary-900/95 backdrop-blur-sm border-b border-parchment-300 dark:border-primary-800 px-4 py-3">
         <div className="max-w-2xl mx-auto flex items-center gap-4">
-          <div className="flex items-center gap-2 text-primary-600 dark:text-primary-400">
+          <div className="flex items-center gap-2 text-primary-600 dark:text-primary-300">
             <Target className="w-5 h-5" />
             <span className="font-semibold">Défi</span>
           </div>
@@ -219,7 +219,7 @@ export default function DefiPage() {
       <div className="max-w-2xl mx-auto px-4 py-8">
         <Card>
           <CardContent className="p-6">
-            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 text-center">
+            <p className="text-sm text-primary-400 dark:text-primary-400 mb-4 text-center">
               Question {currentQuestionIndex + 1} / {questions.length}
             </p>
             {currentQuestion && (

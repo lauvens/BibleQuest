@@ -41,15 +41,15 @@ export function FillBlank({ content, onAnswer, disabled }: FillBlankProps) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{content.reference}</p>
-        <p className="text-xl text-gray-900 dark:text-gray-100">
+        <p className="text-sm text-primary-400 dark:text-primary-400 mb-2">{content.reference}</p>
+        <p className="text-xl text-primary-800 dark:text-parchment-100">
           {parts[0]}
           <span className={cn(
             "inline-block min-w-[100px] border-b-2 mx-1 px-2",
             {
-              "border-gray-400 dark:border-gray-600": !showResult,
-              "border-green-500 text-green-700 dark:text-green-400": showResult && isCorrect,
-              "border-red-500 text-red-700 dark:text-red-400": showResult && !isCorrect,
+              "border-primary-400 dark:border-primary-500": !showResult,
+              "border-olive-500 text-olive-700 dark:text-olive-400": showResult && isCorrect,
+              "border-error-500 text-error-700 dark:text-error-400": showResult && !isCorrect,
             }
           )}>
             {showResult ? (isCorrect ? userAnswer : content.answer) : userAnswer || "___"}
@@ -67,7 +67,7 @@ export function FillBlank({ content, onAnswer, disabled }: FillBlankProps) {
             onKeyDown={handleKeyDown}
             placeholder="Tapez votre réponse..."
             disabled={disabled}
-            className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-700 rounded-xl focus:border-primary-500 focus:outline-none text-center text-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+            className="w-full px-4 py-3 border-2 border-parchment-300 dark:border-primary-700 rounded-xl focus:border-primary-500 focus:outline-none text-center text-lg bg-parchment-50 dark:bg-primary-800 text-primary-800 dark:text-parchment-100"
           />
           <Button
             onClick={handleSubmit}
@@ -81,8 +81,8 @@ export function FillBlank({ content, onAnswer, disabled }: FillBlankProps) {
         <div className={cn(
           "flex items-center justify-center gap-2 p-4 rounded-xl",
           {
-            "bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400": isCorrect,
-            "bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400": !isCorrect,
+            "bg-olive-50 dark:bg-olive-900/30 text-olive-700 dark:text-olive-400": isCorrect,
+            "bg-error-50 dark:bg-error-900/30 text-error-700 dark:text-error-400": !isCorrect,
           }
         )}>
           {isCorrect ? (
