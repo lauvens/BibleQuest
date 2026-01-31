@@ -1,76 +1,89 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useUserStore } from "@/lib/store/user-store";
-import { User } from "@supabase/supabase-js";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const setUser = useUserStore((state) => state.setUser);
   const clearUser = useUserStore((state) => state.clearUser);
-
-  const syncUserData = useCallback(async (authUser: User) => {
-    const supabase = createClient();
-
-    // Fetch user data from our users table
-    const { data: userData, error } = await supabase
-      .from("users")
-      .select("*")
-      .eq("id", authUser.id)
-      .single();
-
-    if (error) {
-      console.error("Error fetching user data:", error);
-      return;
-    }
-
-    if (userData) {
-      setUser({
-        id: userData.id,
-        email: userData.email,
-        username: userData.username,
-        avatarUrl: userData.avatar_url,
-        xp: userData.xp,
-        level: userData.level,
-        coins: userData.coins,
-        gems: userData.gems,
-        hearts: userData.hearts,
-        heartsUpdatedAt: new Date(userData.hearts_updated_at),
-        currentStreak: userData.current_streak,
-        longestStreak: userData.longest_streak,
-        lastActivityDate: userData.last_activity_date,
-        role: userData.role,
-        isGuest: false,
-      });
-    }
-  }, [setUser]);
+  const isSyncing = useRef(false);
 
   useEffect(() => {
     const supabase = createClient();
 
-    // Check initial session using getUser() which validates the JWT
-    const checkUser = async () => {
-      const { data: { user }, error } = await supabase.auth.getUser();
-
-      if (error) {
-        // No valid session or error
+    const syncUserData = async (userId: string) => {
+      // Prevent duplicate calls
+      if (isSyncing.current) {
+        console.log("[Auth] Already syncing, skipping...");
         return;
       }
+      isSyncing.current = true;
 
-      if (user) {
-        await syncUserData(user);
+      console.log("[Auth] syncUserData for:", userId);
+
+      try {
+        const { data, error } = await supabase
+          .from("users")
+          .select("*")
+          .eq("id", userId)
+          .single();
+
+        console.log("[Auth] Query result:", error ? `Error: ${error.message}` : "Success");
+
+        if (error) {
+          console.error("[Auth] Error:", error);
+          isSyncing.current = false;
+          return;
+        }
+
+        if (data) {
+          console.log("[Auth] Setting user:", data.username);
+          setUser({
+            id: data.id,
+            email: data.email,
+            username: data.username,
+            avatarUrl: data.avatar_url,
+            xp: data.xp,
+            level: data.level,
+            coins: data.coins,
+            gems: data.gems,
+            hearts: data.hearts,
+            heartsUpdatedAt: new Date(data.hearts_updated_at),
+            currentStreak: data.current_streak,
+            longestStreak: data.longest_streak,
+            lastActivityDate: data.last_activity_date,
+            role: data.role,
+            isGuest: false,
+          });
+        }
+      } catch (err) {
+        console.error("[Auth] Exception:", err);
+      } finally {
+        isSyncing.current = false;
       }
     };
 
-    checkUser();
+    // Check session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("[Auth] Initial session:", session ? "exists" : "none");
+      if (session?.user) {
+        syncUserData(session.user.id);
+      }
+    });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if ((event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "INITIAL_SESSION") && session?.user) {
-          await syncUserData(session.user);
-        } else if (event === "SIGNED_OUT") {
+      (event, session) => {
+        console.log("[Auth] Event:", event);
+
+        if (event === "SIGNED_OUT") {
           clearUser();
+        } else if (event === "SIGNED_IN" && session?.user) {
+          // Use setTimeout to ensure cookies are set
+          setTimeout(() => {
+            syncUserData(session.user.id);
+          }, 100);
         }
       }
     );
@@ -78,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [syncUserData, clearUser]);
+  }, [setUser, clearUser]);
 
   return <>{children}</>;
 }
