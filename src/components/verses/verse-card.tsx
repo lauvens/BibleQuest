@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Heart, Copy, Check } from "lucide-react";
+import Link from "next/link";
+import { Heart, Copy, Check, BookOpen } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -112,6 +113,14 @@ export function VerseCard({
               <Copy className="w-5 h-5" />
             )}
           </Button>
+
+          <Link
+            href={`/bible/${encodeURIComponent(book)}/${chapter}`}
+            title="Lire en contexte"
+            className="p-2 text-primary-400 hover:text-primary-600 hover:bg-parchment-100 dark:hover:bg-primary-800 rounded-md transition-colors"
+          >
+            <BookOpen className="w-5 h-5" />
+          </Link>
         </div>
       </CardContent>
     </Card>

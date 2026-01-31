@@ -1,55 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { Heart, Coins, Gem, Sparkles, Crown, Palette, User } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { Heart, Coins, Gem, Sparkles, Crown, Palette, User, Check, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/lib/store/user-store";
 import { useToast } from "@/components/ui/toast";
+import { getAllCosmetics, getUserCosmetics, purchaseCosmetic } from "@/lib/supabase/queries";
+import { Database } from "@/types/database";
 
 type TabType = "hearts" | "cosmetics" | "gems";
+type Cosmetic = Database["public"]["Tables"]["cosmetics"]["Row"];
 
-// Sample shop items
 const heartPackages = [
   { id: "h1", hearts: 1, price: 20, currency: "coins" as const },
   { id: "h2", hearts: 3, price: 50, currency: "coins" as const },
   { id: "h3", hearts: 5, price: 5, currency: "gems" as const },
-];
-
-const cosmetics = [
-  {
-    id: "c1",
-    type: "avatar",
-    name: "Roi David",
-    price: 300,
-    currency: "coins" as const,
-    icon: User,
-  },
-  {
-    id: "c2",
-    type: "frame",
-    name: "Couronne d'Or",
-    price: 50,
-    currency: "gems" as const,
-    icon: Crown,
-  },
-  {
-    id: "c3",
-    type: "theme",
-    name: "Theme Royal",
-    price: 150,
-    currency: "coins" as const,
-    icon: Palette,
-  },
-  {
-    id: "c4",
-    type: "title",
-    name: "Théologien",
-    price: 200,
-    currency: "coins" as const,
-    icon: Sparkles,
-  },
 ];
 
 const gemPackages = [
@@ -59,18 +26,47 @@ const gemPackages = [
   { id: "g4", gems: 1200, price: 49.99 },
 ];
 
+const cosmeticIcons: Record<string, React.ElementType> = {
+  avatar: User,
+  frame: Crown,
+  theme: Palette,
+  title: Sparkles,
+};
+
 export default function BoutiquePage() {
   const [activeTab, setActiveTab] = useState<TabType>("hearts");
-  const { coins, gems, getActualHearts, spendCoins, spendGems } = useUserStore();
+  const { id: userId, isGuest, coins, gems, level, getActualHearts, spendCoins, spendGems, setUser } = useUserStore();
   const { showToast } = useToast();
+
+  const [cosmetics, setCosmetics] = useState<Cosmetic[]>([]);
+  const [ownedIds, setOwnedIds] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
+  const [purchasing, setPurchasing] = useState<string | null>(null);
 
   const hearts = getActualHearts();
 
-  const handlePurchase = (
-    price: number,
-    currency: "coins" | "gems",
-    itemName: string
-  ) => {
+  const loadCosmetics = useCallback(async () => {
+    setLoading(true);
+    try {
+      const allCosmetics = await getAllCosmetics();
+      setCosmetics(allCosmetics);
+
+      if (userId && !isGuest) {
+        const userCosmetics = await getUserCosmetics(userId);
+        setOwnedIds(new Set(userCosmetics.map((uc) => uc.cosmetic_id)));
+      }
+    } catch {
+      showToast("Erreur de chargement", "error");
+    } finally {
+      setLoading(false);
+    }
+  }, [userId, isGuest, showToast]);
+
+  useEffect(() => {
+    loadCosmetics();
+  }, [loadCosmetics]);
+
+  const handleHeartPurchase = (price: number, currency: "coins" | "gems", heartCount: number) => {
     let success = false;
     if (currency === "coins") {
       success = spendCoins(price);
@@ -79,10 +75,71 @@ export default function BoutiquePage() {
     }
 
     if (success) {
-      showToast(`${itemName} acheté avec succès!`, "success");
+      showToast(`${heartCount} cœur(s) acheté(s)!`, "success");
     } else {
       showToast(`Pas assez de ${currency === "coins" ? "pièces" : "gemmes"}!`, "error");
     }
+  };
+
+  const handleCosmeticPurchase = async (cosmetic: Cosmetic) => {
+    if (isGuest || !userId) {
+      showToast("Connectez-vous pour acheter", "error");
+      return;
+    }
+
+    if (ownedIds.has(cosmetic.id)) {
+      showToast("Déjà possédé", "error");
+      return;
+    }
+
+    setPurchasing(cosmetic.id);
+    try {
+      const result = await purchaseCosmetic(userId, cosmetic.id);
+      if (result.success) {
+        // Update local state
+        setOwnedIds((prev) => new Set([...Array.from(prev), cosmetic.id]));
+        // Update user store with new balance
+        if (cosmetic.unlock_type === "coins") {
+          setUser({ coins: coins - cosmetic.unlock_value });
+        } else if (cosmetic.unlock_type === "gems") {
+          setUser({ gems: gems - cosmetic.unlock_value });
+        }
+        showToast(`${cosmetic.name} acheté!`, "success");
+      } else {
+        showToast(result.error || "Erreur", "error");
+      }
+    } catch {
+      showToast("Erreur lors de l'achat", "error");
+    } finally {
+      setPurchasing(null);
+    }
+  };
+
+  const canPurchase = (cosmetic: Cosmetic): boolean => {
+    if (ownedIds.has(cosmetic.id)) return false;
+    if (cosmetic.unlock_type === "free") return true;
+    if (cosmetic.unlock_type === "level") return level >= cosmetic.unlock_value;
+    if (cosmetic.unlock_type === "coins") return coins >= cosmetic.unlock_value;
+    if (cosmetic.unlock_type === "gems") return gems >= cosmetic.unlock_value;
+    return false;
+  };
+
+  const isLocked = (cosmetic: Cosmetic): boolean => {
+    if (cosmetic.unlock_type === "level" && level < cosmetic.unlock_value) return true;
+    return false;
+  };
+
+  const groupedCosmetics = cosmetics.reduce((acc, c) => {
+    if (!acc[c.type]) acc[c.type] = [];
+    acc[c.type].push(c);
+    return acc;
+  }, {} as Record<string, Cosmetic[]>);
+
+  const typeLabels: Record<string, string> = {
+    avatar: "Avatars",
+    frame: "Cadres",
+    title: "Titres",
+    theme: "Thèmes",
   };
 
   return (
@@ -130,8 +187,7 @@ export default function BoutiquePage() {
       {activeTab === "hearts" && (
         <div className="space-y-4">
           <p className="text-primary-600 dark:text-primary-400 mb-4">
-            Vous avez actuellement {hearts}/5 coeurs. Les coeurs se regenerent
-            toutes les 30 minutes.
+            Vous avez actuellement {hearts}/5 cœurs. Les cœurs se régénèrent toutes les 30 minutes.
           </p>
 
           {heartPackages.map((pkg) => (
@@ -140,33 +196,18 @@ export default function BoutiquePage() {
                 <div className="flex items-center gap-4">
                   <div className="flex">
                     {Array.from({ length: pkg.hearts }).map((_, i) => (
-                      <Heart
-                        key={i}
-                        className="w-6 h-6 text-heart fill-heart -ml-1 first:ml-0"
-                      />
+                      <Heart key={i} className="w-6 h-6 text-heart fill-heart -ml-1 first:ml-0" />
                     ))}
                   </div>
-                  <span className="font-medium">
-                    {pkg.hearts} cœur{pkg.hearts > 1 ? "s" : ""}
-                  </span>
+                  <span className="font-medium">{pkg.hearts} cœur{pkg.hearts > 1 ? "s" : ""}</span>
                 </div>
                 <Button
-                  onClick={() =>
-                    handlePurchase(
-                      pkg.price,
-                      pkg.currency,
-                      `${pkg.hearts} cœur(s)`
-                    )
-                  }
+                  onClick={() => handleHeartPurchase(pkg.price, pkg.currency, pkg.hearts)}
                   variant={pkg.currency === "gems" ? "secondary" : "primary"}
                   size="sm"
                 >
                   {pkg.price}{" "}
-                  {pkg.currency === "coins" ? (
-                    <Coins className="w-4 h-4 ml-1" />
-                  ) : (
-                    <Gem className="w-4 h-4 ml-1" />
-                  )}
+                  {pkg.currency === "coins" ? <Coins className="w-4 h-4 ml-1" /> : <Gem className="w-4 h-4 ml-1" />}
                 </Button>
               </CardContent>
             </Card>
@@ -176,35 +217,98 @@ export default function BoutiquePage() {
 
       {/* Cosmetics tab */}
       {activeTab === "cosmetics" && (
-        <div className="grid grid-cols-2 gap-4">
-          {cosmetics.map((item) => (
-            <Card key={item.id}>
-              <CardContent className="p-4 text-center">
-                <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center mx-auto mb-3">
-                  <item.icon className="w-8 h-8 text-primary-600 dark:text-primary-300" />
+        <div className="space-y-6">
+          {loading ? (
+            <div className="grid grid-cols-2 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-4 h-40" />
+                </Card>
+              ))}
+            </div>
+          ) : (
+            Object.entries(groupedCosmetics).map(([type, items]) => (
+              <div key={type}>
+                <h2 className="text-lg font-semibold text-primary-800 dark:text-parchment-50 mb-3">
+                  {typeLabels[type] || type}
+                </h2>
+                <div className="grid grid-cols-2 gap-4">
+                  {items.map((item) => {
+                    const Icon = cosmeticIcons[item.type] || Sparkles;
+                    const owned = ownedIds.has(item.id);
+                    const locked = isLocked(item);
+                    const canBuy = canPurchase(item);
+
+                    return (
+                      <Card key={item.id} className={cn({ "opacity-60": locked })}>
+                        <CardContent className="p-4 text-center">
+                          <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-800 flex items-center justify-center mx-auto mb-3 relative">
+                            <Icon className="w-8 h-8 text-primary-600 dark:text-primary-300" />
+                            {owned && (
+                              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-success-500 rounded-full flex items-center justify-center">
+                                <Check className="w-4 h-4 text-white" />
+                              </div>
+                            )}
+                            {locked && (
+                              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary-400 rounded-full flex items-center justify-center">
+                                <Lock className="w-4 h-4 text-white" />
+                              </div>
+                            )}
+                          </div>
+                          <h3 className="font-medium text-primary-800 dark:text-parchment-50 mb-1">{item.name}</h3>
+
+                          {owned ? (
+                            <p className="text-xs text-success-600 dark:text-success-400 mb-3">Possédé</p>
+                          ) : locked ? (
+                            <p className="text-xs text-primary-500 dark:text-primary-400 mb-3">
+                              Niveau {item.unlock_value} requis
+                            </p>
+                          ) : item.unlock_type === "free" ? (
+                            <p className="text-xs text-success-600 dark:text-success-400 mb-3">Gratuit</p>
+                          ) : (
+                            <p className="text-xs text-primary-500 dark:text-primary-400 mb-3">
+                              {item.unlock_value} {item.unlock_type === "coins" ? "pièces" : "gemmes"}
+                            </p>
+                          )}
+
+                          {!owned && !locked && (
+                            <Button
+                              onClick={() => handleCosmeticPurchase(item)}
+                              disabled={!canBuy || purchasing === item.id || isGuest}
+                              variant={item.unlock_type === "gems" ? "secondary" : "primary"}
+                              size="sm"
+                              className="w-full"
+                            >
+                              {purchasing === item.id ? (
+                                "..."
+                              ) : item.unlock_type === "free" ? (
+                                "Obtenir"
+                              ) : (
+                                <>
+                                  {item.unlock_value}{" "}
+                                  {item.unlock_type === "coins" ? (
+                                    <Coins className="w-4 h-4 ml-1" />
+                                  ) : (
+                                    <Gem className="w-4 h-4 ml-1" />
+                                  )}
+                                </>
+                              )}
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
-                <h3 className="font-medium text-primary-800 dark:text-parchment-50 mb-1">{item.name}</h3>
-                <p className="text-xs text-primary-500 dark:text-primary-400 mb-3 capitalize">
-                  {item.type}
-                </p>
-                <Button
-                  onClick={() =>
-                    handlePurchase(item.price, item.currency, item.name)
-                  }
-                  variant={item.currency === "gems" ? "secondary" : "primary"}
-                  size="sm"
-                  className="w-full"
-                >
-                  {item.price}{" "}
-                  {item.currency === "coins" ? (
-                    <Coins className="w-4 h-4 ml-1" />
-                  ) : (
-                    <Gem className="w-4 h-4 ml-1" />
-                  )}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            ))
+          )}
+
+          {isGuest && (
+            <p className="text-center text-primary-500 dark:text-primary-400 text-sm">
+              Connectez-vous pour acheter des cosmétiques.
+            </p>
+          )}
         </div>
       )}
 
@@ -212,17 +316,11 @@ export default function BoutiquePage() {
       {activeTab === "gems" && (
         <div className="space-y-4">
           <p className="text-primary-600 dark:text-primary-400 mb-4">
-            Achetez des gemmes pour debloquer des cosmetiques exclusifs et des
-            bonus speciaux.
+            Achetez des gemmes pour débloquer des cosmétiques exclusifs et des bonus spéciaux.
           </p>
 
           {gemPackages.map((pkg) => (
-            <Card
-              key={pkg.id}
-              className={cn({
-                "ring-2 ring-secondary-500": pkg.popular,
-              })}
-            >
+            <Card key={pkg.id} className={cn({ "ring-2 ring-secondary-500": pkg.popular })}>
               <CardContent className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-info-100 dark:bg-info-900/40 flex items-center justify-center">
@@ -240,16 +338,13 @@ export default function BoutiquePage() {
                     </div>
                   </div>
                 </div>
-                <Button variant="secondary">
-                  {pkg.price.toFixed(2)} EUR
-                </Button>
+                <Button variant="secondary">{pkg.price.toFixed(2)} EUR</Button>
               </CardContent>
             </Card>
           ))}
 
           <p className="text-xs text-primary-500 dark:text-primary-400 text-center mt-4">
-            Les achats en argent reel seront disponibles prochainement via
-            Stripe.
+            Les achats en argent réel seront disponibles prochainement via Stripe.
           </p>
         </div>
       )}

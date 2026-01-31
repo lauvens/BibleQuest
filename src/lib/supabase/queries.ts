@@ -406,6 +406,112 @@ export async function unequipCosmetic(userId: string, cosmeticId: string) {
   if (error) throw error;
 }
 
+// Purchase a cosmetic (deduct currency and add to user_cosmetics)
+export async function purchaseCosmetic(
+  userId: string,
+  cosmeticId: string
+): Promise<{ success: boolean; error?: string }> {
+  // Get the cosmetic details
+  const { data: cosmetic, error: cosmeticError } = await supabase()
+    .from("cosmetics")
+    .select("*")
+    .eq("id", cosmeticId)
+    .eq("is_active", true)
+    .single();
+
+  if (cosmeticError || !cosmetic) {
+    return { success: false, error: "Cosmétique introuvable" };
+  }
+
+  // Check if already owned
+  const { data: existing } = await supabase()
+    .from("user_cosmetics")
+    .select("cosmetic_id")
+    .eq("user_id", userId)
+    .eq("cosmetic_id", cosmeticId)
+    .single();
+
+  if (existing) {
+    return { success: false, error: "Déjà possédé" };
+  }
+
+  // Get user's current balance
+  const { data: user, error: userError } = await supabase()
+    .from("users")
+    .select("coins, gems, level")
+    .eq("id", userId)
+    .single();
+
+  if (userError || !user) {
+    return { success: false, error: "Utilisateur introuvable" };
+  }
+
+  // Check unlock requirements
+  const unlockType = cosmetic.unlock_type as string;
+  const unlockValue = cosmetic.unlock_value as number;
+
+  if (unlockType === "level" && user.level < unlockValue) {
+    return { success: false, error: `Niveau ${unlockValue} requis` };
+  }
+
+  if (unlockType === "coins" && user.coins < unlockValue) {
+    return { success: false, error: "Pas assez de pièces" };
+  }
+
+  if (unlockType === "gems" && user.gems < unlockValue) {
+    return { success: false, error: "Pas assez de gemmes" };
+  }
+
+  // Deduct currency if needed
+  if (unlockType === "coins") {
+    const { error } = await supabase()
+      .from("users")
+      .update({ coins: user.coins - unlockValue })
+      .eq("id", userId);
+    if (error) return { success: false, error: "Erreur de paiement" };
+  } else if (unlockType === "gems") {
+    const { error } = await supabase()
+      .from("users")
+      .update({ gems: user.gems - unlockValue })
+      .eq("id", userId);
+    if (error) return { success: false, error: "Erreur de paiement" };
+  }
+
+  // Add to user_cosmetics
+  const { error: insertError } = await supabase()
+    .from("user_cosmetics")
+    .insert({
+      user_id: userId,
+      cosmetic_id: cosmeticId,
+      is_equipped: false,
+    });
+
+  if (insertError) {
+    return { success: false, error: "Erreur lors de l'achat" };
+  }
+
+  return { success: true };
+}
+
+// Get user's equipped cosmetics
+export async function getUserEquippedCosmetics(userId: string) {
+  const { data, error } = await supabase()
+    .from("user_cosmetics")
+    .select("cosmetic_id, cosmetics(*)")
+    .eq("user_id", userId)
+    .eq("is_equipped", true);
+  if (error) throw error;
+
+  const result: Record<string, Tables["cosmetics"]["Row"]> = {};
+  (data ?? []).forEach((uc) => {
+    const cosmetic = uc.cosmetics as unknown as Tables["cosmetics"]["Row"];
+    if (cosmetic) {
+      result[cosmetic.type] = cosmetic;
+    }
+  });
+  return result;
+}
+
 // Update avatar URL
 export async function updateAvatarUrl(userId: string, avatarUrl: string | null) {
   const { error } = await supabase()

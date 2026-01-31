@@ -13,6 +13,7 @@ import {
   Trophy,
   Flame,
   ShoppingBag,
+  Sparkles,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,7 @@ import { CurrencyDisplay } from "@/components/game/currency-display";
 import { StreakBadge } from "@/components/game/streak-badge";
 import { useUserStore } from "@/lib/store/user-store";
 import { createClient } from "@/lib/supabase/client";
-import { getUserStats, getUserAchievements } from "@/lib/supabase/queries";
+import { getUserStats, getUserAchievements, getUserEquippedCosmetics } from "@/lib/supabase/queries";
 
 interface AchievementData {
   id: string;
@@ -67,6 +68,7 @@ export default function ProfilPage() {
 
   const [achievements, setAchievements] = useState<AchievementData[]>([]);
   const [stats, setStats] = useState<StatsData | null>(null);
+  const [equippedTitle, setEquippedTitle] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
   const loadProfile = async () => {
@@ -74,9 +76,10 @@ export default function ProfilPage() {
     setError(false);
     try {
       // Parallel fetch - async-parallel rule
-      const [statsData, achievementsData] = await Promise.all([
+      const [statsData, achievementsData, equippedData] = await Promise.all([
         getUserStats(userId),
         getUserAchievements(userId),
+        getUserEquippedCosmetics(userId),
       ]);
       setStats(statsData);
       setAchievements(
@@ -87,6 +90,9 @@ export default function ProfilPage() {
           unlocked: a.unlocked,
         }))
       );
+      if (equippedData.title) {
+        setEquippedTitle(equippedData.title.name);
+      }
     } catch {
       setError(true);
     }
@@ -189,6 +195,11 @@ export default function ProfilPage() {
                 <h1 className="text-xl font-bold text-primary-800 dark:text-parchment-50">
                   {username || "Utilisateur"}
                 </h1>
+                {equippedTitle && (
+                  <p className="text-sm text-gold-600 dark:text-gold-400 font-medium">
+                    {equippedTitle}
+                  </p>
+                )}
                 <p className="text-primary-500 dark:text-primary-400">{email}</p>
               </div>
             </div>
@@ -289,6 +300,12 @@ export default function ProfilPage() {
           <Button variant="outline" className="w-full justify-start">
             <ShoppingBag className="w-5 h-5 mr-3" />
             Boutique
+          </Button>
+        </Link>
+        <Link href="/profil/cosmetiques">
+          <Button variant="outline" className="w-full justify-start">
+            <Sparkles className="w-5 h-5 mr-3" />
+            Mes cosmétiques
           </Button>
         </Link>
         <Button
