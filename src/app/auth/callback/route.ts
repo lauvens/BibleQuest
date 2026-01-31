@@ -20,18 +20,24 @@ export async function GET(request: Request) {
     if (!error && data.session) {
       // Check if this is an email confirmation:
       // - type is signup, email, or email_change
-      // - OR no next parameter and user was recently created (within 5 minutes)
+      // - OR email was just confirmed (within 30 seconds)
+      // - OR user was recently created (within 5 minutes)
       const isEmailConfirmation =
         type === "signup" ||
         type === "email" ||
         type === "email_change";
 
-      // Also check if user was just created (for cases where type param is missing)
+      // Check if email was just confirmed (for cases where type param is missing)
+      const emailConfirmedAt = data.session.user.email_confirmed_at;
+      const isJustConfirmed = emailConfirmedAt &&
+        (Date.now() - new Date(emailConfirmedAt).getTime()) < 30 * 1000; // 30 seconds
+
+      // Also check if user was just created
       const userCreatedAt = data.session.user.created_at;
       const isNewUser = userCreatedAt &&
         (Date.now() - new Date(userCreatedAt).getTime()) < 5 * 60 * 1000; // 5 minutes
 
-      if (isEmailConfirmation || (isNewUser && !next)) {
+      if (isEmailConfirmation || isJustConfirmed || (isNewUser && !next)) {
         return NextResponse.redirect(`${origin}/auth/confirmed`);
       }
 
