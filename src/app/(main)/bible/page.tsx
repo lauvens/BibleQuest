@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { BookOpen, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { BookOpen, RefreshCw, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookCard } from "@/components/bible/book-card";
@@ -41,18 +42,26 @@ export default function BiblePage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-12 h-12 rounded-2xl bg-gold-100 dark:bg-gold-900/40 flex items-center justify-center">
-          <BookOpen className="w-6 h-6 text-gold-600 dark:text-gold-400" />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gold-100 dark:bg-gold-900/40 flex items-center justify-center">
+            <BookOpen className="w-6 h-6 text-gold-600 dark:text-gold-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50">
+              La Bible
+            </h1>
+            <p className="text-primary-500 dark:text-primary-400">
+              Louis Segond 1910
+            </p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50">
-            La Bible
-          </h1>
-          <p className="text-primary-500 dark:text-primary-400">
-            Louis Segond 1910
-          </p>
-        </div>
+        <Link href="/versets">
+          <Button variant="outline" size="sm" className="gap-2">
+            <Heart className="w-4 h-4" />
+            <span className="hidden sm:inline">Mes versets</span>
+          </Button>
+        </Link>
       </div>
 
       {/* Testament Tabs */}
