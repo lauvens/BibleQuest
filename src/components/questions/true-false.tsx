@@ -36,12 +36,13 @@ export function TrueFalse({ content, onAnswer, disabled }: TrueFalseProps) {
     return cn(
       "flex-1 p-6 rounded-xl border-2 font-bold text-lg transition-all",
       "flex items-center justify-center gap-2",
+      "text-gray-900 dark:text-gray-100",
       {
-        "border-gray-200 hover:border-primary-300 hover:bg-primary-50":
+        "border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20":
           !showResult && !isSelected,
-        "border-primary-500 bg-primary-50": isSelected && !showResult,
-        "border-green-500 bg-green-50 text-green-700": showCorrect,
-        "border-red-500 bg-red-50 text-red-700": showWrong,
+        "border-primary-500 bg-primary-50 dark:bg-primary-900/30": isSelected && !showResult,
+        "border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400": showCorrect,
+        "border-red-500 bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400": showWrong,
         "opacity-50 cursor-not-allowed": disabled,
       }
     );
@@ -49,7 +50,7 @@ export function TrueFalse({ content, onAnswer, disabled }: TrueFalseProps) {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-900 text-center mb-8">
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 text-center mb-8">
         {content.statement}
       </h2>
 

@@ -29,7 +29,7 @@ export function MultipleChoice({ content, onAnswer, disabled }: MultipleChoicePr
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900 text-center mb-6">
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 text-center mb-6">
         {content.question}
       </h2>
 
@@ -49,23 +49,23 @@ export function MultipleChoice({ content, onAnswer, disabled }: MultipleChoicePr
                 "w-full p-4 rounded-xl border-2 text-left transition-all",
                 "flex items-center justify-between",
                 {
-                  "border-gray-200 hover:border-primary-300 hover:bg-primary-50":
+                  "border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20":
                     !showResult && !isSelected,
-                  "border-primary-500 bg-primary-50": isSelected && !showResult,
-                  "border-green-500 bg-green-50": showCorrect,
-                  "border-red-500 bg-red-50": showWrong,
+                  "border-primary-500 bg-primary-50 dark:bg-primary-900/30": isSelected && !showResult,
+                  "border-green-500 bg-green-50 dark:bg-green-900/30": showCorrect,
+                  "border-red-500 bg-red-50 dark:bg-red-900/30": showWrong,
                   "opacity-50 cursor-not-allowed": disabled,
                 }
               )}
             >
-              <span className={cn("font-medium", {
-                "text-green-700": showCorrect,
-                "text-red-700": showWrong,
+              <span className={cn("font-medium text-gray-900 dark:text-gray-100", {
+                "text-green-700 dark:text-green-400": showCorrect,
+                "text-red-700 dark:text-red-400": showWrong,
               })}>
                 {option}
               </span>
-              {showCorrect && <Check className="w-6 h-6 text-green-600" />}
-              {showWrong && <X className="w-6 h-6 text-red-600" />}
+              {showCorrect && <Check className="w-6 h-6 text-green-600 dark:text-green-400" />}
+              {showWrong && <X className="w-6 h-6 text-red-600 dark:text-red-400" />}
             </button>
           );
         })}
