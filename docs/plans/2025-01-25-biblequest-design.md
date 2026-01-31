@@ -1,4 +1,4 @@
-# BibleQuest - Design Document
+# BibleEidó - Design Document
 
 **Date:** 2025-01-25
 **Status:** Approved
@@ -7,7 +7,7 @@
 
 ## Overview
 
-BibleQuest is a gamified Christian theology learning app in French, inspired by Duolingo. Users learn Bible history, context, verses, and core doctrines through interactive lessons with a fun progression system.
+BibleEidó is a gamified Christian theology learning app in French, inspired by Duolingo. Users learn Bible history, context, verses, and core doctrines through interactive lessons with a fun progression system.
 
 **Target Platform:** Web first (Next.js), mobile later (React Native)
 **Primary Language:** French (internationalized for English later)

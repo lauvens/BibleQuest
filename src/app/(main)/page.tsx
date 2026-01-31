@@ -78,7 +78,7 @@ export default function HomePage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50 mb-2">
           {isGuest
-            ? "Bienvenue sur BibleQuest!"
+            ? "Bienvenue sur BibleEidó!"
             : `Bonjour, ${username || "Utilisateur"}!`}
         </h1>
         <p className="text-primary-500 dark:text-primary-400">

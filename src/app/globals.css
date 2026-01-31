@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* Couleurs du thème BibleQuest - Mode clair */
+    /* Couleurs du thème BibleEidó - Mode clair */
     --color-primary: 166 124 91;      /* Brun chaud */
     --color-parchment: 253 249 243;   /* Beige parchemin */
     --color-gold: 255 217 102;        /* Or doux */
@@ -19,7 +19,7 @@
   }
 
   .dark {
-    /* Couleurs du thème BibleQuest - Mode sombre */
+    /* Couleurs du thème BibleEidó - Mode sombre */
     --color-primary: 166 124 91;
     --color-parchment: 43 31 23;      /* primary-900 */
     --color-gold: 245 195 44;

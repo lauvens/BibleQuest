@@ -178,7 +178,7 @@ export const useUserStore = create<UserStore>()(
         set({ guestProgress: initialGuestProgress }),
     }),
     {
-      name: "biblequest-user",
+      name: "bibleeido-user",
       partialize: (state) => ({
         guestProgress: state.guestProgress,
       }),

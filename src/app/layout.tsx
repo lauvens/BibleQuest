@@ -9,7 +9,7 @@ import { LevelUpModal } from "@/components/game/level-up-modal";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "BibleQuest - Apprenez la Bible en vous amusant",
+  title: "BibleEidó - Apprenez la Bible en vous amusant",
   description:
     "Application gamifiée pour apprendre l'histoire, le contexte et les versets de la Bible",
 };

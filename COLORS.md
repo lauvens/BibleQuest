@@ -1,4 +1,4 @@
-# BibleQuest - Light Mode Colors
+# BibleEidó - Light Mode Colors
 
 ## Base Colors (from tailwind.config.ts)
 
@@ -138,7 +138,7 @@
 
 ---
 
-# BibleQuest – Dark Mode Colors
+# BibleEidó – Dark Mode Colors
 
 ## Base Colors (Dark Mode Tokens)
 

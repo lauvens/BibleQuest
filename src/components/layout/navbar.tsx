@@ -21,7 +21,7 @@ export function Navbar() {
             <BookOpen className="w-5 h-5 text-white" />
           </div>
           <span className="text-xl font-bold text-primary-700 hidden sm:block">
-            BibleQuest
+            BibleEidó
           </span>
         </Link>
 

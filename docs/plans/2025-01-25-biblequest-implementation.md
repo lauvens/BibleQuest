@@ -1,4 +1,4 @@
-# BibleQuest Implementation Plan
+# BibleEidó Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
@@ -83,7 +83,7 @@ git commit -m "chore: install core dependencies (supabase, zustand, next-intl)"
 - Modify: `tailwind.config.ts`
 - Modify: `src/app/globals.css`
 
-**Step 1: Update Tailwind config with BibleQuest theme colors**
+**Step 1: Update Tailwind config with BibleEidó theme colors**
 
 ```typescript
 // tailwind.config.ts
@@ -178,7 +178,7 @@ export default config;
 
 ```bash
 git add tailwind.config.ts src/app/globals.css
-git commit -m "style: configure Tailwind with BibleQuest theme colors"
+git commit -m "style: configure Tailwind with BibleEidó theme colors"
 ```
 
 ---
@@ -1386,7 +1386,7 @@ export const useUserStore = create<UserStore>()(
         set({ guestProgress: initialGuestProgress }),
     }),
     {
-      name: "biblequest-user",
+      name: "bibleeido-user",
       partialize: (state) => ({
         guestProgress: state.guestProgress,
       }),
@@ -2166,7 +2166,7 @@ export function Navbar() {
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <span className="text-2xl font-bold text-primary-600">BibleQuest</span>
+          <span className="text-2xl font-bold text-primary-600">BibleEidó</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-6">
@@ -2277,7 +2277,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "BibleQuest - Apprenez la Bible en vous amusant",
+  title: "BibleEidó - Apprenez la Bible en vous amusant",
   description:
     "Application gamifiée pour apprendre l'histoire, le contexte et les versets de la Bible",
 };
@@ -2367,7 +2367,7 @@ export default function HomePage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
           {isGuest
-            ? "Bienvenue sur BibleQuest!"
+            ? "Bienvenue sur BibleEidó!"
             : `Bonjour, ${username || "Utilisateur"}!`}
         </h1>
         <p className="text-gray-600">
@@ -2556,7 +2556,7 @@ The implementation plan continues with:
 
 ## Summary
 
-This plan covers the foundation for BibleQuest. Due to the project's scope, implementation is divided into phases:
+This plan covers the foundation for BibleEidó. Due to the project's scope, implementation is divided into phases:
 
 **Phase 1 (Tasks 1-9):** Project setup, Supabase, database schema
 **Phase 2 (Tasks 10-12):** Authentication & user state
