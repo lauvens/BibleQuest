@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { UserState, GuestProgress } from "@/types";
 import { calculateHearts, calculateLevel } from "@/lib/utils";
+import { useLevelUpStore } from "./level-up-store";
 
 interface UserStore extends UserState {
   // Actions
@@ -62,6 +63,10 @@ export const useUserStore = create<UserStore>()(
         set((state) => {
           const newXp = state.xp + amount;
           const newLevel = calculateLevel(newXp);
+          // Trigger level-up modal if level increased
+          if (newLevel > state.level) {
+            useLevelUpStore.getState().show(newLevel);
+          }
           return { xp: newXp, level: newLevel };
         }),
 

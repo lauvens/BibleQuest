@@ -289,4 +289,46 @@
   .dark .bg-parchment-subtle {
     background: linear-gradient(180deg, #2b1f17 0%, #33251b 50%, #3a2a1f 100%);
   }
+
+  /* Shine animation for achievement toast */
+  @keyframes shine {
+    0% {
+      transform: translateX(-100%);
+    }
+    50%, 100% {
+      transform: translateX(100%);
+    }
+  }
+
+  /* Level up animations */
+  .animate-level-up {
+    animation: level-up-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes level-up-pop {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .animate-level-pulse {
+    animation: level-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes level-pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
 }

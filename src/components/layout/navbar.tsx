@@ -10,7 +10,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { BookOpen } from "lucide-react";
 
 export function Navbar() {
-  const { isGuest, getActualHearts, currentStreak, coins, gems, username } = useUserStore();
+  const { isGuest, getActualHearts, currentStreak, coins, gems, username, heartsUpdatedAt } = useUserStore();
   const hearts = getActualHearts();
 
   return (
@@ -26,7 +26,11 @@ export function Navbar() {
         </Link>
 
         <div className="hidden md:flex items-center gap-5">
-          <HeartsDisplay hearts={hearts} />
+          <HeartsDisplay
+            hearts={hearts}
+            heartsUpdatedAt={heartsUpdatedAt}
+            showTimer
+          />
           <StreakBadge streak={currentStreak} />
           <CurrencyDisplay coins={coins} gems={gems} />
         </div>

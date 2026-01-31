@@ -10,9 +10,14 @@ import { ProgressBar } from "@/components/ui/progress-bar";
 import { HeartsDisplay } from "@/components/game/hearts-display";
 import { QuestionRenderer } from "@/components/questions/question-renderer";
 import { useUserStore } from "@/lib/store/user-store";
+import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { QuestionType, QuestionContent } from "@/types";
 import { getLesson, getQuestions, saveProgress, updateUserStats } from "@/lib/supabase/queries";
+import {
+  checkAndUnlockAchievements,
+  getUserLessonsCompleted,
+} from "@/lib/services/achievements";
 
 interface LoadedQuestion {
   type: QuestionType;
@@ -33,7 +38,12 @@ export default function LeconPage() {
     updateStreak,
     isGuest,
     updateGuestProgress,
+    currentStreak,
+    level,
+    heartsUpdatedAt,
   } = useUserStore();
+
+  const { showAchievementToast } = useToast();
 
   const [questions, setQuestions] = useState<LoadedQuestion[]>([]);
   const [lessonData, setLessonData] = useState<{ name: string; xp_reward: number; coin_reward: number } | null>(null);
@@ -110,7 +120,7 @@ export default function LeconPage() {
       }
     }
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (currentQuestionIndex < questions.length - 1) {
         setCurrentQuestionIndex((prev) => prev + 1);
       } else {
@@ -118,6 +128,7 @@ export default function LeconPage() {
           ((correctAnswers + (correct ? 1 : 0)) / questions.length) * 100
         );
         const passed = score >= 70;
+        const isPerfect = score === 100;
 
         const xpEarned = Math.round(lessonData.xp_reward * (score / 100));
         const coinsEarned = Math.round(lessonData.coin_reward * (score / 100));
@@ -131,6 +142,32 @@ export default function LeconPage() {
           // Save to Supabase in background
           saveProgress(userId, lessonId, score, passed).catch(console.error);
           updateUserStats(userId, xpEarned, coinsEarned).catch(console.error);
+
+          // Check for achievement unlocks
+          if (passed) {
+            try {
+              const lessonsCompleted = await getUserLessonsCompleted(userId);
+              const unlocked = await checkAndUnlockAchievements({
+                userId,
+                lessonsCompleted: lessonsCompleted + 1,
+                streak: currentStreak,
+                level,
+                isPerfectLesson: isPerfect,
+              });
+
+              // Show toast for each unlocked achievement
+              unlocked.forEach((achievement) => {
+                showAchievementToast({
+                  name: achievement.name,
+                  icon: achievement.icon,
+                });
+                // Also add the coin reward to user
+                addCoins(achievement.coin_reward);
+              });
+            } catch (err) {
+              console.error("Failed to check achievements:", err);
+            }
+          }
         }
 
         setIsComplete(true);
@@ -255,7 +292,11 @@ export default function LeconPage() {
             <ProgressBar value={progress} max={100} />
           </div>
 
-          <HeartsDisplay hearts={hearts} />
+          <HeartsDisplay
+            hearts={hearts}
+            heartsUpdatedAt={heartsUpdatedAt}
+            showTimer
+          />
         </div>
       </div>
 

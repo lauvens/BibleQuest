@@ -49,3 +49,36 @@ export function getStreakMultiplier(streak: number): number {
   if (streak >= 8) return 1.25;
   return 1;
 }
+
+/**
+ * Get seconds until next heart regeneration
+ * @returns seconds remaining, or null if hearts are full
+ */
+export function getTimeToNextHeart(
+  hearts: number,
+  heartsUpdatedAt: Date,
+  maxHearts = 5
+): number | null {
+  if (hearts >= maxHearts) return null;
+
+  const now = new Date();
+  const updatedAt = new Date(heartsUpdatedAt);
+  const diffMs = now.getTime() - updatedAt.getTime();
+  const diffMinutes = diffMs / (1000 * 60);
+
+  // Hearts regenerate every 30 minutes
+  const REGEN_INTERVAL = 30;
+  const minutesSinceLastRegen = diffMinutes % REGEN_INTERVAL;
+  const minutesUntilNext = REGEN_INTERVAL - minutesSinceLastRegen;
+
+  return Math.max(0, Math.floor(minutesUntilNext * 60));
+}
+
+/**
+ * Format seconds as MM:SS
+ */
+export function formatCountdown(seconds: number): string {
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+}
