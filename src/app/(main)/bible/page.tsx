@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookCard } from "@/components/bible/book-card";
 import { TestamentTabs } from "@/components/bible/testament-tabs";
+import { BibleSearch } from "@/components/bible/bible-search";
 import { getBibleBooks } from "@/lib/supabase/queries";
 import { Database } from "@/types/database";
 
@@ -63,6 +64,9 @@ export default function BiblePage() {
           </Button>
         </Link>
       </div>
+
+      {/* Search */}
+      <BibleSearch className="mb-6" />
 
       {/* Testament Tabs */}
       <TestamentTabs

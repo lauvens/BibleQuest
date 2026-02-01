@@ -682,3 +682,67 @@ export async function getVerse(book: string, chapter: number, verse: number) {
   if (error) throw error;
   return data as Tables["bible_verses"]["Row"];
 }
+
+// ==========================================
+// Full-Text Search for Bible Verses
+// ==========================================
+
+// Search verses using PostgreSQL Full-Text Search (French config)
+export async function searchVersesFTS(query: string, limit: number = 50) {
+  // Convert query to tsquery format: split words and join with &
+  const tsQuery = query
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word.replace(/[^a-zA-ZÀ-ÿ0-9]/g, ""))
+    .filter(Boolean)
+    .join(" & ");
+
+  if (!tsQuery) {
+    return [];
+  }
+
+  const { data, error } = await supabase()
+    .from("bible_verses")
+    .select("*")
+    .textSearch("text_search_vector", tsQuery, { config: "french" })
+    .limit(limit);
+
+  if (error) throw error;
+  return data as Tables["bible_verses"]["Row"][];
+}
+
+// ==========================================
+// User Favorites with Notes
+// ==========================================
+
+// Get user's favorite verses with notes
+export async function getUserFavoritesWithNotes(userId: string) {
+  const { data, error } = await supabase()
+    .from("user_verses")
+    .select("verse_id, created_at, note, bible_verses(*)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map((uv) => {
+    const verse = uv.bible_verses as unknown as Tables["bible_verses"]["Row"];
+    return {
+      ...verse,
+      favorited_at: uv.created_at,
+      note: uv.note,
+    };
+  });
+}
+
+// Update or delete a note on a favorite verse
+export async function updateVerseNote(
+  userId: string,
+  verseId: string,
+  note: string | null
+) {
+  const { error } = await supabase()
+    .from("user_verses")
+    .update({ note })
+    .eq("user_id", userId)
+    .eq("verse_id", verseId);
+  if (error) throw error;
+}

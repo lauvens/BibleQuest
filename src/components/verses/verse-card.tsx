@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Heart, Copy, Check, BookOpen } from "lucide-react";
+import { Heart, Copy, Check, BookOpen, StickyNote } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,9 @@ interface VerseCardProps {
   text: string;
   isFavorite?: boolean;
   isGuest?: boolean;
+  note?: string | null;
   onToggleFavorite?: (verseId: string) => void;
+  onEditNote?: (verseId: string, reference: string, note: string | null) => void;
 }
 
 export function VerseCard({
@@ -26,7 +28,9 @@ export function VerseCard({
   text,
   isFavorite = false,
   isGuest = false,
+  note,
   onToggleFavorite,
+  onEditNote,
 }: VerseCardProps) {
   const [copied, setCopied] = useState(false);
   const [animating, setAnimating] = useState(false);
@@ -58,6 +62,11 @@ export function VerseCard({
     setTimeout(() => setAnimating(false), 300);
   };
 
+  const handleEditNote = () => {
+    if (!onEditNote) return;
+    onEditNote(id, reference, note ?? null);
+  };
+
   return (
     <Card className="h-full flex flex-col">
       <CardContent className="p-4 flex flex-col h-full">
@@ -74,9 +83,21 @@ export function VerseCard({
         </p>
 
         {/* Reference */}
-        <p className="verse-reference mb-4">
+        <p className="verse-reference mb-3">
           {reference}
         </p>
+
+        {/* Note Display */}
+        {note && (
+          <div className="mb-3 p-3 rounded-lg bg-olive-50 dark:bg-olive-900/20 border border-olive-200 dark:border-olive-800">
+            <div className="flex items-start gap-2">
+              <StickyNote className="w-4 h-4 text-olive-600 dark:text-olive-400 flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-primary-700 dark:text-parchment-200 line-clamp-3">
+                {note}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex items-center gap-2 mt-auto">
@@ -113,6 +134,23 @@ export function VerseCard({
               <Copy className="w-5 h-5" />
             )}
           </Button>
+
+          {onEditNote && isFavorite && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleEditNote}
+              title={note ? "Modifier la note" : "Ajouter une note"}
+              className={cn(
+                "p-2",
+                note
+                  ? "text-olive-600 dark:text-olive-400 hover:text-olive-700"
+                  : "text-primary-400 hover:text-primary-600"
+              )}
+            >
+              <StickyNote className={cn("w-5 h-5", note && "fill-olive-100 dark:fill-olive-900/40")} />
+            </Button>
+          )}
 
           <Link
             href={`/bible/${encodeURIComponent(book)}/${chapter}`}

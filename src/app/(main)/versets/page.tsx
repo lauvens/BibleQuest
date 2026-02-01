@@ -10,23 +10,27 @@ import { VerseFilters } from "@/components/verses/verse-filters";
 import { useUserStore } from "@/lib/store/user-store";
 import {
   getAllVerses,
-  searchVerses,
+  searchVersesFTS,
   getVersesByBook,
   getUniqueBooks,
-  getUserFavorites,
+  getUserFavoritesWithNotes,
   getUserFavoriteIds,
   toggleFavorite,
+  updateVerseNote,
 } from "@/lib/supabase/queries";
+import { NoteEditorModal } from "@/components/verses/note-editor-modal";
 import { Database } from "@/types/database";
 
 type BibleVerse = Database["public"]["Tables"]["bible_verses"]["Row"];
+type VerseWithNote = BibleVerse & { note?: string | null };
 
 export default function VersetsPage() {
   const { isGuest, id: userId } = useUserStore();
 
-  const [verses, setVerses] = useState<BibleVerse[]>([]);
+  const [verses, setVerses] = useState<VerseWithNote[]>([]);
   const [books, setBooks] = useState<string[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const [notesMap, setNotesMap] = useState<Map<string, string | null>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -34,6 +38,14 @@ export default function VersetsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBook, setSelectedBook] = useState("");
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
+  // Note editor modal state
+  const [noteModalOpen, setNoteModalOpen] = useState(false);
+  const [editingVerse, setEditingVerse] = useState<{
+    id: string;
+    reference: string;
+    note: string | null;
+  } | null>(null);
 
   // Load initial data
   const loadData = useCallback(async () => {
@@ -46,6 +58,16 @@ export default function VersetsPage() {
       ]);
       setBooks(booksData);
       setFavoriteIds(favIds);
+
+      // Load notes for favorites
+      if (userId && !isGuest) {
+        const favorites = await getUserFavoritesWithNotes(userId);
+        const notes = new Map<string, string | null>();
+        favorites.forEach((f) => {
+          notes.set(f.id, f.note ?? null);
+        });
+        setNotesMap(notes);
+      }
     } catch {
       setError(true);
     } finally {
@@ -58,15 +80,21 @@ export default function VersetsPage() {
     setLoading(true);
     setError(false);
     try {
-      let data: BibleVerse[];
+      let data: VerseWithNote[];
 
       if (showFavoritesOnly && userId && !isGuest) {
-        // Load favorites
-        const favorites = await getUserFavorites(userId);
+        // Load favorites with notes
+        const favorites = await getUserFavoritesWithNotes(userId);
         data = favorites;
+        // Update notes map
+        const notes = new Map<string, string | null>();
+        favorites.forEach((f) => {
+          notes.set(f.id, f.note ?? null);
+        });
+        setNotesMap(notes);
       } else if (searchQuery) {
-        // Search verses
-        data = await searchVerses(searchQuery);
+        // Search verses using FTS
+        data = await searchVersesFTS(searchQuery);
       } else if (selectedBook) {
         // Filter by book
         data = await getVersesByBook(selectedBook);
@@ -135,6 +163,42 @@ export default function VersetsPage() {
       // Silently fail - could add toast notification here
     }
   }, [userId, isGuest, showFavoritesOnly]);
+
+  const handleEditNote = useCallback((verseId: string, reference: string, note: string | null) => {
+    setEditingVerse({ id: verseId, reference, note });
+    setNoteModalOpen(true);
+  }, []);
+
+  const handleSaveNote = useCallback(async (note: string | null) => {
+    if (!editingVerse || !userId || isGuest) return;
+
+    try {
+      await updateVerseNote(userId, editingVerse.id, note);
+
+      // Update local state
+      setNotesMap((prev) => {
+        const next = new Map(prev);
+        next.set(editingVerse.id, note);
+        return next;
+      });
+
+      // Update verse in list if showing favorites
+      if (showFavoritesOnly) {
+        setVerses((prev) =>
+          prev.map((v) =>
+            v.id === editingVerse.id ? { ...v, note } : v
+          )
+        );
+      }
+    } catch {
+      // Silently fail
+    }
+  }, [editingVerse, userId, isGuest, showFavoritesOnly]);
+
+  const handleCloseNoteModal = useCallback(() => {
+    setNoteModalOpen(false);
+    setEditingVerse(null);
+  }, []);
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -258,7 +322,9 @@ export default function VersetsPage() {
               text={verse.text}
               isFavorite={favoriteIds.has(verse.id)}
               isGuest={isGuest}
+              note={notesMap.get(verse.id) ?? verse.note}
               onToggleFavorite={handleToggleFavorite}
+              onEditNote={!isGuest ? handleEditNote : undefined}
             />
           ))}
         </div>
@@ -270,6 +336,15 @@ export default function VersetsPage() {
           {verses.length} verset{verses.length > 1 ? "s" : ""} affiche{verses.length > 1 ? "s" : ""}
         </p>
       )}
+
+      {/* Note Editor Modal */}
+      <NoteEditorModal
+        isOpen={noteModalOpen}
+        verseReference={editingVerse?.reference ?? ""}
+        initialNote={editingVerse?.note ?? null}
+        onSave={handleSaveNote}
+        onClose={handleCloseNoteModal}
+      />
     </div>
   );
 }

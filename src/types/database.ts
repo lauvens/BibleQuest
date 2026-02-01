@@ -335,6 +335,7 @@ export interface Database {
           chapter: number;
           verse: number;
           text: string;
+          text_search_vector: unknown | null;
         };
         Insert: {
           id?: string;
@@ -343,6 +344,7 @@ export interface Database {
           chapter: number;
           verse: number;
           text: string;
+          text_search_vector?: unknown | null;
         };
         Update: {
           id?: string;
@@ -351,6 +353,7 @@ export interface Database {
           chapter?: number;
           verse?: number;
           text?: string;
+          text_search_vector?: unknown | null;
         };
       };
       user_verses: {
@@ -359,18 +362,21 @@ export interface Database {
           user_id: string;
           verse_id: string;
           created_at: string;
+          note: string | null;
         };
         Insert: {
           id?: string;
           user_id: string;
           verse_id: string;
           created_at?: string;
+          note?: string | null;
         };
         Update: {
           id?: string;
           user_id?: string;
           verse_id?: string;
           created_at?: string;
+          note?: string | null;
         };
       };
       bible_books: {
