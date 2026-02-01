@@ -123,7 +123,8 @@ export function VerseList({
                   </div>
                 )}
               </div>
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              {/* Buttons: always visible on mobile, hover on desktop */}
+              <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                 {!isGuest && (
                   <>
                     <button
