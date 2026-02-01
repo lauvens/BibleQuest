@@ -746,3 +746,146 @@ export async function updateVerseNote(
     .eq("verse_id", verseId);
   if (error) throw error;
 }
+
+// ==========================================
+// Verse Notes
+// ==========================================
+
+// Get note for a specific verse
+export async function getVerseNote(userId: string, verseId: string) {
+  const { data, error } = await supabase()
+    .from("verse_notes")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("verse_id", verseId)
+    .single();
+  if (error && error.code !== "PGRST116") throw error; // PGRST116 = no rows
+  return data as Tables["verse_notes"]["Row"] | null;
+}
+
+// Get all notes for verses in a chapter (for bulk loading)
+export async function getChapterNotes(userId: string, verseIds: string[]) {
+  if (verseIds.length === 0) return new Map<string, string>();
+  const { data, error } = await supabase()
+    .from("verse_notes")
+    .select("verse_id, content")
+    .eq("user_id", userId)
+    .in("verse_id", verseIds);
+  if (error) throw error;
+  const map = new Map<string, string>();
+  (data ?? []).forEach((n) => map.set(n.verse_id, n.content));
+  return map;
+}
+
+// Save or update a note
+export async function saveVerseNote(
+  userId: string,
+  verseId: string,
+  content: string
+) {
+  const { error } = await supabase()
+    .from("verse_notes")
+    .upsert(
+      {
+        user_id: userId,
+        verse_id: verseId,
+        content,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id,verse_id" }
+    );
+  if (error) throw error;
+}
+
+// Delete a note
+export async function deleteVerseNote(userId: string, verseId: string) {
+  const { error } = await supabase()
+    .from("verse_notes")
+    .delete()
+    .eq("user_id", userId)
+    .eq("verse_id", verseId);
+  if (error) throw error;
+}
+
+// ==========================================
+// Verse Cross-References
+// ==========================================
+
+// Get all references for a source verse
+export async function getVerseReferences(userId: string, sourceVerseId: string) {
+  const { data, error } = await supabase()
+    .from("verse_references")
+    .select("id, target_verse_id, bible_verses!verse_references_target_verse_id_fkey(*)")
+    .eq("user_id", userId)
+    .eq("source_verse_id", sourceVerseId);
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    targetVerse: r.bible_verses as unknown as Tables["bible_verses"]["Row"],
+  }));
+}
+
+// Get reference counts for all verses in a chapter (for showing indicator)
+export async function getChapterReferenceCounts(userId: string, verseIds: string[]) {
+  if (verseIds.length === 0) return new Map<string, number>();
+  const { data, error } = await supabase()
+    .from("verse_references")
+    .select("source_verse_id")
+    .eq("user_id", userId)
+    .in("source_verse_id", verseIds);
+  if (error) throw error;
+  const map = new Map<string, number>();
+  (data ?? []).forEach((r) => {
+    map.set(r.source_verse_id, (map.get(r.source_verse_id) ?? 0) + 1);
+  });
+  return map;
+}
+
+// Add a cross-reference
+export async function addVerseReference(
+  userId: string,
+  sourceVerseId: string,
+  targetVerseId: string
+) {
+  const { error } = await supabase()
+    .from("verse_references")
+    .insert({
+      user_id: userId,
+      source_verse_id: sourceVerseId,
+      target_verse_id: targetVerseId,
+    });
+  if (error) throw error;
+}
+
+// Remove a cross-reference
+export async function removeVerseReference(userId: string, referenceId: string) {
+  const { error } = await supabase()
+    .from("verse_references")
+    .delete()
+    .eq("user_id", userId)
+    .eq("id", referenceId);
+  if (error) throw error;
+}
+
+// Search verses for reference picker (by book/chapter/verse or text)
+export async function searchVersesForReference(
+  query: string,
+  limit: number = 10
+) {
+  // Try to parse as reference (e.g., "Jean 3:16" or "Ephésiens 5:23")
+  const refMatch = query.match(/^(.+?)\s*(\d+):(\d+)$/);
+  if (refMatch) {
+    const [, bookName, chapter, verse] = refMatch;
+    const { data, error } = await supabase()
+      .from("bible_verses")
+      .select("*")
+      .ilike("book", `%${bookName.trim()}%`)
+      .eq("chapter", parseInt(chapter))
+      .eq("verse", parseInt(verse))
+      .limit(limit);
+    if (error) throw error;
+    return data as Tables["bible_verses"]["Row"][];
+  }
+  // Fall back to text search
+  return searchVersesFTS(query, limit);
+}

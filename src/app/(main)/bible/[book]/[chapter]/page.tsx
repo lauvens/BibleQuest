@@ -9,7 +9,20 @@ import { Button } from "@/components/ui/button";
 import { VerseList } from "@/components/bible/verse-list";
 import { ChapterNav } from "@/components/bible/chapter-nav";
 import { useUserStore } from "@/lib/store/user-store";
-import { getChapter, getBibleBook, getUserFavoriteIds, toggleFavorite } from "@/lib/supabase/queries";
+import {
+  getChapter,
+  getBibleBook,
+  getUserFavoriteIds,
+  toggleFavorite,
+  getChapterNotes,
+  saveVerseNote,
+  deleteVerseNote,
+  getChapterReferenceCounts,
+  getVerseReferences,
+  addVerseReference,
+  removeVerseReference,
+  searchVersesForReference,
+} from "@/lib/supabase/queries";
 import { Database } from "@/types/database";
 
 type BibleVerse = Database["public"]["Tables"]["bible_verses"]["Row"];
@@ -25,6 +38,8 @@ export default function ChapterPage() {
   const [verses, setVerses] = useState<BibleVerse[]>([]);
   const [book, setBook] = useState<BibleBook | null>(null);
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
+  const [notes, setNotes] = useState<Map<string, string>>(new Map());
+  const [referenceCounts, setReferenceCounts] = useState<Map<string, number>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
@@ -32,14 +47,29 @@ export default function ChapterPage() {
     setLoading(true);
     setError(false);
     try {
-      const [versesData, bookData, favIds] = await Promise.all([
+      const [versesData, bookData] = await Promise.all([
         getChapter(bookName, chapterNum),
         getBibleBook(bookName),
-        userId && !isGuest ? getUserFavoriteIds(userId) : Promise.resolve(new Set<string>()),
       ]);
       setVerses(versesData);
       setBook(bookData);
-      setFavoriteIds(favIds);
+
+      // Load user data if logged in
+      if (userId && !isGuest) {
+        const verseIds = versesData.map((v) => v.id);
+        const [favIds, notesData, refCounts] = await Promise.all([
+          getUserFavoriteIds(userId),
+          getChapterNotes(userId, verseIds),
+          getChapterReferenceCounts(userId, verseIds),
+        ]);
+        setFavoriteIds(favIds);
+        setNotes(notesData);
+        setReferenceCounts(refCounts);
+      } else {
+        setFavoriteIds(new Set());
+        setNotes(new Map());
+        setReferenceCounts(new Map());
+      }
     } catch {
       setError(true);
     } finally {
@@ -51,27 +81,87 @@ export default function ChapterPage() {
     loadData();
   }, [loadData]);
 
-  const handleToggleFavorite = useCallback(async (verseId: string) => {
-    if (!userId || isGuest) return;
-    try {
-      const isFav = await toggleFavorite(userId, verseId);
-      setFavoriteIds((prev) => {
-        const next = new Set(prev);
-        if (isFav) {
-          next.add(verseId);
-        } else {
-          next.delete(verseId);
-        }
+  const handleToggleFavorite = useCallback(
+    async (verseId: string) => {
+      if (!userId || isGuest) return;
+      try {
+        const isFav = await toggleFavorite(userId, verseId);
+        setFavoriteIds((prev) => {
+          const next = new Set(prev);
+          if (isFav) {
+            next.add(verseId);
+          } else {
+            next.delete(verseId);
+          }
+          return next;
+        });
+      } catch {
+        // Silently fail
+      }
+    },
+    [userId, isGuest]
+  );
+
+  const handleSaveNote = useCallback(
+    async (verseId: string, content: string) => {
+      if (!userId || isGuest) return;
+      await saveVerseNote(userId, verseId, content);
+      setNotes((prev) => new Map(prev).set(verseId, content));
+    },
+    [userId, isGuest]
+  );
+
+  const handleDeleteNote = useCallback(
+    async (verseId: string) => {
+      if (!userId || isGuest) return;
+      await deleteVerseNote(userId, verseId);
+      setNotes((prev) => {
+        const next = new Map(prev);
+        next.delete(verseId);
         return next;
       });
-    } catch {
-      // Silently fail
-    }
-  }, [userId, isGuest]);
+    },
+    [userId, isGuest]
+  );
 
-  const testamentColors = book?.testament === "old"
-    ? "bg-olive-100 dark:bg-olive-900/40 text-olive-700 dark:text-olive-300"
-    : "bg-info-100 dark:bg-info-900/40 text-info-700 dark:text-info-300";
+  const handleLoadReferences = useCallback(
+    async (verseId: string) => {
+      if (!userId || isGuest) return [];
+      return getVerseReferences(userId, verseId);
+    },
+    [userId, isGuest]
+  );
+
+  const handleAddReference = useCallback(
+    async (sourceVerseId: string, targetVerseId: string) => {
+      if (!userId || isGuest) return;
+      await addVerseReference(userId, sourceVerseId, targetVerseId);
+      // Update count
+      setReferenceCounts((prev) => {
+        const next = new Map(prev);
+        next.set(sourceVerseId, (next.get(sourceVerseId) ?? 0) + 1);
+        return next;
+      });
+    },
+    [userId, isGuest]
+  );
+
+  const handleRemoveReference = useCallback(
+    async (referenceId: string) => {
+      if (!userId || isGuest) return;
+      await removeVerseReference(userId, referenceId);
+    },
+    [userId, isGuest]
+  );
+
+  const handleSearchVerses = useCallback(async (query: string) => {
+    return searchVersesForReference(query);
+  }, []);
+
+  const testamentColors =
+    book?.testament === "old"
+      ? "bg-olive-100 dark:bg-olive-900/40 text-olive-700 dark:text-olive-300"
+      : "bg-info-100 dark:bg-info-900/40 text-info-700 dark:text-info-300";
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
@@ -111,7 +201,7 @@ export default function ChapterPage() {
             </p>
             <Button onClick={loadData} variant="outline">
               <RefreshCw className="w-4 h-4 mr-2" />
-              Reessayer
+              Réessayer
             </Button>
           </CardContent>
         </Card>
@@ -149,12 +239,20 @@ export default function ChapterPage() {
                 <VerseList
                   verses={verses}
                   favoriteIds={favoriteIds}
+                  notes={notes}
+                  referenceCounts={referenceCounts}
                   isGuest={isGuest}
                   onToggleFavorite={handleToggleFavorite}
+                  onSaveNote={handleSaveNote}
+                  onDeleteNote={handleDeleteNote}
+                  onLoadReferences={handleLoadReferences}
+                  onAddReference={handleAddReference}
+                  onRemoveReference={handleRemoveReference}
+                  onSearchVerses={handleSearchVerses}
                 />
               ) : (
                 <p className="text-center text-primary-500 dark:text-primary-400 py-8">
-                  Aucun verset trouve pour ce chapitre.
+                  Aucun verset trouvé pour ce chapitre.
                 </p>
               )}
             </CardContent>
