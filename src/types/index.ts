@@ -1,18 +1,24 @@
 export * from "./database";
 
+// Base question fields (optional explanation for all types)
+interface BaseQuestionContent {
+  explanation?: string;
+  verse_reference?: string;
+}
+
 // Question content types
-export interface MultipleChoiceContent {
+export interface MultipleChoiceContent extends BaseQuestionContent {
   question: string;
   options: string[];
   correct: number;
 }
 
-export interface TrueFalseContent {
+export interface TrueFalseContent extends BaseQuestionContent {
   statement: string;
   correct: boolean;
 }
 
-export interface FillBlankContent {
+export interface FillBlankContent extends BaseQuestionContent {
   verse: string;
   answer: string;
   reference: string;
