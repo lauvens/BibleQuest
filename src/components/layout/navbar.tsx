@@ -20,9 +20,9 @@ export function Navbar() {
           <Image
             src="/logo.png"
             alt="BibleEidó"
-            width={36}
-            height={36}
-            className="rounded-xl shadow-soft group-hover:shadow-card transition-shadow"
+            width={44}
+            height={44}
+            className="shadow-soft group-hover:shadow-card transition-shadow"
           />
           <span className="text-xl font-bold text-primary-700 dark:text-parchment-100 hidden sm:block">
             BibleEidó

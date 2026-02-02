@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, Instagram, Youtube, Twitter, Mail } from "lucide-react";
+import Image from "next/image";
+import { Instagram, Youtube, Twitter, Mail } from "lucide-react";
 import { FadeIn } from "@/components/ui/motion";
 
 const navigation = {
@@ -34,10 +35,13 @@ export function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             {/* Brand */}
             <div className="md:col-span-2">
-              <Link href="/" className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 rounded-xl bg-accent-400 flex items-center justify-center">
-                  <BookOpen className="w-6 h-6 text-primary-900" />
-                </div>
+              <Link href="/" className="flex items-center gap-3 mb-4">
+                <Image
+                  src="/logo-white.png"
+                  alt="BibleEidó"
+                  width={40}
+                  height={40}
+                />
                 <span className="text-xl font-bold">BibleEidó</span>
               </Link>
               <p className="text-white/60 mb-4 max-w-sm">
