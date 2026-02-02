@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { HeroSection } from "@/components/home/hero-section";
 import { CourseCard } from "@/components/courses/course-card";
 import { DailyVerseSection } from "@/components/home/daily-verse-section";
 import { ExplorerSection } from "@/components/home/explorer-section";
+import { StreakCalendar } from "@/components/game/streak-calendar";
 import { FadeIn, Stagger, StaggerItem } from "@/components/ui/motion";
 import { useUserStore } from "@/lib/store/user-store";
 import { getDailyVerse } from "@/lib/supabase/queries";
@@ -48,6 +50,21 @@ export default function HomePage() {
   } = useUserStore();
 
   const [verse, setVerse] = useState<{ text: string; reference: string } | null>(null);
+
+  // Generate placeholder active days (will be replaced with real data)
+  const activeDays = useMemo(() => {
+    const days: Date[] = [];
+    const today = new Date();
+    // Generate random active days in the last 84 days
+    for (let i = 0; i < 84; i++) {
+      if (Math.random() > 0.6) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        days.push(date);
+      }
+    }
+    return days;
+  }, []);
 
   useEffect(() => {
     getDailyVerse()
@@ -99,6 +116,15 @@ export default function HomePage() {
 
       {/* Daily Verse */}
       <DailyVerseSection verse={verse} />
+
+      {/* Streak Calendar */}
+      <FadeIn delay={0.35} className="mb-12">
+        <Card>
+          <CardContent className="p-6">
+            <StreakCalendar activeDays={activeDays} />
+          </CardContent>
+        </Card>
+      </FadeIn>
 
       {/* Explorer */}
       <ExplorerSection />

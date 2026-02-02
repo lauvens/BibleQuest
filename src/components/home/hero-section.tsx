@@ -3,6 +3,7 @@
 import { Flame, Coins, Gem } from "lucide-react";
 import { FadeIn } from "@/components/ui/motion";
 import { XpBar } from "@/components/game/xp-bar";
+import { AnimatedCounter } from "@/components/ui/animated-counter";
 import { cn } from "@/lib/utils";
 
 interface HeroSectionProps {
@@ -61,13 +62,13 @@ export function HeroSection({
           {/* Coins */}
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/10">
             <Coins className="w-5 h-5 text-gold-400" />
-            <span className="font-semibold">{coins}</span>
+            <AnimatedCounter value={coins} className="font-semibold" />
           </div>
 
           {/* Gems */}
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/10">
             <Gem className="w-5 h-5 text-accent-400" />
-            <span className="font-semibold">{gems}</span>
+            <AnimatedCounter value={gems} className="font-semibold" />
           </div>
         </div>
       </div>
