@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { HeartsDisplay } from "@/components/game/hearts-display";
 import { QuestionRenderer } from "@/components/questions/question-renderer";
+import { CelebrationModal } from "@/components/ui/celebration-modal";
 import { useUserStore } from "@/lib/store/user-store";
 import { QuestionType, QuestionContent } from "@/types";
 import { getRandomQuestions } from "@/lib/supabase/queries";
+import { fireGoldConfetti } from "@/lib/confetti";
 
 interface LoadedQuestion {
   type: QuestionType;
@@ -28,6 +30,8 @@ export default function DefiPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [earnedRewards, setEarnedRewards] = useState({ xp: 0, coins: 0 });
 
   const hearts = getActualHearts();
 
@@ -62,6 +66,7 @@ export default function DefiPage() {
   const handleAnswer = (correct: boolean) => {
     if (correct) {
       setCorrectAnswers((prev) => prev + 1);
+      fireGoldConfetti();
     } else {
       loseHeart();
     }
@@ -79,6 +84,8 @@ export default function DefiPage() {
         addXp(xpEarned);
         addCoins(coinsEarned);
 
+        setEarnedRewards({ xp: xpEarned, coins: coinsEarned });
+        setShowCelebration(true);
         setIsComplete(true);
       }
     }, 1500);
@@ -161,6 +168,15 @@ export default function DefiPage() {
   if (isComplete) {
     return (
       <div className="min-h-screen bg-parchment-50 dark:bg-primary-900 flex items-center justify-center p-4">
+        <CelebrationModal
+          isOpen={showCelebration}
+          onClose={() => setShowCelebration(false)}
+          type="achievement"
+          title="Défi terminé!"
+          description={`Vous avez obtenu ${finalScore}% de bonnes réponses`}
+          reward={{ xp: earnedRewards.xp, coins: earnedRewards.coins }}
+        />
+
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             <div className="w-20 h-20 rounded-full bg-gold-100 dark:bg-gold-900/30 flex items-center justify-center mx-auto mb-4">
@@ -176,13 +192,13 @@ export default function DefiPage() {
             <div className="flex items-center justify-center gap-6 mb-6">
               <div className="text-center">
                 <p className="text-2xl font-bold text-xp">
-                  +{25 + Math.round(25 * (finalScore / 100))}
+                  +{earnedRewards.xp}
                 </p>
                 <p className="text-sm text-primary-400 dark:text-primary-400">XP</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-gold-500">
-                  +{15 + Math.round(15 * (finalScore / 100))}
+                  +{earnedRewards.coins}
                 </p>
                 <p className="text-sm text-primary-400 dark:text-primary-400">Pièces</p>
               </div>
@@ -224,6 +240,7 @@ export default function DefiPage() {
             </p>
             {currentQuestion && (
               <QuestionRenderer
+                key={currentQuestionIndex}
                 type={currentQuestion.type}
                 content={currentQuestion.content}
                 onAnswer={handleAnswer}

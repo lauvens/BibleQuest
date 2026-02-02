@@ -305,6 +305,7 @@ export default function LeconPage() {
         <Card>
           <CardContent className="p-6">
             <QuestionRenderer
+              key={currentQuestionIndex}
               type={currentQuestion.type}
               content={currentQuestion.content}
               onAnswer={handleAnswer}
