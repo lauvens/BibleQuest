@@ -84,6 +84,8 @@ export interface UserState {
 // Guest progress for localStorage
 export interface GuestProgress {
   lessonProgress: Record<string, { completed: boolean; bestScore: number }>;
+  milestoneProgress: Record<string, { completed: boolean; bestScore: number }>;
+  pathProgress: Record<string, { started: boolean; currentMilestoneIndex: number }>;
   xp: number;
   currentStreak: number;
   lastActivityDate: string | null;

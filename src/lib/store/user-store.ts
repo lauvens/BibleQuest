@@ -21,6 +21,8 @@ interface UserStore extends UserState {
   // Guest progress
   guestProgress: GuestProgress;
   updateGuestProgress: (lessonId: string, score: number, completed: boolean) => void;
+  updateGuestMilestoneProgress: (milestoneId: string, score: number, completed: boolean) => void;
+  updateGuestPathProgress: (pathId: string, currentMilestoneIndex: number) => void;
   clearGuestProgress: () => void;
 }
 
@@ -44,6 +46,8 @@ const initialUserState: UserState = {
 
 const initialGuestProgress: GuestProgress = {
   lessonProgress: {},
+  milestoneProgress: {},
+  pathProgress: {},
   xp: 0,
   currentStreak: 0,
   lastActivityDate: null,
@@ -169,6 +173,37 @@ export const useUserStore = create<UserStore>()(
                   state.guestProgress.lessonProgress[lessonId]?.bestScore || 0,
                   score
                 ),
+              },
+            },
+          },
+        })),
+
+      updateGuestMilestoneProgress: (milestoneId, score, completed) =>
+        set((state) => ({
+          guestProgress: {
+            ...state.guestProgress,
+            milestoneProgress: {
+              ...state.guestProgress.milestoneProgress,
+              [milestoneId]: {
+                completed,
+                bestScore: Math.max(
+                  state.guestProgress.milestoneProgress[milestoneId]?.bestScore || 0,
+                  score
+                ),
+              },
+            },
+          },
+        })),
+
+      updateGuestPathProgress: (pathId, currentMilestoneIndex) =>
+        set((state) => ({
+          guestProgress: {
+            ...state.guestProgress,
+            pathProgress: {
+              ...state.guestProgress.pathProgress,
+              [pathId]: {
+                started: true,
+                currentMilestoneIndex,
               },
             },
           },

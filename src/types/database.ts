@@ -22,6 +22,10 @@ export type UnlockType = "free" | "level" | "coins" | "gems";
 
 export type UserRole = "user" | "admin";
 
+export type PathDifficulty = "beginner" | "intermediate" | "advanced";
+
+export type MilestoneType = "lesson" | "quiz" | "reading" | "reflection";
+
 export interface Database {
   public: {
     Tables: {
@@ -452,6 +456,163 @@ export interface Database {
           source_verse_id?: string;
           target_verse_id?: string;
           created_at?: string;
+        };
+      };
+      mastery_paths: {
+        Row: {
+          id: string;
+          name: string;
+          slug: string;
+          description: string | null;
+          icon: string;
+          color: string;
+          cover_image_url: string | null;
+          estimated_hours: number;
+          difficulty: PathDifficulty;
+          order_index: number;
+          is_published: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          slug: string;
+          description?: string | null;
+          icon?: string;
+          color?: string;
+          cover_image_url?: string | null;
+          estimated_hours?: number;
+          difficulty?: PathDifficulty;
+          order_index?: number;
+          is_published?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          slug?: string;
+          description?: string | null;
+          icon?: string;
+          color?: string;
+          cover_image_url?: string | null;
+          estimated_hours?: number;
+          difficulty?: PathDifficulty;
+          order_index?: number;
+          is_published?: boolean;
+          created_at?: string;
+        };
+      };
+      path_milestones: {
+        Row: {
+          id: string;
+          path_id: string;
+          name: string;
+          description: string | null;
+          milestone_type: MilestoneType;
+          content: Json | null;
+          order_index: number;
+          xp_reward: number;
+          coin_reward: number;
+          required_score: number;
+        };
+        Insert: {
+          id?: string;
+          path_id: string;
+          name: string;
+          description?: string | null;
+          milestone_type?: MilestoneType;
+          content?: Json | null;
+          order_index?: number;
+          xp_reward?: number;
+          coin_reward?: number;
+          required_score?: number;
+        };
+        Update: {
+          id?: string;
+          path_id?: string;
+          name?: string;
+          description?: string | null;
+          milestone_type?: MilestoneType;
+          content?: Json | null;
+          order_index?: number;
+          xp_reward?: number;
+          coin_reward?: number;
+          required_score?: number;
+        };
+      };
+      milestone_questions: {
+        Row: {
+          id: string;
+          milestone_id: string;
+          type: QuestionType;
+          content: Json;
+          difficulty: number;
+          order_index: number;
+        };
+        Insert: {
+          id?: string;
+          milestone_id: string;
+          type: QuestionType;
+          content: Json;
+          difficulty?: number;
+          order_index?: number;
+        };
+        Update: {
+          id?: string;
+          milestone_id?: string;
+          type?: QuestionType;
+          content?: Json;
+          difficulty?: number;
+          order_index?: number;
+        };
+      };
+      user_path_progress: {
+        Row: {
+          user_id: string;
+          path_id: string;
+          started_at: string;
+          completed_at: string | null;
+          current_milestone_index: number;
+        };
+        Insert: {
+          user_id: string;
+          path_id: string;
+          started_at?: string;
+          completed_at?: string | null;
+          current_milestone_index?: number;
+        };
+        Update: {
+          user_id?: string;
+          path_id?: string;
+          started_at?: string;
+          completed_at?: string | null;
+          current_milestone_index?: number;
+        };
+      };
+      user_milestone_progress: {
+        Row: {
+          user_id: string;
+          milestone_id: string;
+          completed: boolean;
+          best_score: number;
+          attempts: number;
+          completed_at: string | null;
+        };
+        Insert: {
+          user_id: string;
+          milestone_id: string;
+          completed?: boolean;
+          best_score?: number;
+          attempts?: number;
+          completed_at?: string | null;
+        };
+        Update: {
+          user_id?: string;
+          milestone_id?: string;
+          completed?: boolean;
+          best_score?: number;
+          attempts?: number;
+          completed_at?: string | null;
         };
       };
     };

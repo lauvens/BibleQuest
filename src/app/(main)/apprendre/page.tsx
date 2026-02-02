@@ -1,290 +1,223 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { Scroll, Map, BookOpen, Church, Lock, CheckCircle } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { ProgressBar } from "@/components/ui/progress-bar";
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import { Compass, BookOpen, Filter, Clock, CheckCircle } from "lucide-react";
+import { PathCard } from "@/components/mastery/path-card";
 import { useUserStore } from "@/lib/store/user-store";
-import { getCategories, getCategoryWithProgress } from "@/lib/supabase/queries";
-import { Database } from "@/types/database";
+import { getMasteryPathsWithProgress } from "@/lib/supabase/queries";
+import { Database, PathDifficulty } from "@/types/database";
+import { cn } from "@/lib/utils";
 
-type CategoryRow = Database["public"]["Tables"]["categories"]["Row"];
-
-const categoryIcons: Record<string, React.ReactNode> = {
-  scroll: <Scroll className="w-8 h-8" />,
-  map: <Map className="w-8 h-8" />,
-  "book-open": <BookOpen className="w-8 h-8" />,
-  church: <Church className="w-8 h-8" />,
-};
-
-const categoryNames: Record<string, { name: string; description: string }> = {
-  history: { name: "Histoire Biblique", description: "Découvrez la chronologie et les événements majeurs de la Bible" },
-  context: { name: "Contexte Culturel", description: "Explorez la géographie et la culture de l'époque biblique" },
-  verses: { name: "Versets Clés", description: "Mémorisez les versets les plus importants" },
-  doctrines: { name: "Doctrines", description: "Comprenez les fondements de la foi chrétienne" },
-};
-
-interface UnitWithProgress {
-  id: string;
-  name: string;
-  description: string | null;
-  order_index: number;
-  unlock_threshold: number;
+type MasteryPath = Database["public"]["Tables"]["mastery_paths"]["Row"] & {
+  started: boolean;
+  completed: boolean;
   progress: number;
-  completedCount: number;
-  lessons: {
-    id: string;
-    name: string;
-    order_index: number;
-    completed: boolean;
-    bestScore: number;
-  }[];
-}
+  completedMilestones: number;
+  totalMilestones: number;
+};
 
-function ApprendreContent() {
-  const searchParams = useSearchParams();
-  const categoryParam = searchParams.get("category");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(
-    categoryParam || null
-  );
-  const { id: userId, guestProgress, isGuest } = useUserStore();
+type FilterType = "all" | "in_progress" | "completed" | "not_started";
+type DifficultyFilter = "all" | PathDifficulty;
 
-  const [categories, setCategories] = useState<CategoryRow[]>([]);
-  const [units, setUnits] = useState<UnitWithProgress[]>([]);
-  const [categoryInfo, setCategoryInfo] = useState<{ name: string; description: string } | null>(null);
-  const [loading, setLoading] = useState(false);
+export default function ApprendrePage() {
+  const { id: userId, isGuest, guestProgress } = useUserStore();
+
+  const [paths, setPaths] = useState<MasteryPath[]>([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<FilterType>("all");
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>("all");
 
   useEffect(() => {
-    getCategories()
-      .then(setCategories)
-      .catch(() => setError(true));
-  }, []);
-
-  useEffect(() => {
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
-    }
-  }, [categoryParam]);
-
-  useEffect(() => {
-    if (!selectedCategory) {
-      setUnits([]);
-      setCategoryInfo(null);
-      return;
-    }
     setLoading(true);
-    getCategoryWithProgress(selectedCategory, isGuest ? null : userId)
-      .then((result) => {
-        const names = categoryNames[selectedCategory] || {
-          name: selectedCategory,
-          description: "",
-        };
-        setCategoryInfo(names);
-
+    getMasteryPathsWithProgress(isGuest ? null : userId)
+      .then((data) => {
         // Apply guest progress if guest
         if (isGuest) {
-          setUnits(
-            result.units.map((u: UnitWithProgress) => ({
-              ...u,
-              lessons: u.lessons.map((l: UnitWithProgress["lessons"][number]) => ({
-                ...l,
-                completed: guestProgress.lessonProgress[l.id]?.completed ?? false,
-                bestScore: guestProgress.lessonProgress[l.id]?.bestScore ?? 0,
-              })),
-              progress: (() => {
-                const completed = u.lessons.filter(
-                  (l: UnitWithProgress["lessons"][number]) => guestProgress.lessonProgress[l.id]?.completed
-                ).length;
-                return u.lessons.length > 0
-                  ? Math.round((completed / u.lessons.length) * 100)
-                  : 0;
-              })(),
-            }))
-          );
+          const pathsWithGuestProgress = data.map((path) => {
+            const guestPathProgress = guestProgress.pathProgress[path.id];
+            const started = !!guestPathProgress?.started;
+
+            // Count completed milestones from guest progress
+            // This is a simplified version - in production you'd need to fetch milestone IDs
+            return {
+              ...path,
+              started,
+              completed: false, // Guest completion is harder to track without milestone IDs
+              progress: started ? Math.min(guestPathProgress?.currentMilestoneIndex * 20, 100) : 0,
+            };
+          });
+          setPaths(pathsWithGuestProgress);
         } else {
-          setUnits(result.units);
+          setPaths(data);
         }
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [selectedCategory, userId, isGuest, guestProgress]);
+  }, [userId, isGuest, guestProgress]);
 
-  // Determine which units are locked based on previous unit completion
-  const getLockedStatus = (unitIndex: number): boolean => {
-    if (unitIndex === 0) return false;
-    const prevUnit = units[unitIndex - 1];
-    if (!prevUnit) return true;
-    return prevUnit.progress < 100;
-  };
+  // Filter paths
+  const filteredPaths = paths.filter((path) => {
+    // Status filter
+    if (statusFilter === "in_progress" && (!path.started || path.completed)) return false;
+    if (statusFilter === "completed" && !path.completed) return false;
+    if (statusFilter === "not_started" && path.started) return false;
+
+    // Difficulty filter
+    if (difficultyFilter !== "all" && path.difficulty !== difficultyFilter) return false;
+
+    return true;
+  });
+
+  // Stats
+  const totalPaths = paths.length;
+  const inProgressCount = paths.filter((p) => p.started && !p.completed).length;
+  const completedCount = paths.filter((p) => p.completed).length;
+  const totalHours = paths.reduce((sum, p) => sum + p.estimated_hours, 0);
+
+  const statusFilters: { id: FilterType; label: string; count: number }[] = [
+    { id: "all", label: "Tous", count: totalPaths },
+    { id: "in_progress", label: "En cours", count: inProgressCount },
+    { id: "completed", label: "Termines", count: completedCount },
+    { id: "not_started", label: "A commencer", count: totalPaths - inProgressCount - completedCount },
+  ];
+
+  const difficultyFilters: { id: DifficultyFilter; label: string }[] = [
+    { id: "all", label: "Toutes difficultes" },
+    { id: "beginner", label: "Debutant" },
+    { id: "intermediate", label: "Intermediaire" },
+    { id: "advanced", label: "Avance" },
+  ];
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50 mb-6">Apprendre</h1>
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-12 h-12 rounded-xl bg-accent-100 dark:bg-accent-900/30 flex items-center justify-center">
+            <Compass className="w-6 h-6 text-accent-600 dark:text-accent-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50">
+              Parcours de Maitrise
+            </h1>
+            <p className="text-primary-600 dark:text-primary-400">
+              Approfondissez vos connaissances theologiques
+            </p>
+          </div>
+        </div>
+      </div>
 
+      {/* Stats overview */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="p-4 bg-parchment-100 dark:bg-primary-850 rounded-xl">
+          <BookOpen className="w-5 h-5 text-primary-500 dark:text-primary-400 mb-2" />
+          <p className="text-2xl font-bold text-primary-800 dark:text-parchment-50">{totalPaths}</p>
+          <p className="text-sm text-primary-500 dark:text-primary-400">Parcours</p>
+        </div>
+        <div className="p-4 bg-parchment-100 dark:bg-primary-850 rounded-xl">
+          <Clock className="w-5 h-5 text-accent-500 mb-2" />
+          <p className="text-2xl font-bold text-primary-800 dark:text-parchment-50">{totalHours}h</p>
+          <p className="text-sm text-primary-500 dark:text-primary-400">De contenu</p>
+        </div>
+        <div className="p-4 bg-parchment-100 dark:bg-primary-850 rounded-xl">
+          <Filter className="w-5 h-5 text-gold-500 mb-2" />
+          <p className="text-2xl font-bold text-primary-800 dark:text-parchment-50">{inProgressCount}</p>
+          <p className="text-sm text-primary-500 dark:text-primary-400">En cours</p>
+        </div>
+        <div className="p-4 bg-parchment-100 dark:bg-primary-850 rounded-xl">
+          <CheckCircle className="w-5 h-5 text-success-500 mb-2" />
+          <p className="text-2xl font-bold text-primary-800 dark:text-parchment-50">{completedCount}</p>
+          <p className="text-sm text-primary-500 dark:text-primary-400">Termines</p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="space-y-4 mb-8">
+        {/* Status filter */}
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {statusFilters.map((filter) => (
+            <button
+              key={filter.id}
+              onClick={() => setStatusFilter(filter.id)}
+              className={cn(
+                "px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all",
+                {
+                  "bg-primary-600 text-white": statusFilter === filter.id,
+                  "bg-parchment-100 dark:bg-primary-850 text-primary-600 dark:text-primary-400 hover:bg-parchment-200 dark:hover:bg-primary-800":
+                    statusFilter !== filter.id,
+                }
+              )}
+            >
+              {filter.label} ({filter.count})
+            </button>
+          ))}
+        </div>
+
+        {/* Difficulty filter */}
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          {difficultyFilters.map((filter) => (
+            <button
+              key={filter.id}
+              onClick={() => setDifficultyFilter(filter.id)}
+              className={cn(
+                "px-3 py-1.5 rounded-lg text-sm transition-all",
+                {
+                  "bg-accent-100 dark:bg-accent-900/30 text-accent-700 dark:text-accent-400 font-medium":
+                    difficultyFilter === filter.id,
+                  "text-primary-500 dark:text-primary-400 hover:bg-parchment-100 dark:hover:bg-primary-850":
+                    difficultyFilter !== filter.id,
+                }
+              )}
+            >
+              {filter.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Error state */}
       {error && (
         <div className="bg-error-50 border border-error-200 text-error-600 p-4 rounded-xl mb-6 text-center">
-          <p className="mb-2">Erreur de chargement des données.</p>
-          <button onClick={() => window.location.reload()} className="text-sm font-medium text-primary-600 hover:underline">
-            Réessayer
+          <p className="mb-2">Erreur de chargement des parcours.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm font-medium text-primary-600 hover:underline"
+          >
+            Reessayer
           </button>
         </div>
       )}
 
-      {/* Category selector */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {categories.map((category) => (
-          <button
-            key={category.id}
-            onClick={() => setSelectedCategory(category.name_key)}
-            className={cn(
-              "p-4 rounded-xl border-2 transition-all text-center",
-              {
-                "border-parchment-300 dark:border-primary-700 hover:border-primary-300 dark:hover:border-primary-500":
-                  selectedCategory !== category.name_key,
-                "ring-2 ring-offset-2": selectedCategory === category.name_key,
-              }
-            )}
-            style={{
-              borderColor:
-                selectedCategory === category.name_key
-                  ? category.color
-                  : undefined,
-              // @ts-expect-error CSS custom property for ring color
-              "--tw-ring-color": category.color,
-            }}
-          >
-            <div
-              className="w-12 h-12 rounded-full mx-auto mb-2 flex items-center justify-center"
-              style={{ backgroundColor: `${category.color}20` }}
-            >
-              <span style={{ color: category.color }}>
-                {categoryIcons[category.icon]}
-              </span>
-            </div>
-            <span className="font-medium text-sm">
-              {categoryNames[category.name_key]?.name || category.name_key}
-            </span>
-          </button>
-        ))}
-      </div>
-
-      {/* Selected category content */}
-      {loading ? (
-        <div className="text-center py-12 text-primary-500 dark:text-primary-400">Chargement...</div>
-      ) : selectedCategory && categoryInfo ? (
-        <div>
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-primary-800 dark:text-parchment-50 mb-1">
-              {categoryInfo.name}
-            </h2>
-            <p className="text-primary-600 dark:text-primary-400">{categoryInfo.description}</p>
-          </div>
-
-          {/* Units */}
-          <div className="space-y-4">
-            {units.map((unit, unitIndex) => {
-              const locked = getLockedStatus(unitIndex);
-              return (
-                <Card
-                  key={unit.id}
-                  className={cn({ "opacity-60": locked })}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
-                          style={{
-                            backgroundColor:
-                              categories.find((c) => c.name_key === selectedCategory)
-                                ?.color || "#666",
-                          }}
-                        >
-                          {unitIndex + 1}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-primary-800 dark:text-parchment-50">
-                            {unit.name}
-                          </h3>
-                          <p className="text-sm text-primary-500 dark:text-primary-400">
-                            {locked
-                              ? "Completez l'unite precedente pour debloquer"
-                              : `${unit.lessons.filter((l) => l.completed).length}/${unit.lessons.length} lecons`}
-                          </p>
-                        </div>
-                      </div>
-                      {locked && <Lock className="w-5 h-5 text-primary-400 dark:text-primary-600" />}
-                    </div>
-
-                    {!locked && (
-                      <>
-                        <ProgressBar
-                          value={unit.progress}
-                          max={100}
-                          className="mb-4"
-                        />
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                          {unit.lessons.map((lesson) => (
-                            <Link
-                              key={lesson.id}
-                              href={`/lecon/${lesson.id}`}
-                              className={cn(
-                                "flex items-center gap-2 p-3 rounded-lg border transition-colors",
-                                {
-                                  "border-success-200 dark:border-success-800 bg-success-50 dark:bg-success-900/30": lesson.completed,
-                                  "border-parchment-300 dark:border-primary-700 hover:border-primary-300 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/30":
-                                    !lesson.completed,
-                                }
-                              )}
-                            >
-                              {lesson.completed ? (
-                                <CheckCircle className="w-5 h-5 text-success-600 dark:text-success-400 flex-shrink-0" />
-                              ) : (
-                                <div className="w-5 h-5 rounded-full border-2 border-primary-300 dark:border-primary-600 flex-shrink-0" />
-                              )}
-                              <span
-                                className={cn("text-sm font-medium", {
-                                  "text-success-700 dark:text-success-400": lesson.completed,
-                                  "text-primary-700 dark:text-primary-300": !lesson.completed,
-                                })}
-                              >
-                                {lesson.name}
-                              </span>
-                            </Link>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
+      {/* Loading state */}
+      {loading && (
+        <div className="text-center py-12 text-primary-500 dark:text-primary-400">
+          Chargement des parcours...
         </div>
-      ) : (
-        <div className="text-center py-12">
-          <BookOpen className="w-16 h-16 text-primary-300 dark:text-primary-600 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-primary-800 dark:text-parchment-50 mb-2">
-            Choisissez une categorie
-          </h2>
-          <p className="text-primary-600 dark:text-primary-400">
-            Selectionnez une categorie ci-dessus pour commencer a apprendre
-          </p>
+      )}
+
+      {/* Paths grid */}
+      {!loading && !error && (
+        <div className="space-y-4">
+          {filteredPaths.length > 0 ? (
+            filteredPaths.map((path) => (
+              <PathCard key={path.id} path={path} />
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <Compass className="w-16 h-16 text-primary-300 dark:text-primary-600 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-primary-800 dark:text-parchment-50 mb-2">
+                Aucun parcours trouve
+              </h2>
+              <p className="text-primary-600 dark:text-primary-400">
+                {statusFilter !== "all" || difficultyFilter !== "all"
+                  ? "Essayez de modifier vos filtres"
+                  : "Les parcours seront bientot disponibles"}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
-  );
-}
-
-export default function ApprendrePage() {
-  return (
-    <Suspense fallback={<div className="max-w-4xl mx-auto px-4 py-8">Chargement...</div>}>
-      <ApprendreContent />
-    </Suspense>
   );
 }

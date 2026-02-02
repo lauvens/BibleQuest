@@ -889,3 +889,262 @@ export async function searchVersesForReference(
   // Fall back to text search
   return searchVersesFTS(query, limit);
 }
+
+// ==========================================
+// Mastery Paths Queries
+// ==========================================
+
+// Get all published mastery paths
+export async function getMasteryPaths() {
+  const { data, error } = await supabase()
+    .from("mastery_paths")
+    .select("*")
+    .eq("is_published", true)
+    .order("order_index");
+  if (error) throw error;
+  return data as Tables["mastery_paths"]["Row"][];
+}
+
+// Get a single mastery path by slug
+export async function getMasteryPathBySlug(slug: string) {
+  const { data, error } = await supabase()
+    .from("mastery_paths")
+    .select("*")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .single();
+  if (error) throw error;
+  return data as Tables["mastery_paths"]["Row"];
+}
+
+// Get all milestones for a path
+export async function getPathMilestones(pathId: string) {
+  const { data, error } = await supabase()
+    .from("path_milestones")
+    .select("*")
+    .eq("path_id", pathId)
+    .order("order_index");
+  if (error) throw error;
+  return data as Tables["path_milestones"]["Row"][];
+}
+
+// Get a single milestone by ID
+export async function getMilestone(milestoneId: string) {
+  const { data, error } = await supabase()
+    .from("path_milestones")
+    .select("*")
+    .eq("id", milestoneId)
+    .single();
+  if (error) throw error;
+  return data as Tables["path_milestones"]["Row"];
+}
+
+// Get questions for a milestone
+export async function getMilestoneQuestions(milestoneId: string) {
+  const { data, error } = await supabase()
+    .from("milestone_questions")
+    .select("*")
+    .eq("milestone_id", milestoneId)
+    .order("order_index");
+  if (error) throw error;
+  return data as Tables["milestone_questions"]["Row"][];
+}
+
+// Get user's progress on all paths
+export async function getUserPathsProgress(userId: string) {
+  const { data, error } = await supabase()
+    .from("user_path_progress")
+    .select("*")
+    .eq("user_id", userId);
+  if (error) throw error;
+  return data as Tables["user_path_progress"]["Row"][];
+}
+
+// Get user's progress on a specific path
+export async function getUserPathProgress(userId: string, pathId: string) {
+  const { data, error } = await supabase()
+    .from("user_path_progress")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("path_id", pathId)
+    .single();
+  if (error && error.code !== "PGRST116") throw error;
+  return data as Tables["user_path_progress"]["Row"] | null;
+}
+
+// Get user's milestone progress for a path
+export async function getUserMilestonesProgress(userId: string, milestoneIds: string[]) {
+  if (milestoneIds.length === 0) return [];
+  const { data, error } = await supabase()
+    .from("user_milestone_progress")
+    .select("*")
+    .eq("user_id", userId)
+    .in("milestone_id", milestoneIds);
+  if (error) throw error;
+  return data as Tables["user_milestone_progress"]["Row"][];
+}
+
+// Start a path (create path progress record)
+export async function startPath(userId: string, pathId: string) {
+  const { error } = await supabase()
+    .from("user_path_progress")
+    .upsert(
+      {
+        user_id: userId,
+        path_id: pathId,
+        started_at: new Date().toISOString(),
+        current_milestone_index: 0,
+      },
+      { onConflict: "user_id,path_id" }
+    );
+  if (error) throw error;
+}
+
+// Save milestone progress
+export async function saveMilestoneProgress(
+  userId: string,
+  milestoneId: string,
+  score: number,
+  completed: boolean
+) {
+  const { error } = await supabase()
+    .from("user_milestone_progress")
+    .upsert(
+      {
+        user_id: userId,
+        milestone_id: milestoneId,
+        completed,
+        best_score: score,
+        attempts: 1,
+        completed_at: completed ? new Date().toISOString() : null,
+      },
+      { onConflict: "user_id,milestone_id" }
+    );
+  if (error) throw error;
+}
+
+// Update path progress (current milestone index)
+export async function updatePathProgress(
+  userId: string,
+  pathId: string,
+  currentMilestoneIndex: number,
+  completed: boolean = false
+) {
+  const { error } = await supabase()
+    .from("user_path_progress")
+    .update({
+      current_milestone_index: currentMilestoneIndex,
+      completed_at: completed ? new Date().toISOString() : null,
+    })
+    .eq("user_id", userId)
+    .eq("path_id", pathId);
+  if (error) throw error;
+}
+
+// Get mastery path with full progress data
+export async function getMasteryPathWithProgress(
+  slug: string,
+  userId?: string | null
+) {
+  // Get path
+  const path = await getMasteryPathBySlug(slug);
+
+  // Get milestones
+  const milestones = await getPathMilestones(path.id);
+
+  // Get user progress if logged in
+  let pathProgress: Tables["user_path_progress"]["Row"] | null = null;
+  const milestoneProgressMap: Record<string, Tables["user_milestone_progress"]["Row"]> = {};
+
+  if (userId) {
+    pathProgress = await getUserPathProgress(userId, path.id);
+
+    const milestoneIds = milestones.map((m) => m.id);
+    const milestoneProgress = await getUserMilestonesProgress(userId, milestoneIds);
+    milestoneProgress.forEach((mp) => {
+      milestoneProgressMap[mp.milestone_id] = mp;
+    });
+  }
+
+  // Calculate overall progress
+  const completedMilestones = milestones.filter(
+    (m) => milestoneProgressMap[m.id]?.completed
+  ).length;
+  const overallProgress = milestones.length > 0
+    ? Math.round((completedMilestones / milestones.length) * 100)
+    : 0;
+
+  return {
+    path,
+    milestones: milestones.map((m, index) => {
+      const progress = milestoneProgressMap[m.id];
+      // Milestone is unlocked if: first one, OR previous is completed
+      const isUnlocked = index === 0 || milestoneProgressMap[milestones[index - 1]?.id]?.completed;
+      return {
+        ...m,
+        completed: progress?.completed ?? false,
+        bestScore: progress?.best_score ?? 0,
+        attempts: progress?.attempts ?? 0,
+        isUnlocked,
+      };
+    }),
+    pathProgress,
+    overallProgress,
+    completedMilestones,
+    totalMilestones: milestones.length,
+  };
+}
+
+// Get all mastery paths with user progress summary
+export async function getMasteryPathsWithProgress(userId?: string | null) {
+  const paths = await getMasteryPaths();
+
+  if (!userId) {
+    return paths.map((p) => ({
+      ...p,
+      started: false,
+      completed: false,
+      progress: 0,
+      completedMilestones: 0,
+      totalMilestones: 0,
+    }));
+  }
+
+  // Get all user path progress
+  const userProgress = await getUserPathsProgress(userId);
+  const progressMap: Record<string, Tables["user_path_progress"]["Row"]> = {};
+  userProgress.forEach((up) => {
+    progressMap[up.path_id] = up;
+  });
+
+  // Get milestone counts for each path
+  const pathsWithProgress = await Promise.all(
+    paths.map(async (path) => {
+      const milestones = await getPathMilestones(path.id);
+      const milestoneIds = milestones.map((m) => m.id);
+
+      let completedMilestones = 0;
+      if (milestoneIds.length > 0) {
+        const milestoneProgress = await getUserMilestonesProgress(userId, milestoneIds);
+        completedMilestones = milestoneProgress.filter((mp) => mp.completed).length;
+      }
+
+      const progress = milestones.length > 0
+        ? Math.round((completedMilestones / milestones.length) * 100)
+        : 0;
+
+      const pathProg = progressMap[path.id];
+
+      return {
+        ...path,
+        started: !!pathProg,
+        completed: !!pathProg?.completed_at,
+        progress,
+        completedMilestones,
+        totalMilestones: milestones.length,
+      };
+    })
+  );
+
+  return pathsWithProgress;
+}
