@@ -10,114 +10,140 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Couleur principale - Brun chaud (sagesse, stabilité, histoire)
+        // Couleur principale - Bleu foncé (presque noir)
         primary: {
-          50: '#faf6f3',
-          100: '#f3ebe4',
-          200: '#e6d5c7',
-          300: '#d4b8a3',
-          400: '#c19a7f',
-          500: '#a67c5b',  // Brun chocolat doux
-          600: '#8b6344',
-          700: '#6f4e36',
-          800: '#3a2a1f',  // Dark mode card bg
-          850: '#33251b',  // Dark mode stat card bg
-          900: '#2b1f17',  // Dark mode page bg
+          50: '#e6eef5',
+          100: '#ccdcea',
+          200: '#99b9d5',
+          300: '#6697c0',
+          400: '#3374ab',
+          500: '#025a96',  // Version intermédiaire
+          600: '#014a7a',
+          700: '#013a5e',
+          800: '#012a45',
+          850: '#011f35',
+          900: '#011627',  // Bleu très foncé (presque noir) - fond dark mode
         },
-        // Fond - Beige clair / Parchemin (douceur, confort, manuscrits anciens)
+        // Fond clair - Blanc cassé
         parchment: {
-          50: '#fefdfb',
-          100: '#fdf9f3',
-          200: '#faf3e8',
-          300: '#f5e9d6',
-          400: '#eddcc0',
-          500: '#e3cca6',
-          600: '#d4b88a',
-          700: '#c2a06d',
-          800: '#a68753',
-          900: '#8a6f44',
+          50: '#FDFFFC',   // Blanc cassé principal
+          100: '#f8faf7',
+          200: '#f3f5f2',
+          300: '#eaece9',
+          400: '#dfe1de',
+          500: '#d4d6d3',
+          600: '#b8bab7',
+          700: '#9c9e9b',
+          800: '#80827f',
+          900: '#646663',
         },
-        // Accent positif - Or doux (valeur, réussite, lumière)
+        // Accent - Bleu clair
+        accent: {
+          50: '#e7f6ff',
+          100: '#d0edff',
+          200: '#a1dbff',
+          300: '#72c9ff',
+          400: '#38B6FF',  // Bleu clair principal
+          500: '#2da3e6',
+          600: '#2390cc',
+          700: '#1a7db3',
+          800: '#116a99',
+          900: '#085780',
+        },
+        // Gold remplacé par Orange (warning/attention)
         gold: {
-          50: '#fffdf5',
-          100: '#fff9e6',
-          200: '#fff0c2',
-          300: '#ffe599',
-          400: '#ffd966',  // Or principal
-          500: '#f5c32c',
-          600: '#d4a520',
-          700: '#b38918',
-          800: '#8f6d14',
-          900: '#755a12',
+          50: '#fff8ed',
+          100: '#fff0db',
+          200: '#ffe1b8',
+          300: '#ffd294',
+          400: '#FF9F1C',  // Orange principal
+          500: '#e68c19',
+          600: '#cc7916',
+          700: '#b36613',
+          800: '#995310',
+          900: '#80400d',
         },
-        // CTA - Vert olive (confiance, croissance, guidance)
+        // Olive remplacé par Accent (bleu clair) pour CTA
         olive: {
-          50: '#f7f9f4',
-          100: '#ecf2e5',
-          200: '#d9e5cc',
-          300: '#bdd1a6',
-          400: '#9db87c',
-          500: '#7a9a55',  // Vert olive principal
-          600: '#5f7b40',
-          700: '#4a6133',
-          800: '#3d4e2b',
-          900: '#344127',
+          50: '#e7f6ff',
+          100: '#d0edff',
+          200: '#a1dbff',
+          300: '#72c9ff',
+          400: '#38B6FF',  // Même que accent
+          500: '#2da3e6',
+          600: '#2390cc',
+          700: '#1a7db3',
+          800: '#116a99',
+          900: '#085780',
         },
         // Couleurs fonctionnelles
         success: {
-          50: '#f0fdf4',
-          100: '#dcfce7',
-          200: '#bbf7d0',
-          300: '#86efac',
-          400: '#4ade80',
-          500: '#22c55e',  // Vert doux
-          600: '#16a34a',
-          700: '#15803d',
-          800: '#166534',
-          900: '#14532d',
+          50: '#e7f6ff',
+          100: '#d0edff',
+          200: '#a1dbff',
+          300: '#72c9ff',
+          400: '#38B6FF',
+          500: '#2da3e6',
+          600: '#2390cc',
+          700: '#1a7db3',
+          800: '#116a99',
+          900: '#085780',
         },
         error: {
-          50: '#fef7f6',
-          100: '#fdecea',
-          200: '#fbd5d1',
-          300: '#f7b3ac',
-          400: '#f08578',
-          500: '#e25d4e',  // Rouge désaturé (non agressif)
-          600: '#c94535',
-          700: '#a83a2c',
-          800: '#8b3328',
-          900: '#742f27',
+          50: '#fef2f3',
+          100: '#fde6e8',
+          200: '#fbc1c6',
+          300: '#f89ca4',
+          400: '#f25260',
+          500: '#E71D36',  // Rouge principal
+          600: '#c91830',
+          700: '#ab1429',
+          800: '#8d1022',
+          900: '#6f0c1b',
+        },
+        warning: {
+          50: '#fff8ed',
+          100: '#fff0db',
+          200: '#ffe1b8',
+          300: '#ffd294',
+          400: '#FF9F1C',  // Orange principal
+          500: '#e68c19',
+          600: '#cc7916',
+          700: '#b36613',
+          800: '#995310',
+          900: '#80400d',
         },
         info: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',  // Bleu clair
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
+          50: '#e7f6ff',
+          100: '#d0edff',
+          200: '#a1dbff',
+          300: '#72c9ff',
+          400: '#38B6FF',  // Bleu clair principal
+          500: '#2da3e6',
+          600: '#2390cc',
+          700: '#1a7db3',
+          800: '#116a99',
+          900: '#085780',
         },
         // Couleurs spéciales pour la gamification
-        heart: '#e25d4e',
-        xp: '#7a9a55',
-        streak: '#f5c32c',
-        gem: '#38bdf8',
+        heart: '#E71D36',      // Rouge
+        xp: '#38B6FF',         // Bleu clair
+        streak: '#FF9F1C',     // Orange
+        gem: '#38B6FF',        // Bleu clair
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
         serif: ['Georgia', 'Cambria', 'serif'],
       },
       backgroundImage: {
-        'parchment-texture': 'linear-gradient(180deg, #fdf9f3 0%, #faf3e8 100%)',
-        'gold-gradient': 'linear-gradient(135deg, #ffd966 0%, #f5c32c 100%)',
+        'parchment-texture': 'linear-gradient(180deg, #FDFFFC 0%, #f8faf7 100%)',
+        'gold-gradient': 'linear-gradient(135deg, #FF9F1C 0%, #e68c19 100%)',
+        'accent-gradient': 'linear-gradient(135deg, #38B6FF 0%, #2da3e6 100%)',
       },
       boxShadow: {
-        'soft': '0 2px 8px rgba(166, 124, 91, 0.12)',
-        'card': '0 4px 12px rgba(166, 124, 91, 0.08)',
-        'elevated': '0 8px 24px rgba(166, 124, 91, 0.15)',
+        'soft': '0 2px 8px rgba(1, 22, 39, 0.08)',
+        'card': '0 4px 12px rgba(1, 22, 39, 0.06)',
+        'elevated': '0 8px 24px rgba(1, 22, 39, 0.12)',
       },
       borderRadius: {
         'xl': '1rem',
