@@ -8,7 +8,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { HeartsDisplay } from "@/components/game/hearts-display";
-import { QuestionRenderer } from "@/components/questions/question-renderer";
+import { QuizQuestion } from "@/components/quiz/quiz-question";
+import { QuizProvider, useQuiz } from "@/lib/contexts/quiz-context";
+import { CelebrationModal } from "@/components/ui/celebration-modal";
 import { useUserStore } from "@/lib/store/user-store";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
@@ -24,7 +26,7 @@ interface LoadedQuestion {
   content: QuestionContent;
 }
 
-export default function LeconPage() {
+function LeconContent() {
   const params = useParams();
   const router = useRouter();
   const lessonId = params.id as string;
@@ -44,21 +46,24 @@ export default function LeconPage() {
   } = useUserStore();
 
   const { showAchievementToast } = useToast();
+  const { totalPoints, maxCombo, correctAnswers: quizCorrectAnswers, resetQuiz } = useQuiz();
 
   const [questions, setQuestions] = useState<LoadedQuestion[]>([]);
   const [lessonData, setLessonData] = useState<{ name: string; xp_reward: number; coin_reward: number } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [correctAnswers, setCorrectAnswers] = useState(0);
   const [isComplete, setIsComplete] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [earnedRewards, setEarnedRewards] = useState({ xp: 0, coins: 0 });
 
   const hearts = getActualHearts();
 
   const loadLesson = () => {
     setLoading(true);
     setError(false);
+    resetQuiz();
     Promise.all([getLesson(lessonId), getQuestions(lessonId)])
       .then(([lesson, qs]) => {
         setLessonData({
@@ -109,10 +114,8 @@ export default function LeconPage() {
   const progress = (currentQuestionIndex / questions.length) * 100;
   const currentQuestion = questions[currentQuestionIndex];
 
-  const handleAnswer = (correct: boolean) => {
-    if (correct) {
-      setCorrectAnswers((prev) => prev + 1);
-    } else {
+  const handleQuestionComplete = async (correct: boolean) => {
+    if (!correct) {
       const hasHearts = loseHeart();
       if (!hasHearts && getActualHearts() <= 0) {
         setIsComplete(true);
@@ -120,67 +123,81 @@ export default function LeconPage() {
       }
     }
 
-    setTimeout(async () => {
-      if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex((prev) => prev + 1);
-      } else {
-        const score = Math.round(
-          ((correctAnswers + (correct ? 1 : 0)) / questions.length) * 100
-        );
-        const passed = score >= 70;
-        const isPerfect = score === 100;
+    if (currentQuestionIndex < questions.length - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+    } else {
+      // Use quizCorrectAnswers + 1 if this answer was correct (since state updates are async)
+      const finalCorrect = quizCorrectAnswers + (correct ? 1 : 0);
+      const score = Math.round((finalCorrect / questions.length) * 100);
+      const passed = score >= 70;
+      const isPerfect = score === 100;
 
-        const xpEarned = Math.round(lessonData.xp_reward * (score / 100));
-        const coinsEarned = Math.round(lessonData.coin_reward * (score / 100));
+      // Calculate rewards with combo bonus
+      const baseXp = lessonData!.xp_reward;
+      const baseCoins = lessonData!.coin_reward;
+      const comboBonus = Math.min(maxCombo * 2, 20);
 
-        addXp(xpEarned);
-        addCoins(coinsEarned);
+      const xpEarned = Math.round(baseXp * (score / 100)) + comboBonus + Math.round(totalPoints / 10);
+      const coinsEarned = Math.round(baseCoins * (score / 100)) + Math.round(totalPoints / 20);
 
-        if (isGuest) {
-          updateGuestProgress(lessonId, score, passed);
-        } else if (userId) {
-          // Save to Supabase in background
-          saveProgress(userId, lessonId, score, passed).catch(console.error);
-          updateUserStats(userId, xpEarned, coinsEarned).catch(console.error);
+      addXp(xpEarned);
+      addCoins(coinsEarned);
+      setEarnedRewards({ xp: xpEarned, coins: coinsEarned });
 
-          // Check for achievement unlocks
-          if (passed) {
-            try {
-              const lessonsCompleted = await getUserLessonsCompleted(userId);
-              const unlocked = await checkAndUnlockAchievements({
-                userId,
-                lessonsCompleted: lessonsCompleted + 1,
-                streak: currentStreak,
-                level,
-                isPerfectLesson: isPerfect,
+      if (isGuest) {
+        updateGuestProgress(lessonId, score, passed);
+      } else if (userId) {
+        // Save to Supabase in background
+        saveProgress(userId, lessonId, score, passed).catch(console.error);
+        updateUserStats(userId, xpEarned, coinsEarned).catch(console.error);
+
+        // Check for achievement unlocks
+        if (passed) {
+          try {
+            const lessonsCompleted = await getUserLessonsCompleted(userId);
+            const unlocked = await checkAndUnlockAchievements({
+              userId,
+              lessonsCompleted: lessonsCompleted + 1,
+              streak: currentStreak,
+              level,
+              isPerfectLesson: isPerfect,
+            });
+
+            // Show toast for each unlocked achievement
+            unlocked.forEach((achievement) => {
+              showAchievementToast({
+                name: achievement.name,
+                icon: achievement.icon,
               });
-
-              // Show toast for each unlocked achievement
-              unlocked.forEach((achievement) => {
-                showAchievementToast({
-                  name: achievement.name,
-                  icon: achievement.icon,
-                });
-                // Also add the coin reward to user
-                addCoins(achievement.coin_reward);
-              });
-            } catch (err) {
-              console.error("Failed to check achievements:", err);
-            }
+              // Also add the coin reward to user
+              addCoins(achievement.coin_reward);
+            });
+          } catch (err) {
+            console.error("Failed to check achievements:", err);
           }
         }
-
-        setIsComplete(true);
       }
-    }, 1500);
+
+      setShowCelebration(true);
+      setIsComplete(true);
+    }
   };
 
-  const finalScore = Math.round((correctAnswers / questions.length) * 100);
+  const finalScore = questions.length > 0 ? Math.round((quizCorrectAnswers / questions.length) * 100) : 0;
   const passed = finalScore >= 70;
 
   if (isComplete) {
     return (
       <div className="min-h-screen bg-parchment-50 dark:bg-primary-900 flex items-center justify-center p-4">
+        <CelebrationModal
+          isOpen={showCelebration && passed}
+          onClose={() => setShowCelebration(false)}
+          type="course-complete"
+          title="Leçon terminée!"
+          description={`${finalScore}% correct • ${totalPoints} points • Combo max: ${maxCombo}`}
+          reward={{ xp: earnedRewards.xp, coins: earnedRewards.coins }}
+        />
+
         <Card className="w-full max-w-md">
           <CardContent className="p-8 text-center">
             {hearts <= 0 ? (
@@ -203,23 +220,34 @@ export default function LeconPage() {
                 <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-100 mb-2">
                   Félicitations!
                 </h1>
-                <p className="text-primary-600 dark:text-primary-300 mb-4">
-                  Vous avez terminé la leçon avec {finalScore}%
+                <p className="text-primary-600 dark:text-primary-300 mb-2">
+                  {finalScore}% de bonnes réponses
                 </p>
-                <div className="flex items-center justify-center gap-4 mb-6">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-xp">
-                      +{Math.round(lessonData.xp_reward * (finalScore / 100))}
-                    </p>
-                    <p className="text-sm text-primary-400 dark:text-primary-400">XP</p>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="p-3 bg-parchment-100 dark:bg-primary-850 rounded-xl">
+                    <p className="text-2xl font-bold text-accent-500">{totalPoints}</p>
+                    <p className="text-xs text-primary-400">Points</p>
                   </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-gold-500">
-                      +{Math.round(lessonData.coin_reward * (finalScore / 100))}
-                    </p>
-                    <p className="text-sm text-primary-400 dark:text-primary-400">Pièces</p>
+                  <div className="p-3 bg-parchment-100 dark:bg-primary-850 rounded-xl">
+                    <p className="text-2xl font-bold text-gold-500">{maxCombo}</p>
+                    <p className="text-xs text-primary-400">Combo max</p>
                   </div>
                 </div>
+
+                {/* Rewards */}
+                <div className="flex items-center justify-center gap-6 mb-6 p-4 bg-accent-50 dark:bg-accent-900/20 rounded-xl">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-accent-600 dark:text-accent-400">+{earnedRewards.xp}</p>
+                    <p className="text-sm text-primary-400">XP</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-gold-500">+{earnedRewards.coins}</p>
+                    <p className="text-sm text-primary-400">Pièces</p>
+                  </div>
+                </div>
+
                 <div className="flex justify-center gap-1 mb-6">
                   {[1, 2, 3].map((star) => (
                     <Star
@@ -262,8 +290,9 @@ export default function LeconPage() {
                   className="w-full"
                   onClick={() => {
                     setCurrentQuestionIndex(0);
-                    setCorrectAnswers(0);
+                    resetQuiz();
                     setIsComplete(false);
+                    setShowCelebration(false);
                   }}
                 >
                   Réessayer
@@ -304,13 +333,16 @@ export default function LeconPage() {
       <div className="max-w-2xl mx-auto px-4 py-8">
         <Card>
           <CardContent className="p-6">
-            <QuestionRenderer
-              key={currentQuestionIndex}
-              type={currentQuestion.type}
-              content={currentQuestion.content}
-              onAnswer={handleAnswer}
-              disabled={hearts <= 0}
-            />
+            {currentQuestion && (
+              <QuizQuestion
+                key={currentQuestionIndex}
+                type={currentQuestion.type}
+                content={currentQuestion.content}
+                onComplete={handleQuestionComplete}
+                questionNumber={currentQuestionIndex + 1}
+                totalQuestions={questions.length}
+              />
+            )}
           </CardContent>
         </Card>
       </div>
@@ -347,5 +379,13 @@ export default function LeconPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function LeconPage() {
+  return (
+    <QuizProvider>
+      <LeconContent />
+    </QuizProvider>
   );
 }
