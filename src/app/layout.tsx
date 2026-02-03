@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   title: "BibleEidó - Apprenez la Bible en vous amusant",
   description:
     "Application gamifiée pour apprendre l'histoire, le contexte et les versets de la Bible",
+  icons: {
+    icon: "/logo-icon.png",
+    apple: "/logo-icon.png",
+  },
 };
 
 export default function RootLayout({

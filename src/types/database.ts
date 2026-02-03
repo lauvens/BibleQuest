@@ -24,6 +24,8 @@ export type UserRole = "user" | "admin";
 
 export type PathDifficulty = "beginner" | "intermediate" | "advanced";
 
+export type PathCategory = "doctrine" | "bible_study" | "characters" | "history" | "practical";
+
 export type MilestoneType = "lesson" | "quiz" | "reading" | "reflection";
 
 export interface Database {
@@ -469,6 +471,7 @@ export interface Database {
           cover_image_url: string | null;
           estimated_hours: number;
           difficulty: PathDifficulty;
+          category: PathCategory;
           order_index: number;
           is_published: boolean;
           created_at: string;
@@ -483,6 +486,7 @@ export interface Database {
           cover_image_url?: string | null;
           estimated_hours?: number;
           difficulty?: PathDifficulty;
+          category?: PathCategory;
           order_index?: number;
           is_published?: boolean;
           created_at?: string;
@@ -497,6 +501,7 @@ export interface Database {
           cover_image_url?: string | null;
           estimated_hours?: number;
           difficulty?: PathDifficulty;
+          category?: PathCategory;
           order_index?: number;
           is_published?: boolean;
           created_at?: string;
