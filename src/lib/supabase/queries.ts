@@ -1397,24 +1397,45 @@ export async function markChallengeCompleted(
   userId: string,
   notes?: string
 ) {
-  const { data, error } = await supabase()
+  // Check if progress already exists
+  const { data: existing } = await supabase()
     .from("challenge_progress")
-    .upsert(
-      {
+    .select("id")
+    .eq("challenge_id", challengeId)
+    .eq("user_id", userId)
+    .single();
+
+  if (existing) {
+    // Update existing record
+    const { data, error } = await supabase()
+      .from("challenge_progress")
+      .update({
+        completed: true,
+        completed_at: new Date().toISOString(),
+        notes,
+      })
+      .eq("challenge_id", challengeId)
+      .eq("user_id", userId)
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  } else {
+    // Insert new record
+    const { data, error } = await supabase()
+      .from("challenge_progress")
+      .insert({
         challenge_id: challengeId,
         user_id: userId,
         completed: true,
         completed_at: new Date().toISOString(),
         notes,
-      },
-      {
-        onConflict: "challenge_id,user_id",
-      }
-    )
-    .select()
-    .single();
-  if (error) throw error;
-  return data;
+      })
+      .select()
+      .single();
+    if (error) throw error;
+    return data;
+  }
 }
 
 // Get active challenges for a user (across all groups)
