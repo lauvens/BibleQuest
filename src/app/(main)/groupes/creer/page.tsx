@@ -71,23 +71,22 @@ export default function CreerGroupePage() {
         </Link>
 
         {/* Form card */}
-        <div className="bg-white dark:bg-primary-850 rounded-2xl border border-parchment-200 dark:border-primary-700 overflow-hidden">
+        <div className="bg-white dark:bg-primary-800/50 rounded-2xl border border-parchment-200 dark:border-primary-700/50 overflow-hidden">
           {/* Preview header */}
-          <div className="relative p-4 border-b border-parchment-200 dark:border-primary-700">
-            {/* Color bar */}
-            <div
-              className="absolute top-0 left-0 right-0 h-1 transition-colors"
-              style={{ backgroundColor: color }}
-            />
-            <div className="flex items-center gap-3 pt-2">
-              <div
-                className="w-14 h-14 rounded-xl flex items-center justify-center shadow-sm transition-colors dark:ring-1 dark:ring-white/10"
-                style={{ backgroundColor: color }}
-              >
-                <Users className="w-7 h-7 text-white" />
+          <div className="p-4 border-b border-parchment-200 dark:border-primary-700/50 bg-parchment-50/50 dark:bg-primary-800/30">
+            <div className="flex items-center gap-3">
+              <div className="relative flex-shrink-0">
+                <div className="w-14 h-14 rounded-xl bg-primary-100 dark:bg-primary-700/50 flex items-center justify-center transition-colors">
+                  <Users className="w-7 h-7 text-primary-600 dark:text-primary-300" />
+                </div>
+                {/* Color indicator dot */}
+                <div
+                  className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full border-2 border-white dark:border-primary-800 transition-colors"
+                  style={{ backgroundColor: color }}
+                />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-primary-800 dark:text-parchment-50">
+                <h2 className="text-xl font-bold text-primary-800 dark:text-parchment-100">
                   {name || "Nom du groupe"}
                 </h2>
                 <p className="text-primary-500 dark:text-primary-400 text-sm">
@@ -100,7 +99,7 @@ export default function CreerGroupePage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
             {error && (
-              <div className="p-3 bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800 text-error-600 dark:text-error-400 rounded-lg text-sm">
+              <div className="p-3 bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800/50 text-error-600 dark:text-error-400 rounded-xl text-sm">
                 {error}
               </div>
             )}
@@ -117,7 +116,7 @@ export default function CreerGroupePage() {
                 placeholder="Ex: Etude du dimanche"
                 maxLength={50}
                 required
-                className="w-full px-4 py-3 rounded-xl border border-parchment-300 dark:border-primary-600 bg-white dark:bg-primary-800 text-primary-800 dark:text-parchment-50 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="w-full px-4 py-3 rounded-xl border border-parchment-300 dark:border-primary-700/50 bg-white dark:bg-primary-800/50 text-primary-800 dark:text-parchment-100 placeholder-primary-400 dark:placeholder-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400"
               />
             </div>
 
@@ -132,7 +131,7 @@ export default function CreerGroupePage() {
                 placeholder="Decrivez votre groupe..."
                 maxLength={200}
                 rows={3}
-                className="w-full px-4 py-3 rounded-xl border border-parchment-300 dark:border-primary-600 bg-white dark:bg-primary-800 text-primary-800 dark:text-parchment-50 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                className="w-full px-4 py-3 rounded-xl border border-parchment-300 dark:border-primary-700/50 bg-white dark:bg-primary-800/50 text-primary-800 dark:text-parchment-100 placeholder-primary-400 dark:placeholder-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 resize-none"
               />
             </div>
 
@@ -150,7 +149,7 @@ export default function CreerGroupePage() {
                     onClick={() => setColor(c)}
                     className={`w-10 h-10 rounded-xl transition-all ${
                       color === c
-                        ? "ring-2 ring-offset-2 ring-primary-500 scale-110"
+                        ? "ring-2 ring-offset-2 ring-offset-white dark:ring-offset-primary-800 ring-primary-500 dark:ring-primary-400 scale-110"
                         : "hover:scale-105"
                     }`}
                     style={{ backgroundColor: c }}
@@ -163,7 +162,7 @@ export default function CreerGroupePage() {
             <button
               type="submit"
               disabled={!name.trim() || loading}
-              className="w-full py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-xl transition-colors"
+              className="w-full py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 disabled:dark:bg-primary-700 text-white font-medium rounded-xl transition-colors"
             >
               {loading ? "Creation..." : "Creer le groupe"}
             </button>

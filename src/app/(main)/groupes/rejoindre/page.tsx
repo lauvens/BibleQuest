@@ -91,12 +91,12 @@ function RejoindreGroupeContent() {
           Retour aux groupes
         </Link>
 
-        <div className="bg-white dark:bg-primary-850 rounded-2xl border border-parchment-200 dark:border-primary-700 overflow-hidden">
-          <div className="p-6 border-b border-parchment-200 dark:border-primary-700 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-primary-100 dark:bg-primary-800 flex items-center justify-center mx-auto mb-4">
-              <UserPlus className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+        <div className="bg-white dark:bg-primary-800/50 rounded-2xl border border-parchment-200 dark:border-primary-700/50 overflow-hidden">
+          <div className="p-6 border-b border-parchment-200 dark:border-primary-700/50 text-center bg-parchment-50/50 dark:bg-primary-800/30">
+            <div className="w-16 h-16 rounded-2xl bg-primary-100 dark:bg-primary-700/50 flex items-center justify-center mx-auto mb-4">
+              <UserPlus className="w-8 h-8 text-primary-600 dark:text-primary-300" />
             </div>
-            <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50">
+            <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-100">
               Rejoindre un groupe
             </h1>
             <p className="text-primary-500 dark:text-primary-400 mt-1">
@@ -106,7 +106,7 @@ function RejoindreGroupeContent() {
 
           <div className="p-6 space-y-6">
             {error && (
-              <div className="p-3 bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800 text-error-600 dark:text-error-400 rounded-lg text-sm text-center">
+              <div className="p-3 bg-error-50 dark:bg-error-900/20 border border-error-200 dark:border-error-800/50 text-error-600 dark:text-error-400 rounded-xl text-sm text-center">
                 {error}
               </div>
             )}
@@ -120,12 +120,12 @@ function RejoindreGroupeContent() {
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                   placeholder="Ex: A1B2C3D4"
                   maxLength={8}
-                  className="flex-1 px-4 py-3 rounded-xl border border-parchment-300 dark:border-primary-600 bg-white dark:bg-primary-800 text-primary-800 dark:text-parchment-50 placeholder-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 font-mono text-center text-lg tracking-widest uppercase"
+                  className="flex-1 px-4 py-3 rounded-xl border border-parchment-300 dark:border-primary-700/50 bg-white dark:bg-primary-800/50 text-primary-800 dark:text-parchment-100 placeholder-primary-400 dark:placeholder-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 font-mono text-center text-lg tracking-widest uppercase"
                 />
                 <button
                   type="submit"
                   disabled={!code.trim() || loading}
-                  className="px-5 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 text-white font-medium rounded-xl transition-colors"
+                  className="px-5 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 disabled:dark:bg-primary-700 text-white font-medium rounded-xl transition-colors"
                 >
                   {loading && !foundGroup ? "..." : "Chercher"}
                 </button>
@@ -134,19 +134,20 @@ function RejoindreGroupeContent() {
 
             {/* Found group preview */}
             {foundGroup && (
-              <div className="border border-parchment-200 dark:border-primary-700 rounded-xl overflow-hidden">
-                {/* Color bar */}
-                <div
-                  className="h-1"
-                  style={{ backgroundColor: foundGroup.cover_color }}
-                />
+              <div className="border border-parchment-200 dark:border-primary-700/50 rounded-xl overflow-hidden bg-parchment-50/50 dark:bg-primary-800/30">
                 <div className="p-4">
                   <div className="flex items-center gap-3 mb-3">
-                    <div
-                      className="w-12 h-12 rounded-xl flex-shrink-0 dark:ring-1 dark:ring-white/10"
-                      style={{ backgroundColor: foundGroup.cover_color }}
-                    />
-                    <h3 className="font-semibold text-lg text-primary-800 dark:text-parchment-50">
+                    <div className="relative flex-shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-primary-100 dark:bg-primary-700/50 flex items-center justify-center">
+                        <Users className="w-6 h-6 text-primary-600 dark:text-primary-300" />
+                      </div>
+                      {/* Color indicator dot */}
+                      <div
+                        className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white dark:border-primary-800"
+                        style={{ backgroundColor: foundGroup.cover_color }}
+                      />
+                    </div>
+                    <h3 className="font-semibold text-lg text-primary-800 dark:text-parchment-100">
                       {foundGroup.name}
                     </h3>
                   </div>
@@ -163,7 +164,7 @@ function RejoindreGroupeContent() {
                   <button
                     onClick={handleJoin}
                     disabled={loading || foundGroup.memberCount >= foundGroup.max_members}
-                    className="w-full mt-4 py-3 bg-success-600 hover:bg-success-700 disabled:bg-primary-400 text-white font-medium rounded-xl transition-colors"
+                    className="w-full mt-4 py-3 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 disabled:dark:bg-primary-700 text-white font-medium rounded-xl transition-colors"
                   >
                     {loading ? "Adhesion..." : "Rejoindre ce groupe"}
                   </button>

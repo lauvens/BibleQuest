@@ -136,30 +136,28 @@ export default function GroupDetailPage() {
   return (
     <div className="min-h-screen bg-parchment-50 dark:bg-primary-900">
       {/* Header */}
-      <div className="relative overflow-hidden">
-        {/* Background with color accent */}
-        <div
-          className="absolute inset-0 opacity-100 dark:opacity-20"
-          style={{ backgroundColor: data.group.cover_color }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-parchment-50 dark:to-primary-900" />
-
-        {/* Content */}
-        <div className="relative max-w-6xl mx-auto px-4 py-8">
+      <div className="bg-gradient-to-br from-primary-700 via-primary-800 to-primary-900">
+        <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="flex items-start justify-between">
             <div className="flex items-start gap-4">
-              {/* Color accent badge */}
-              <div
-                className="w-16 h-16 rounded-2xl shadow-lg flex-shrink-0 dark:ring-2 dark:ring-white/10"
-                style={{ backgroundColor: data.group.cover_color }}
-              />
+              {/* Icon with color accent */}
+              <div className="relative flex-shrink-0">
+                <div className="w-16 h-16 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <Users className="w-8 h-8 text-white" />
+                </div>
+                {/* Color indicator dot */}
+                <div
+                  className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-primary-800"
+                  style={{ backgroundColor: data.group.cover_color }}
+                />
+              </div>
               <div>
-                <h1 className="text-3xl font-bold text-white dark:text-parchment-50">{data.group.name}</h1>
+                <h1 className="text-3xl font-bold text-white">{data.group.name}</h1>
                 {data.group.description && (
-                  <p className="text-white/80 dark:text-primary-300 mt-2">{data.group.description}</p>
+                  <p className="text-primary-200 mt-2 max-w-xl">{data.group.description}</p>
                 )}
                 <div className="flex items-center gap-4 mt-3">
-                  <span className="flex items-center gap-1.5 text-white/90 dark:text-primary-300">
+                  <span className="flex items-center gap-1.5 text-primary-200">
                     <Users className="w-4 h-4" />
                     {data.members?.length || 0} membres
                   </span>
@@ -170,23 +168,23 @@ export default function GroupDetailPage() {
             {isOwnerOrAdmin && (
               <Link
                 href={`/groupes/${groupId}/parametres`}
-                className="p-2 bg-white/10 dark:bg-primary-800 hover:bg-white/20 dark:hover:bg-primary-700 rounded-lg transition-colors"
+                className="p-2.5 bg-white/10 hover:bg-white/20 rounded-xl transition-colors"
               >
-                <Settings className="w-5 h-5 text-white dark:text-primary-300" />
+                <Settings className="w-5 h-5 text-white" />
               </Link>
             )}
           </div>
 
           {/* Invite code */}
           <div className="mt-6 flex items-center gap-3">
-            <span className="text-white/70 dark:text-primary-400 text-sm">Code d&apos;invitation:</span>
+            <span className="text-primary-300 text-sm">Code d&apos;invitation:</span>
             <button
               onClick={handleCopyInviteCode}
-              className="flex items-center gap-2 px-3 py-1.5 bg-white/10 dark:bg-primary-800 hover:bg-white/20 dark:hover:bg-primary-700 rounded-lg text-sm font-mono text-white dark:text-parchment-50 transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-mono text-white transition-colors"
             >
               {data.group.invite_code}
               {copied ? (
-                <Check className="w-4 h-4 text-success-400" />
+                <Check className="w-4 h-4 text-green-400" />
               ) : (
                 <Copy className="w-4 h-4" />
               )}
@@ -196,15 +194,15 @@ export default function GroupDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="bg-white dark:bg-primary-850 border-b border-parchment-200 dark:border-primary-700 sticky top-0 z-10">
+      <div className="bg-white dark:bg-primary-800/50 border-b border-parchment-200 dark:border-primary-700/50 sticky top-0 z-10">
         <div className="max-w-6xl mx-auto px-4">
           <div className="flex gap-1">
             <button
               onClick={() => setActiveTab("challenges")}
               className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === "challenges"
-                  ? "border-primary-600 text-primary-800 dark:text-white"
-                  : "border-transparent text-primary-500 hover:text-primary-700"
+                  ? "border-primary-600 dark:border-primary-400 text-primary-800 dark:text-parchment-100"
+                  : "border-transparent text-primary-500 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
               }`}
             >
               Defis de lecture
@@ -213,8 +211,8 @@ export default function GroupDetailPage() {
               onClick={() => setActiveTab("members")}
               className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === "members"
-                  ? "border-primary-600 text-primary-800 dark:text-white"
-                  : "border-transparent text-primary-500 hover:text-primary-700"
+                  ? "border-primary-600 dark:border-primary-400 text-primary-800 dark:text-parchment-100"
+                  : "border-transparent text-primary-500 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
               }`}
             >
               Membres ({data.members?.length || 0})
@@ -231,7 +229,7 @@ export default function GroupDetailPage() {
             {isOwnerOrAdmin && (
               <Link
                 href={`/groupes/${groupId}/nouveau-defi`}
-                className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-primary-300 dark:border-primary-600 rounded-2xl text-primary-600 dark:text-primary-400 hover:border-primary-400 hover:text-primary-700 transition-colors"
+                className="flex items-center justify-center gap-2 p-4 border-2 border-dashed border-primary-300 dark:border-primary-600/50 rounded-2xl text-primary-600 dark:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
               >
                 <Plus className="w-5 h-5" />
                 Creer un nouveau defi de lecture
@@ -262,8 +260,8 @@ export default function GroupDetailPage() {
           </div>
         ) : (
           /* Members list */
-          <div className="bg-white dark:bg-primary-850 rounded-2xl border border-parchment-200 dark:border-primary-700 overflow-hidden">
-            <div className="divide-y divide-parchment-100 dark:divide-primary-700">
+          <div className="bg-white dark:bg-primary-800/50 rounded-2xl border border-parchment-200 dark:border-primary-700/50 overflow-hidden">
+            <div className="divide-y divide-parchment-100 dark:divide-primary-700/50">
               {data.members?.map((member) => {
                 const user = member.users as unknown as {
                   id: string;
@@ -278,10 +276,10 @@ export default function GroupDetailPage() {
                 return (
                   <div
                     key={member.id}
-                    className="flex items-center gap-4 p-4 hover:bg-parchment-50 dark:hover:bg-primary-800 transition-colors"
+                    className="flex items-center gap-4 p-4 hover:bg-parchment-50 dark:hover:bg-primary-800/50 transition-colors"
                   >
                     {/* Avatar */}
-                    <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-700 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-700/50 flex items-center justify-center">
                       {user.avatar_url ? (
                         <Image
                           src={user.avatar_url}
@@ -291,26 +289,26 @@ export default function GroupDetailPage() {
                           className="w-full h-full rounded-full object-cover"
                         />
                       ) : (
-                        <User className="w-6 h-6 text-primary-400" />
+                        <User className="w-6 h-6 text-primary-400 dark:text-primary-500" />
                       )}
                     </div>
 
                     {/* Info */}
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-primary-800 dark:text-parchment-50">
+                        <span className="font-medium text-primary-800 dark:text-parchment-100">
                           {user.username || "Utilisateur"}
                         </span>
                         <RoleIcon
                           className={`w-4 h-4 ${
                             member.role === "owner"
-                              ? "text-yellow-500"
+                              ? "text-amber-500"
                               : member.role === "admin"
                               ? "text-blue-500"
-                              : "text-primary-400"
+                              : "text-primary-400 dark:text-primary-500"
                           }`}
                         />
-                        <span className="text-xs text-primary-400">
+                        <span className="text-xs text-primary-400 dark:text-primary-500">
                           {member.role === "owner" ? "Chef" : member.role === "admin" ? "Admin" : "Membre"}
                         </span>
                       </div>
@@ -325,21 +323,21 @@ export default function GroupDetailPage() {
                         {member.role === "member" ? (
                           <button
                             onClick={() => handleRoleChange(member.id, member.user_id, "admin")}
-                            className="px-3 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                            className="px-3 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-500/30 transition-colors"
                           >
                             Promouvoir Admin
                           </button>
                         ) : (
                           <button
                             onClick={() => handleRoleChange(member.id, member.user_id, "member")}
-                            className="px-3 py-1.5 text-xs font-medium bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors"
+                            className="px-3 py-1.5 text-xs font-medium bg-primary-100 dark:bg-primary-700/50 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors"
                           >
                             Rétrograder
                           </button>
                         )}
                         <button
                           onClick={() => handleKickMember(member.user_id)}
-                          className="p-1.5 text-error-500 hover:bg-error-100 dark:hover:bg-error-900/30 rounded-lg transition-colors"
+                          className="p-1.5 text-error-500 dark:text-error-400 hover:bg-error-100 dark:hover:bg-error-500/20 rounded-lg transition-colors"
                           title="Expulser"
                         >
                           <UserMinus className="w-4 h-4" />
