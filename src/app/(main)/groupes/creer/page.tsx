@@ -49,9 +49,10 @@ export default function CreerGroupePage() {
     try {
       const group = await createGroup(name.trim(), userId, description.trim() || undefined, color);
       router.push(`/groupes/${group.id}`);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error creating group:", err);
-      setError("Erreur lors de la creation du groupe. Veuillez reessayer.");
+      const message = err instanceof Error ? err.message : String(err);
+      setError(`Erreur: ${message}`);
     } finally {
       setLoading(false);
     }

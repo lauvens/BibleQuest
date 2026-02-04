@@ -56,7 +56,8 @@
       "WebFetch(domain:bibleproject.com)",
       "Bash(npx tsc --noEmit)",
       "Bash(npx supabase:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "mcp__plugin_supabase_supabase__list_migrations"
     ]
   }
 }
