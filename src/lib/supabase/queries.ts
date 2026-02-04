@@ -1099,52 +1099,366 @@ export async function getMasteryPathWithProgress(
 export async function getMasteryPathsWithProgress(userId?: string | null) {
   const paths = await getMasteryPaths();
 
+  // Create a map of path id to path name for prerequisite lookup
+  const pathNameMap: Record<string, string | undefined> = {};
+  paths.forEach((p) => {
+    pathNameMap[p.id] = p.name;
+  });
+
+  const pathIds = paths.map((p) => p.id);
+
+  // Batch load all milestones for all paths in ONE query (fixes N+1 problem)
+  const { data: allMilestones } = await supabase()
+    .from("path_milestones")
+    .select("id, path_id")
+    .in("path_id", pathIds);
+
+  // Group milestones by path_id
+  const milestonesByPath: Record<string, string[]> = {};
+  const allMilestoneIds: string[] = [];
+  allMilestones?.forEach((m) => {
+    if (!milestonesByPath[m.path_id]) milestonesByPath[m.path_id] = [];
+    milestonesByPath[m.path_id].push(m.id);
+    allMilestoneIds.push(m.id);
+  });
+
   if (!userId) {
+    // For guests, paths with prerequisites are locked
     return paths.map((p) => ({
       ...p,
       started: false,
       completed: false,
       progress: 0,
       completedMilestones: 0,
-      totalMilestones: 0,
+      totalMilestones: milestonesByPath[p.id]?.length || 0,
+      isLocked: !!p.required_path_id,
+      requiredPathName: p.required_path_id ? pathNameMap[p.required_path_id] : undefined,
     }));
   }
 
-  // Get all user path progress
+  // Get all user path progress in ONE query
   const userProgress = await getUserPathsProgress(userId);
   const progressMap: Record<string, Tables["user_path_progress"]["Row"]> = {};
   userProgress.forEach((up) => {
     progressMap[up.path_id] = up;
   });
 
-  // Get milestone counts for each path
-  const pathsWithProgress = await Promise.all(
-    paths.map(async (path) => {
-      const milestones = await getPathMilestones(path.id);
-      const milestoneIds = milestones.map((m) => m.id);
+  // Get all milestone progress in ONE query (fixes N+1 problem)
+  const allMilestoneProgress = allMilestoneIds.length > 0
+    ? await getUserMilestonesProgress(userId, allMilestoneIds)
+    : [];
 
-      let completedMilestones = 0;
-      if (milestoneIds.length > 0) {
-        const milestoneProgress = await getUserMilestonesProgress(userId, milestoneIds);
-        completedMilestones = milestoneProgress.filter((mp) => mp.completed).length;
-      }
-
-      const progress = milestones.length > 0
-        ? Math.round((completedMilestones / milestones.length) * 100)
-        : 0;
-
-      const pathProg = progressMap[path.id];
-
-      return {
-        ...path,
-        started: !!pathProg,
-        completed: !!pathProg?.completed_at,
-        progress,
-        completedMilestones,
-        totalMilestones: milestones.length,
-      };
-    })
+  // Create a set of completed milestone IDs for fast lookup
+  const completedMilestoneIds = new Set(
+    allMilestoneProgress.filter((mp) => mp.completed).map((mp) => mp.milestone_id)
   );
 
+  // Build paths with progress using pre-loaded data
+  const pathsWithProgress = paths.map((path) => {
+    const pathMilestoneIds = milestonesByPath[path.id] || [];
+    const totalMilestones = pathMilestoneIds.length;
+    const completedMilestones = pathMilestoneIds.filter((id) => completedMilestoneIds.has(id)).length;
+
+    const progress = totalMilestones > 0
+      ? Math.round((completedMilestones / totalMilestones) * 100)
+      : 0;
+
+    const pathProg = progressMap[path.id];
+
+    // Check if prerequisite path is completed
+    let isLocked = false;
+    let requiredPathName: string | undefined;
+    if (path.required_path_id) {
+      const requiredPathProgress = progressMap[path.required_path_id];
+      isLocked = !requiredPathProgress?.completed_at;
+      requiredPathName = pathNameMap[path.required_path_id];
+    }
+
+    return {
+      ...path,
+      started: !!pathProg,
+      completed: !!pathProg?.completed_at,
+      progress,
+      completedMilestones,
+      totalMilestones,
+      isLocked,
+      requiredPathName,
+    };
+  });
+
   return pathsWithProgress;
+}
+
+// ============================================
+// READING GROUPS
+// ============================================
+
+// Get all groups for a user
+export async function getUserGroups(userId: string) {
+  const { data, error } = await supabase()
+    .from("group_members")
+    .select(`
+      role,
+      joined_at,
+      reading_groups (
+        id,
+        name,
+        description,
+        cover_color,
+        creator_id,
+        invite_code,
+        max_members,
+        is_public,
+        created_at
+      )
+    `)
+    .eq("user_id", userId);
+  if (error) throw error;
+  return data;
+}
+
+// Get a single group with members and active challenges
+export async function getGroupDetails(groupId: string) {
+  const { data: group, error: groupError } = await supabase()
+    .from("reading_groups")
+    .select("*")
+    .eq("id", groupId)
+    .single();
+  if (groupError) throw groupError;
+
+  const { data: members, error: membersError } = await supabase()
+    .from("group_members")
+    .select(`
+      id,
+      role,
+      joined_at,
+      user_id,
+      users (
+        id,
+        username,
+        avatar_url,
+        xp,
+        level
+      )
+    `)
+    .eq("group_id", groupId)
+    .order("role", { ascending: true });
+  if (membersError) throw membersError;
+
+  const { data: challenges, error: challengesError } = await supabase()
+    .from("reading_challenges")
+    .select("*")
+    .eq("group_id", groupId)
+    .eq("status", "active")
+    .order("deadline", { ascending: true });
+  if (challengesError) throw challengesError;
+
+  return { group, members, challenges };
+}
+
+// Get group by invite code
+export async function getGroupByInviteCode(inviteCode: string) {
+  const { data, error } = await supabase()
+    .from("reading_groups")
+    .select("*")
+    .eq("invite_code", inviteCode)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// Create a new group
+export async function createGroup(
+  name: string,
+  creatorId: string,
+  description?: string,
+  coverColor?: string
+) {
+  const { data, error } = await supabase()
+    .from("reading_groups")
+    .insert({
+      name,
+      creator_id: creatorId,
+      description,
+      cover_color: coverColor || "#6366F1",
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// Join a group
+export async function joinGroup(groupId: string, userId: string) {
+  const { data, error } = await supabase()
+    .from("group_members")
+    .insert({
+      group_id: groupId,
+      user_id: userId,
+      role: "member",
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// Leave a group
+export async function leaveGroup(groupId: string, userId: string) {
+  const { error } = await supabase()
+    .from("group_members")
+    .delete()
+    .eq("group_id", groupId)
+    .eq("user_id", userId);
+  if (error) throw error;
+}
+
+// Get members count for a group
+export async function getGroupMembersCount(groupId: string) {
+  const { count, error } = await supabase()
+    .from("group_members")
+    .select("*", { count: "exact", head: true })
+    .eq("group_id", groupId);
+  if (error) throw error;
+  return count || 0;
+}
+
+// ============================================
+// READING CHALLENGES
+// ============================================
+
+// Create a reading challenge
+export async function createChallenge(
+  groupId: string,
+  createdBy: string,
+  data: {
+    title: string;
+    description?: string;
+    bookName: string;
+    chapterStart: number;
+    verseStart?: number;
+    chapterEnd?: number;
+    verseEnd?: number;
+    deadline: string;
+  }
+) {
+  const { data: challenge, error } = await supabase()
+    .from("reading_challenges")
+    .insert({
+      group_id: groupId,
+      created_by: createdBy,
+      title: data.title,
+      description: data.description,
+      book_name: data.bookName,
+      chapter_start: data.chapterStart,
+      verse_start: data.verseStart || 1,
+      chapter_end: data.chapterEnd,
+      verse_end: data.verseEnd,
+      deadline: data.deadline,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return challenge;
+}
+
+// Get challenge with progress for all members
+export async function getChallengeWithProgress(challengeId: string) {
+  const { data: challenge, error: challengeError } = await supabase()
+    .from("reading_challenges")
+    .select("*")
+    .eq("id", challengeId)
+    .single();
+  if (challengeError) throw challengeError;
+
+  const { data: progress, error: progressError } = await supabase()
+    .from("challenge_progress")
+    .select(`
+      id,
+      user_id,
+      completed,
+      completed_at,
+      notes,
+      users (
+        id,
+        username,
+        avatar_url
+      )
+    `)
+    .eq("challenge_id", challengeId);
+  if (progressError) throw progressError;
+
+  return { challenge, progress };
+}
+
+// Mark challenge as completed for user
+export async function markChallengeCompleted(
+  challengeId: string,
+  userId: string,
+  notes?: string
+) {
+  const { data, error } = await supabase()
+    .from("challenge_progress")
+    .upsert({
+      challenge_id: challengeId,
+      user_id: userId,
+      completed: true,
+      completed_at: new Date().toISOString(),
+      notes,
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// Get active challenges for a user (across all groups)
+export async function getUserActiveChallenges(userId: string) {
+  // Get user's groups first
+  const { data: memberships, error: memberError } = await supabase()
+    .from("group_members")
+    .select("group_id")
+    .eq("user_id", userId);
+  if (memberError) throw memberError;
+
+  const groupIds = memberships?.map((m) => m.group_id) || [];
+  if (groupIds.length === 0) return [];
+
+  // Get active challenges from those groups
+  const { data: challenges, error: challengeError } = await supabase()
+    .from("reading_challenges")
+    .select(`
+      *,
+      reading_groups (
+        id,
+        name,
+        cover_color
+      )
+    `)
+    .in("group_id", groupIds)
+    .eq("status", "active")
+    .gte("deadline", new Date().toISOString())
+    .order("deadline", { ascending: true });
+  if (challengeError) throw challengeError;
+
+  // Get user's progress on these challenges
+  const challengeIds = challenges?.map((c) => c.id) || [];
+  if (challengeIds.length === 0) return challenges;
+
+  const { data: progress, error: progressError } = await supabase()
+    .from("challenge_progress")
+    .select("challenge_id, completed, completed_at")
+    .eq("user_id", userId)
+    .in("challenge_id", challengeIds);
+  if (progressError) throw progressError;
+
+  const progressMap: Record<string, { completed: boolean; completed_at: string | null }> = {};
+  progress?.forEach((p) => {
+    progressMap[p.challenge_id] = { completed: p.completed, completed_at: p.completed_at };
+  });
+
+  return challenges?.map((c) => ({
+    ...c,
+    userProgress: progressMap[c.id] || { completed: false, completed_at: null },
+  }));
 }

@@ -24,9 +24,13 @@ export type UserRole = "user" | "admin";
 
 export type PathDifficulty = "beginner" | "intermediate" | "advanced";
 
-export type PathCategory = "doctrine" | "bible_study" | "characters" | "history" | "practical";
+export type PathCategory = "doctrine" | "bible_study" | "characters" | "history" | "practical" | "theology";
 
 export type MilestoneType = "lesson" | "quiz" | "reading" | "reflection";
+
+export type GroupRole = "owner" | "admin" | "member";
+
+export type ChallengeStatus = "active" | "completed" | "cancelled";
 
 export interface Database {
   public: {
@@ -474,6 +478,8 @@ export interface Database {
           category: PathCategory;
           order_index: number;
           is_published: boolean;
+          is_coming_soon: boolean;
+          required_path_id: string | null;
           created_at: string;
         };
         Insert: {
@@ -489,6 +495,8 @@ export interface Database {
           category?: PathCategory;
           order_index?: number;
           is_published?: boolean;
+          is_coming_soon?: boolean;
+          required_path_id?: string | null;
           created_at?: string;
         };
         Update: {
@@ -504,6 +512,8 @@ export interface Database {
           category?: PathCategory;
           order_index?: number;
           is_published?: boolean;
+          is_coming_soon?: boolean;
+          required_path_id?: string | null;
           created_at?: string;
         };
       };
@@ -618,6 +628,137 @@ export interface Database {
           best_score?: number;
           attempts?: number;
           completed_at?: string | null;
+        };
+      };
+      reading_groups: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          cover_color: string;
+          creator_id: string;
+          invite_code: string;
+          max_members: number;
+          is_public: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          description?: string | null;
+          cover_color?: string;
+          creator_id: string;
+          invite_code?: string;
+          max_members?: number;
+          is_public?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          description?: string | null;
+          cover_color?: string;
+          creator_id?: string;
+          invite_code?: string;
+          max_members?: number;
+          is_public?: boolean;
+          created_at?: string;
+        };
+      };
+      group_members: {
+        Row: {
+          id: string;
+          group_id: string;
+          user_id: string;
+          role: GroupRole;
+          joined_at: string;
+        };
+        Insert: {
+          id?: string;
+          group_id: string;
+          user_id: string;
+          role?: GroupRole;
+          joined_at?: string;
+        };
+        Update: {
+          id?: string;
+          group_id?: string;
+          user_id?: string;
+          role?: GroupRole;
+          joined_at?: string;
+        };
+      };
+      reading_challenges: {
+        Row: {
+          id: string;
+          group_id: string;
+          created_by: string;
+          title: string;
+          description: string | null;
+          book_name: string;
+          chapter_start: number;
+          verse_start: number;
+          chapter_end: number | null;
+          verse_end: number | null;
+          deadline: string;
+          status: ChallengeStatus;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          group_id: string;
+          created_by: string;
+          title: string;
+          description?: string | null;
+          book_name: string;
+          chapter_start: number;
+          verse_start?: number;
+          chapter_end?: number | null;
+          verse_end?: number | null;
+          deadline: string;
+          status?: ChallengeStatus;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          group_id?: string;
+          created_by?: string;
+          title?: string;
+          description?: string | null;
+          book_name?: string;
+          chapter_start?: number;
+          verse_start?: number;
+          chapter_end?: number | null;
+          verse_end?: number | null;
+          deadline?: string;
+          status?: ChallengeStatus;
+          created_at?: string;
+        };
+      };
+      challenge_progress: {
+        Row: {
+          id: string;
+          challenge_id: string;
+          user_id: string;
+          completed: boolean;
+          completed_at: string | null;
+          notes: string | null;
+        };
+        Insert: {
+          id?: string;
+          challenge_id: string;
+          user_id: string;
+          completed?: boolean;
+          completed_at?: string | null;
+          notes?: string | null;
+        };
+        Update: {
+          id?: string;
+          challenge_id?: string;
+          user_id?: string;
+          completed?: boolean;
+          completed_at?: string | null;
+          notes?: string | null;
         };
       };
     };
