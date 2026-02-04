@@ -1399,13 +1399,18 @@ export async function markChallengeCompleted(
 ) {
   const { data, error } = await supabase()
     .from("challenge_progress")
-    .upsert({
-      challenge_id: challengeId,
-      user_id: userId,
-      completed: true,
-      completed_at: new Date().toISOString(),
-      notes,
-    })
+    .upsert(
+      {
+        challenge_id: challengeId,
+        user_id: userId,
+        completed: true,
+        completed_at: new Date().toISOString(),
+        notes,
+      },
+      {
+        onConflict: "challenge_id,user_id",
+      }
+    )
     .select()
     .single();
   if (error) throw error;
