@@ -1253,27 +1253,54 @@ export async function getGroupDetails(groupId: string, userId?: string) {
     .order("deadline", { ascending: true });
   if (challengesError) throw challengesError;
 
-  // Fetch user's progress on challenges if userId provided
+  // Fetch progress data for challenges
   const userProgress: Record<string, { completed: boolean; completed_at: string | null }> = {};
-  if (userId && challenges && challenges.length > 0) {
-    const challengeIds = challenges.map((c) => c.id);
-    const { data: progress } = await supabase()
-      .from("challenge_progress")
-      .select("challenge_id, completed, completed_at")
-      .eq("user_id", userId)
-      .in("challenge_id", challengeIds);
+  const completedCounts: Record<string, number> = {};
 
-    if (progress) {
-      progress.forEach((p) => {
-        userProgress[p.challenge_id] = {
-          completed: p.completed,
-          completed_at: p.completed_at,
-        };
+  if (challenges && challenges.length > 0) {
+    const challengeIds = challenges.map((c) => c.id);
+
+    // Fetch all progress for these challenges (to count completions)
+    const { data: allProgress } = await supabase()
+      .from("challenge_progress")
+      .select("challenge_id, user_id, completed")
+      .in("challenge_id", challengeIds)
+      .eq("completed", true);
+
+    if (allProgress) {
+      // Count completions per challenge
+      allProgress.forEach((p) => {
+        completedCounts[p.challenge_id] = (completedCounts[p.challenge_id] || 0) + 1;
+        // Also track current user's progress
+        if (userId && p.user_id === userId) {
+          userProgress[p.challenge_id] = {
+            completed: true,
+            completed_at: null,
+          };
+        }
       });
+    }
+
+    // Fetch current user's detailed progress
+    if (userId) {
+      const { data: myProgress } = await supabase()
+        .from("challenge_progress")
+        .select("challenge_id, completed, completed_at")
+        .eq("user_id", userId)
+        .in("challenge_id", challengeIds);
+
+      if (myProgress) {
+        myProgress.forEach((p) => {
+          userProgress[p.challenge_id] = {
+            completed: p.completed,
+            completed_at: p.completed_at,
+          };
+        });
+      }
     }
   }
 
-  return { group, members, challenges, userProgress };
+  return { group, members, challenges, userProgress, completedCounts };
 }
 
 // Get group by invite code
@@ -1331,6 +1358,23 @@ export async function leaveGroup(groupId: string, userId: string) {
     .eq("group_id", groupId)
     .eq("user_id", userId);
   if (error) throw error;
+}
+
+// Update member role
+export async function updateMemberRole(
+  groupId: string,
+  userId: string,
+  newRole: "admin" | "member"
+) {
+  const { data, error } = await supabase()
+    .from("group_members")
+    .update({ role: newRole })
+    .eq("group_id", groupId)
+    .eq("user_id", userId)
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
 }
 
 // Get members count for a group

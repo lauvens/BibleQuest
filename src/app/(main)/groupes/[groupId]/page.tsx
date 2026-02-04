@@ -19,6 +19,7 @@ import { useUserStore } from "@/lib/store/user-store";
 import {
   getGroupDetails,
   markChallengeCompleted,
+  updateMemberRole,
 } from "@/lib/supabase/queries";
 
 type GroupDetails = Awaited<ReturnType<typeof getGroupDetails>>;
@@ -42,6 +43,7 @@ export default function GroupDetailPage() {
   const [activeTab, setActiveTab] = useState<"challenges" | "members">("challenges");
 
   const userMember = data?.members?.find((m) => m.user_id === userId);
+  const isOwner = userMember?.role === "owner";
   const isOwnerOrAdmin = userMember?.role === "owner" || userMember?.role === "admin";
 
   useEffect(() => {
@@ -80,6 +82,17 @@ export default function GroupDetailPage() {
       setData(details);
     } catch (err) {
       console.error("Error marking complete:", err);
+    }
+  }
+
+  async function handleRoleChange(memberId: string, memberUserId: string, newRole: "admin" | "member") {
+    try {
+      await updateMemberRole(groupId, memberUserId, newRole);
+      // Reload data
+      const details = await getGroupDetails(groupId, userId || undefined);
+      setData(details);
+    } catch (err) {
+      console.error("Error updating role:", err);
     }
   }
 
@@ -208,7 +221,7 @@ export default function GroupDetailPage() {
                     challenge={challenge}
                     userProgress={data.userProgress?.[challenge.id]}
                     totalMembers={data.members?.length || 0}
-                    completedCount={0}
+                    completedCount={data.completedCounts?.[challenge.id] || 0}
                     onMarkComplete={() => handleMarkComplete(challenge.id)}
                   />
                 ))}
@@ -271,11 +284,35 @@ export default function GroupDetailPage() {
                               : "text-primary-400"
                           }`}
                         />
+                        <span className="text-xs text-primary-400">
+                          {member.role === "owner" ? "Chef" : member.role === "admin" ? "Admin" : "Membre"}
+                        </span>
                       </div>
                       <p className="text-sm text-primary-500 dark:text-primary-400">
                         Niveau {user.level} • {user.xp} XP
                       </p>
                     </div>
+
+                    {/* Role management (owner only, can't change own role or other owner) */}
+                    {isOwner && member.role !== "owner" && member.user_id !== userId && (
+                      <div className="flex items-center gap-2">
+                        {member.role === "member" ? (
+                          <button
+                            onClick={() => handleRoleChange(member.id, member.user_id, "admin")}
+                            className="px-3 py-1.5 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                          >
+                            Promouvoir Admin
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleRoleChange(member.id, member.user_id, "member")}
+                            className="px-3 py-1.5 text-xs font-medium bg-primary-100 dark:bg-primary-800 text-primary-600 dark:text-primary-400 rounded-lg hover:bg-primary-200 dark:hover:bg-primary-700 transition-colors"
+                          >
+                            Rétrograder
+                          </button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 );
               })}
