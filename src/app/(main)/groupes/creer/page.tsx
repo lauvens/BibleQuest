@@ -73,19 +73,24 @@ export default function CreerGroupePage() {
         {/* Form card */}
         <div className="bg-white dark:bg-primary-850 rounded-2xl border border-parchment-200 dark:border-primary-700 overflow-hidden">
           {/* Preview header */}
-          <div
-            className="h-24 flex items-end p-4 transition-colors"
-            style={{ backgroundColor: color }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                <Users className="w-6 h-6 text-white" />
+          <div className="relative p-4 border-b border-parchment-200 dark:border-primary-700">
+            {/* Color bar */}
+            <div
+              className="absolute top-0 left-0 right-0 h-1 transition-colors"
+              style={{ backgroundColor: color }}
+            />
+            <div className="flex items-center gap-3 pt-2">
+              <div
+                className="w-14 h-14 rounded-xl flex items-center justify-center shadow-sm transition-colors dark:ring-1 dark:ring-white/10"
+                style={{ backgroundColor: color }}
+              >
+                <Users className="w-7 h-7 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-white">
+                <h2 className="text-xl font-bold text-primary-800 dark:text-parchment-50">
                   {name || "Nom du groupe"}
                 </h2>
-                <p className="text-white/70 text-sm">
+                <p className="text-primary-500 dark:text-primary-400 text-sm">
                   {description || "Description du groupe"}
                 </p>
               </div>

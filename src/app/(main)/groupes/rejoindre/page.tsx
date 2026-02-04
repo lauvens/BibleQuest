@@ -135,20 +135,27 @@ function RejoindreGroupeContent() {
             {/* Found group preview */}
             {foundGroup && (
               <div className="border border-parchment-200 dark:border-primary-700 rounded-xl overflow-hidden">
+                {/* Color bar */}
                 <div
-                  className="h-16"
+                  className="h-1"
                   style={{ backgroundColor: foundGroup.cover_color }}
                 />
                 <div className="p-4">
-                  <h3 className="font-semibold text-lg text-primary-800 dark:text-parchment-50">
-                    {foundGroup.name}
-                  </h3>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div
+                      className="w-12 h-12 rounded-xl flex-shrink-0 dark:ring-1 dark:ring-white/10"
+                      style={{ backgroundColor: foundGroup.cover_color }}
+                    />
+                    <h3 className="font-semibold text-lg text-primary-800 dark:text-parchment-50">
+                      {foundGroup.name}
+                    </h3>
+                  </div>
                   {foundGroup.description && (
-                    <p className="text-sm text-primary-500 dark:text-primary-400 mt-1">
+                    <p className="text-sm text-primary-500 dark:text-primary-400 mb-3">
                       {foundGroup.description}
                     </p>
                   )}
-                  <div className="flex items-center gap-2 mt-3 text-sm text-primary-500">
+                  <div className="flex items-center gap-2 text-sm text-primary-500 dark:text-primary-400">
                     <Users className="w-4 h-4" />
                     {foundGroup.memberCount}/{foundGroup.max_members} membres
                   </div>

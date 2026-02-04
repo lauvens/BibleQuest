@@ -136,41 +136,53 @@ export default function GroupDetailPage() {
   return (
     <div className="min-h-screen bg-parchment-50 dark:bg-primary-900">
       {/* Header */}
-      <div
-        className="text-white"
-        style={{ backgroundColor: data.group.cover_color }}
-      >
-        <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="relative overflow-hidden">
+        {/* Background with color accent */}
+        <div
+          className="absolute inset-0 opacity-100 dark:opacity-20"
+          style={{ backgroundColor: data.group.cover_color }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-parchment-50 dark:to-primary-900" />
+
+        {/* Content */}
+        <div className="relative max-w-6xl mx-auto px-4 py-8">
           <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-3xl font-bold">{data.group.name}</h1>
-              {data.group.description && (
-                <p className="text-white/80 mt-2">{data.group.description}</p>
-              )}
-              <div className="flex items-center gap-4 mt-4">
-                <span className="flex items-center gap-1.5 text-white/90">
-                  <Users className="w-4 h-4" />
-                  {data.members?.length || 0} membres
-                </span>
+            <div className="flex items-start gap-4">
+              {/* Color accent badge */}
+              <div
+                className="w-16 h-16 rounded-2xl shadow-lg flex-shrink-0 dark:ring-2 dark:ring-white/10"
+                style={{ backgroundColor: data.group.cover_color }}
+              />
+              <div>
+                <h1 className="text-3xl font-bold text-white dark:text-parchment-50">{data.group.name}</h1>
+                {data.group.description && (
+                  <p className="text-white/80 dark:text-primary-300 mt-2">{data.group.description}</p>
+                )}
+                <div className="flex items-center gap-4 mt-3">
+                  <span className="flex items-center gap-1.5 text-white/90 dark:text-primary-300">
+                    <Users className="w-4 h-4" />
+                    {data.members?.length || 0} membres
+                  </span>
+                </div>
               </div>
             </div>
 
             {isOwnerOrAdmin && (
               <Link
                 href={`/groupes/${groupId}/parametres`}
-                className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                className="p-2 bg-white/10 dark:bg-primary-800 hover:bg-white/20 dark:hover:bg-primary-700 rounded-lg transition-colors"
               >
-                <Settings className="w-5 h-5" />
+                <Settings className="w-5 h-5 text-white dark:text-primary-300" />
               </Link>
             )}
           </div>
 
           {/* Invite code */}
           <div className="mt-6 flex items-center gap-3">
-            <span className="text-white/70 text-sm">Code d&apos;invitation:</span>
+            <span className="text-white/70 dark:text-primary-400 text-sm">Code d&apos;invitation:</span>
             <button
               onClick={handleCopyInviteCode}
-              className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-mono transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 bg-white/10 dark:bg-primary-800 hover:bg-white/20 dark:hover:bg-primary-700 rounded-lg text-sm font-mono text-white dark:text-parchment-50 transition-colors"
             >
               {data.group.invite_code}
               {copied ? (
