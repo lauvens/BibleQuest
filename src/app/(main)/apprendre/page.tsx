@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Compass, BookOpen, Scroll, Users, History, Lightbulb, Search } from "lucide-react";
+import { Compass, BookOpen, Scroll, Users, History, Lightbulb, Search, Church } from "lucide-react";
 import { CourseCard } from "@/components/mastery/course-card";
 import { useUserStore } from "@/lib/store/user-store";
 import { getMasteryPathsWithProgress } from "@/lib/supabase/queries";
@@ -14,11 +14,13 @@ type MasteryPath = Database["public"]["Tables"]["mastery_paths"]["Row"] & {
   progress: number;
   completedMilestones: number;
   totalMilestones: number;
+  isLocked?: boolean;
+  requiredPathName?: string;
 };
 
 const categoryConfig: Record<
   PathCategory,
-  { label: string; icon: React.ComponentType<{ className?: string }>; description: string }
+  { label: string; icon: React.ComponentType<{ className?: string }>; description: string; comingSoon?: boolean }
 > = {
   doctrine: {
     label: "Doctrine",
@@ -45,10 +47,15 @@ const categoryConfig: Record<
     icon: Scroll,
     description: "Appliquer la foi au quotidien",
   },
+  theology: {
+    label: "Theologie",
+    icon: Church,
+    description: "Approfondissement theologique avance",
+  },
 };
 
 // Order of categories to display
-const categoryOrder: PathCategory[] = ["doctrine", "bible_study", "characters", "history", "practical"];
+const categoryOrder: PathCategory[] = ["doctrine", "bible_study", "characters", "history", "practical", "theology"];
 
 export default function ApprendrePage() {
   const { id: userId, isGuest, guestProgress } = useUserStore();
@@ -65,14 +72,37 @@ export default function ApprendrePage() {
       .then((data) => {
         if (isGuest) {
           const pathProgress = guestProgress?.pathProgress || {};
+
+          // First pass: calculate completion status for all paths
+          const pathCompletionMap: Record<string, boolean> = {};
+          data.forEach((path) => {
+            const guestPathProgress = pathProgress[path.id];
+            // Consider a path "complete" if guest has progressed through all milestones
+            // or reached 100% progress (5 milestones at 20% each)
+            const currentIndex = guestPathProgress?.currentMilestoneIndex || 0;
+            const isComplete = currentIndex >= path.totalMilestones && path.totalMilestones > 0;
+            pathCompletionMap[path.id] = isComplete;
+          });
+
+          // Second pass: calculate locked status based on local completion
           const pathsWithGuestProgress = data.map((path) => {
             const guestPathProgress = pathProgress[path.id];
             const started = !!guestPathProgress?.started;
+            const currentIndex = guestPathProgress?.currentMilestoneIndex || 0;
+
+            // Check if prerequisite is completed locally
+            let isLocked = false;
+            if (path.required_path_id) {
+              isLocked = !pathCompletionMap[path.required_path_id];
+            }
+
             return {
               ...path,
               started,
-              completed: false,
-              progress: started ? Math.min((guestPathProgress?.currentMilestoneIndex || 0) * 20, 100) : 0,
+              completed: pathCompletionMap[path.id] || false,
+              progress: started ? Math.min(currentIndex * 20, 100) : 0,
+              isLocked,
+              requiredPathName: path.requiredPathName,
             };
           });
           setPaths(pathsWithGuestProgress);
@@ -110,6 +140,7 @@ export default function ApprendrePage() {
       characters: [],
       history: [],
       practical: [],
+      theology: [],
     };
 
     filteredPaths.forEach((path) => {
