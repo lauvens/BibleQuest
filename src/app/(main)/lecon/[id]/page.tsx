@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Heart, X, Trophy, Star } from "lucide-react";
@@ -60,7 +60,7 @@ function LeconContent() {
 
   const hearts = getActualHearts();
 
-  const loadLesson = () => {
+  const loadLesson = useCallback(() => {
     setLoading(true);
     setError(false);
     resetQuiz();
@@ -80,11 +80,11 @@ function LeconContent() {
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  };
+  }, [lessonId, resetQuiz]);
 
   useEffect(() => {
     loadLesson();
-  }, [lessonId]);
+  }, [loadLesson]);
 
   useEffect(() => {
     updateStreak();

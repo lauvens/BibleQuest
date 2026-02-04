@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Play, BookOpen } from "lucide-react";
 import { MotionCard } from "@/components/ui/motion";
 
@@ -32,10 +33,11 @@ export function CourseCard({
           {/* Thumbnail */}
           <div className="relative aspect-video bg-gradient-to-br from-accent-400 to-accent-600 dark:from-accent-500 dark:to-accent-700">
             {thumbnailUrl ? (
-              <img
+              <Image
                 src={thumbnailUrl}
                 alt={title}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">

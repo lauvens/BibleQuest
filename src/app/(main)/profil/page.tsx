@@ -3,7 +3,7 @@
 // Disable static pre-rendering - this page requires client-side auth
 export const dynamic = "force-dynamic";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -71,7 +71,7 @@ export default function ProfilPage() {
   const [equippedTitle, setEquippedTitle] = useState<string | null>(null);
   const [error, setError] = useState(false);
 
-  const loadProfile = async () => {
+  const loadProfile = useCallback(async () => {
     if (!userId || isGuest) return;
     setError(false);
     try {
@@ -96,11 +96,11 @@ export default function ProfilPage() {
     } catch {
       setError(true);
     }
-  };
+  }, [userId, isGuest]);
 
   useEffect(() => {
     loadProfile();
-  }, [userId, isGuest]);
+  }, [loadProfile]);
 
   const handleLogout = async () => {
     try {
