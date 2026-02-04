@@ -11,6 +11,7 @@ import {
   Crown,
   Shield,
   User,
+  UserMinus,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -20,6 +21,7 @@ import {
   getGroupDetails,
   markChallengeCompleted,
   updateMemberRole,
+  leaveGroup,
 } from "@/lib/supabase/queries";
 
 type GroupDetails = Awaited<ReturnType<typeof getGroupDetails>>;
@@ -93,6 +95,18 @@ export default function GroupDetailPage() {
       setData(details);
     } catch (err) {
       console.error("Error updating role:", err);
+    }
+  }
+
+  async function handleKickMember(memberUserId: string) {
+    if (!confirm("Êtes-vous sûr de vouloir expulser ce membre ?")) return;
+    try {
+      await leaveGroup(groupId, memberUserId);
+      // Reload data
+      const details = await getGroupDetails(groupId, userId || undefined);
+      setData(details);
+    } catch (err) {
+      console.error("Error kicking member:", err);
     }
   }
 
@@ -293,7 +307,7 @@ export default function GroupDetailPage() {
                       </p>
                     </div>
 
-                    {/* Role management (owner only, can't change own role or other owner) */}
+                    {/* Role management and kick (owner only, can't change own role or other owner) */}
                     {isOwner && member.role !== "owner" && member.user_id !== userId && (
                       <div className="flex items-center gap-2">
                         {member.role === "member" ? (
@@ -311,6 +325,13 @@ export default function GroupDetailPage() {
                             Rétrograder
                           </button>
                         )}
+                        <button
+                          onClick={() => handleKickMember(member.user_id)}
+                          className="p-1.5 text-error-500 hover:bg-error-100 dark:hover:bg-error-900/30 rounded-lg transition-colors"
+                          title="Expulser"
+                        >
+                          <UserMinus className="w-4 h-4" />
+                        </button>
                       </div>
                     )}
                   </div>
