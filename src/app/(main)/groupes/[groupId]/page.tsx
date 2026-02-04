@@ -52,7 +52,7 @@ export default function GroupDetailPage() {
 
     async function load() {
       try {
-        const details = await getGroupDetails(groupId);
+        const details = await getGroupDetails(groupId, userId || undefined);
         setData(details);
       } catch (err) {
         console.error("Error loading group:", err);
@@ -62,7 +62,7 @@ export default function GroupDetailPage() {
     }
 
     load();
-  }, [groupId, isGuest, router]);
+  }, [groupId, isGuest, router, userId]);
 
   async function handleCopyInviteCode() {
     if (!data?.group.invite_code) return;
@@ -76,7 +76,7 @@ export default function GroupDetailPage() {
     try {
       await markChallengeCompleted(challengeId, userId);
       // Reload data
-      const details = await getGroupDetails(groupId);
+      const details = await getGroupDetails(groupId, userId);
       setData(details);
     } catch (err) {
       console.error("Error marking complete:", err);
@@ -206,6 +206,7 @@ export default function GroupDetailPage() {
                   <ChallengeCard
                     key={challenge.id}
                     challenge={challenge}
+                    userProgress={data.userProgress?.[challenge.id]}
                     totalMembers={data.members?.length || 0}
                     completedCount={0}
                     onMarkComplete={() => handleMarkComplete(challenge.id)}

@@ -1218,7 +1218,7 @@ export async function getUserGroups(userId: string) {
 }
 
 // Get a single group with members and active challenges
-export async function getGroupDetails(groupId: string) {
+export async function getGroupDetails(groupId: string, userId?: string) {
   const { data: group, error: groupError } = await supabase()
     .from("reading_groups")
     .select("*")
@@ -1253,7 +1253,27 @@ export async function getGroupDetails(groupId: string) {
     .order("deadline", { ascending: true });
   if (challengesError) throw challengesError;
 
-  return { group, members, challenges };
+  // Fetch user's progress on challenges if userId provided
+  const userProgress: Record<string, { completed: boolean; completed_at: string | null }> = {};
+  if (userId && challenges && challenges.length > 0) {
+    const challengeIds = challenges.map((c) => c.id);
+    const { data: progress } = await supabase()
+      .from("challenge_progress")
+      .select("challenge_id, completed, completed_at")
+      .eq("user_id", userId)
+      .in("challenge_id", challengeIds);
+
+    if (progress) {
+      progress.forEach((p) => {
+        userProgress[p.challenge_id] = {
+          completed: p.completed,
+          completed_at: p.completed_at,
+        };
+      });
+    }
+  }
+
+  return { group, members, challenges, userProgress };
 }
 
 // Get group by invite code
