@@ -338,7 +338,7 @@ export default function BoutiquePage() {
                     </div>
                   </div>
                 </div>
-                <Button variant="secondary">{pkg.price.toFixed(2)} EUR</Button>
+                <Button variant="secondary">{pkg.price.toFixed(2)} CAD</Button>
               </CardContent>
             </Card>
           ))}
