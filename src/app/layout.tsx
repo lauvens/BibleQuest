@@ -9,12 +9,29 @@ import { LevelUpModal } from "@/components/game/level-up-modal";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "BibleEidó - Apprenez la Bible en vous amusant",
+  title: {
+    default: "BibleEido - Apprenez la Bible en vous amusant",
+    template: "%s | BibleEido",
+  },
   description:
-    "Application gamifiée pour apprendre l'histoire, le contexte et les versets de la Bible",
+    "Application gamifiee pour apprendre l'histoire, le contexte et les versets de la Bible de maniere interactive et ludique.",
   icons: {
     icon: "/logo-icon.png",
     apple: "/logo-icon.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    siteName: "BibleEido",
+    title: "BibleEido - Apprenez la Bible en vous amusant",
+    description:
+      "Application gamifiee pour apprendre l'histoire, le contexte et les versets de la Bible de maniere interactive et ludique.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BibleEido - Apprenez la Bible en vous amusant",
+    description:
+      "Application gamifiee pour apprendre la Bible de maniere interactive.",
   },
 };
 
