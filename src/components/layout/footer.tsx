@@ -12,6 +12,11 @@ const navigation = {
     { name: "Groupes", href: "/groupes" },
     { name: "Classement", href: "/classement" },
   ],
+  legal: [
+    { name: "Confidentialité", href: "/confidentialite" },
+    { name: "Conditions", href: "/conditions" },
+    { name: "Contact", href: "/contact" },
+  ],
   social: [
     { name: "Instagram", href: "https://instagram.com/bibleeido", icon: Instagram },
     { name: "YouTube", href: "https://youtube.com/@bibleeido", icon: Youtube },
@@ -27,7 +32,7 @@ export function Footer() {
       <footer className="bg-primary-900 dark:bg-primary-950 text-white mt-16">
         <div className="max-w-5xl mx-auto px-4 py-12">
           {/* Top section */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             {/* Brand */}
             <div className="md:col-span-2">
               <Link href="/" className="flex items-center gap-3 mb-4">
@@ -50,6 +55,23 @@ export function Footer() {
               <h3 className="font-semibold mb-4">Navigation</h3>
               <ul className="space-y-2">
                 {navigation.main.map((item) => (
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      className="text-white/60 hover:text-white transition-colors"
+                    >
+                      {item.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h3 className="font-semibold mb-4">Légal</h3>
+              <ul className="space-y-2">
+                {navigation.legal.map((item) => (
                   <li key={item.name}>
                     <Link
                       href={item.href}
