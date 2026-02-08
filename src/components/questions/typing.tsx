@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { cn } from "@/lib/utils";
+import { cn, normalizeText } from "@/lib/utils";
 import { TypingContent } from "@/types";
 import { Check, X } from "lucide-react";
 
@@ -23,7 +23,7 @@ export function Typing({ content, onAnswer, disabled }: TypingProps) {
     let correct = 0;
 
     words.forEach((word, index) => {
-      if (inputWords[index]?.toLowerCase() === word.toLowerCase()) {
+      if (normalizeText(inputWords[index] || "") === normalizeText(word)) {
         correct++;
       }
     });
@@ -63,7 +63,7 @@ export function Typing({ content, onAnswer, disabled }: TypingProps) {
 
     return words.map((word, index) => {
       const inputWord = inputWords[index] || "";
-      const isCorrect = inputWord.toLowerCase() === word.toLowerCase();
+      const isCorrect = normalizeText(inputWord) === normalizeText(word);
       const hasTyped = inputWord.length > 0;
 
       return (

@@ -15,7 +15,7 @@ import { useUserStore } from "@/lib/store/user-store";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/lib/utils";
 import { QuestionType, QuestionContent } from "@/types";
-import { getLesson, getQuestions, saveProgress, updateUserStats } from "@/lib/supabase/queries";
+import { getLesson, getQuestions, saveProgress, updateUserStats, updateHearts } from "@/lib/supabase/queries";
 import {
   checkAndUnlockAchievements,
   getUserLessonsCompleted,
@@ -117,6 +117,10 @@ function LeconContent() {
   const handleQuestionComplete = async (correct: boolean) => {
     if (!correct) {
       const hasHearts = loseHeart();
+      // Persist hearts to database
+      if (userId && !isGuest) {
+        updateHearts(userId, getActualHearts()).catch(console.error);
+      }
       if (!hasHearts && getActualHearts() <= 0) {
         setIsComplete(true);
         return;

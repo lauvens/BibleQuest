@@ -12,7 +12,7 @@ import { CelebrationModal } from "@/components/ui/celebration-modal";
 import { QuizProvider, useQuiz } from "@/lib/contexts/quiz-context";
 import { useUserStore } from "@/lib/store/user-store";
 import { QuestionType, QuestionContent } from "@/types";
-import { getRandomQuestions } from "@/lib/supabase/queries";
+import { getRandomQuestions, updateHearts } from "@/lib/supabase/queries";
 
 interface LoadedQuestion {
   type: QuestionType;
@@ -21,7 +21,7 @@ interface LoadedQuestion {
 
 function DailyChallengeContent() {
   const router = useRouter();
-  const { getActualHearts, loseHeart, addXp, addCoins, updateStreak } = useUserStore();
+  const { id: userId, isGuest, getActualHearts, loseHeart, addXp, addCoins, updateStreak } = useUserStore();
   const { totalPoints, maxCombo, correctAnswers, resetQuiz } = useQuiz();
 
   const [questions, setQuestions] = useState<LoadedQuestion[]>([]);
@@ -67,6 +67,9 @@ function DailyChallengeContent() {
   const handleQuestionComplete = (correct: boolean) => {
     if (!correct) {
       loseHeart();
+      if (userId && !isGuest) {
+        updateHearts(userId, getActualHearts()).catch(console.error);
+      }
     }
 
     if (currentQuestionIndex < questions.length - 1) {

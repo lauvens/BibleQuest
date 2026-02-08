@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, normalizeText } from "@/lib/utils";
 import { FillBlankContent } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
@@ -20,7 +20,7 @@ export function FillBlank({ content, onAnswer, disabled }: FillBlankProps) {
   const handleSubmit = () => {
     if (disabled || showResult || !userAnswer.trim()) return;
 
-    const correct = userAnswer.trim().toLowerCase() === content.answer.toLowerCase();
+    const correct = normalizeText(userAnswer.trim()) === normalizeText(content.answer);
     setIsCorrect(correct);
     setShowResult(true);
 

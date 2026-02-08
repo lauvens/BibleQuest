@@ -111,6 +111,15 @@ export async function saveProgress(
   if (error) throw error;
 }
 
+// Update hearts in Supabase
+export async function updateHearts(userId: string, hearts: number) {
+  const { error } = await supabase()
+    .from("users")
+    .update({ hearts, hearts_updated_at: new Date().toISOString() })
+    .eq("id", userId);
+  if (error) throw error;
+}
+
 // Update user XP/coins and streak in Supabase
 export async function updateUserStats(
   userId: string,
@@ -151,13 +160,25 @@ export async function updateUserStats(
   if (error) throw error;
 }
 
-// Leaderboard - fetch top users by XP
-export async function getLeaderboard(limit: number = 20) {
-  const { data, error } = await supabase()
+// Leaderboard - fetch top users by XP, optionally filtered by recent activity
+export async function getLeaderboard(limit: number = 20, timeRange: "weekly" | "monthly" | "allTime" = "allTime") {
+  let query = supabase()
     .from("users")
     .select("id, username, avatar_url, xp")
     .order("xp", { ascending: false })
     .limit(limit);
+
+  if (timeRange === "weekly") {
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    query = query.gte("last_activity_date", weekAgo.toISOString().split("T")[0]);
+  } else if (timeRange === "monthly") {
+    const monthAgo = new Date();
+    monthAgo.setDate(monthAgo.getDate() - 30);
+    query = query.gte("last_activity_date", monthAgo.toISOString().split("T")[0]);
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
   return data;
 }

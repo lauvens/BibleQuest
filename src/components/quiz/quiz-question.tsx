@@ -51,7 +51,9 @@ export function QuizQuestion({
   } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Start timer when question mounts
+  // Start timer when question mounts, stop when answered
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
   useEffect(() => {
     startQuestion();
     setTimeElapsed(0);
@@ -59,12 +61,22 @@ export function QuizQuestion({
     setAnswered(false);
     setLastResult(null);
 
-    const interval = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setTimeElapsed((prev) => prev + 0.1);
     }, 100);
 
-    return () => clearInterval(interval);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
   }, [questionNumber, startQuestion]);
+
+  // Stop timer when user answers
+  useEffect(() => {
+    if (answered && timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, [answered]);
 
   const handleAnswer = useCallback(
     (correct: boolean) => {

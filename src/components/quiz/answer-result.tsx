@@ -29,25 +29,17 @@ export function AnswerResult({
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-40 flex items-end justify-center p-4 bg-gradient-to-t from-black/50 to-transparent"
-          onClick={onContinue}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ type: "spring", damping: 20 }}
+          className={cn(
+            "w-full rounded-2xl p-6 shadow-elevated mt-4",
+            isCorrect
+              ? "bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-900/80 dark:to-accent-800/80"
+              : "bg-gradient-to-br from-error-50 to-error-100 dark:from-error-900/80 dark:to-error-800/80"
+          )}
         >
-          <motion.div
-            initial={{ y: 100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 100, opacity: 0 }}
-            transition={{ type: "spring", damping: 20 }}
-            className={cn(
-              "w-full max-w-lg rounded-t-3xl p-6 shadow-elevated",
-              isCorrect
-                ? "bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-900/80 dark:to-accent-800/80"
-                : "bg-gradient-to-br from-error-50 to-error-100 dark:from-error-900/80 dark:to-error-800/80"
-            )}
-            onClick={(e) => e.stopPropagation()}
-          >
             {/* Header */}
             <div className="flex items-center gap-4 mb-4">
               <motion.div
@@ -141,7 +133,6 @@ export function AnswerResult({
             >
               Continuer
             </motion.button>
-          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

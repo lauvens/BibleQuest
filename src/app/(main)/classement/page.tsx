@@ -23,18 +23,23 @@ export default function ClassementPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+    getLeaderboard(20, timeRange)
+      .then((data) => setLeaderboard(data as LeaderboardEntry[]))
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }, [timeRange]);
+
   const loadLeaderboard = () => {
     setLoading(true);
     setError(false);
-    getLeaderboard(20)
+    getLeaderboard(20, timeRange)
       .then((data) => setLeaderboard(data as LeaderboardEntry[]))
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   };
-
-  useEffect(() => {
-    loadLeaderboard();
-  }, [timeRange]);
 
   const getRankIcon = (rank: number) => {
     switch (rank) {

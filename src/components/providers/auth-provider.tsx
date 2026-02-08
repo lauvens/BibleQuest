@@ -14,13 +14,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const syncUserData = async (userId: string) => {
       // Prevent duplicate calls
-      if (isSyncing.current) {
-        console.log("[Auth] Already syncing, skipping...");
-        return;
-      }
+      if (isSyncing.current) return;
       isSyncing.current = true;
-
-      console.log("[Auth] syncUserData for:", userId);
 
       try {
         const { data, error } = await supabase
@@ -29,16 +24,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .eq("id", userId)
           .single();
 
-        console.log("[Auth] Query result:", error ? `Error: ${error.message}` : "Success");
-
         if (error) {
-          console.error("[Auth] Error:", error);
           isSyncing.current = false;
           return;
         }
 
         if (data) {
-          console.log("[Auth] Setting user:", data.username);
           setUser({
             id: data.id,
             email: data.email,
@@ -57,8 +48,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             isGuest: false,
           });
         }
-      } catch (err) {
-        console.error("[Auth] Exception:", err);
+      } catch {
+        // Auth sync failed silently
       } finally {
         isSyncing.current = false;
       }
@@ -66,7 +57,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Check session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log("[Auth] Initial session:", session ? "exists" : "none");
       if (session?.user) {
         syncUserData(session.user.id);
       }
@@ -75,8 +65,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        console.log("[Auth] Event:", event);
-
         if (event === "SIGNED_OUT") {
           clearUser();
         } else if (event === "SIGNED_IN" && session?.user) {
