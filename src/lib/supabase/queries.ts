@@ -61,12 +61,13 @@ export async function getQuestions(lessonId: string) {
 
 // Random questions for daily challenge
 export async function getRandomQuestions(limit: number = 10) {
-  // Supabase doesn't support ORDER BY random() directly via client,
-  // so we fetch more and shuffle client-side
+  // Fetch a larger pool (5x limit) and shuffle client-side
+  const poolSize = limit * 5;
   const { data, error } = await supabase()
     .from("questions")
     .select("*")
-    .eq("is_approved", true);
+    .eq("is_approved", true)
+    .limit(poolSize);
   if (error) throw error;
   const questions = data as Tables["questions"]["Row"][];
   // Fisher-Yates shuffle
@@ -1241,7 +1242,8 @@ export async function getUserGroups(userId: string) {
         invite_code,
         max_members,
         is_public,
-        created_at
+        created_at,
+        group_members (count)
       )
     `)
     .eq("user_id", userId);

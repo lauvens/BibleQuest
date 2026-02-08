@@ -5,7 +5,7 @@ import { Plus, Users, Search } from "lucide-react";
 import Link from "next/link";
 import { GroupCard } from "@/components/groups/group-card";
 import { useUserStore } from "@/lib/store/user-store";
-import { getUserGroups, getGroupMembersCount } from "@/lib/supabase/queries";
+import { getUserGroups } from "@/lib/supabase/queries";
 
 type GroupWithMeta = {
   group: {
@@ -35,18 +35,17 @@ export default function GroupesPage() {
     async function loadGroups() {
       try {
         const data = await getUserGroups(userId!);
-        const groupsWithMeta = await Promise.all(
-          (data || []).map(async (item) => {
-            const group = item.reading_groups as unknown as GroupWithMeta["group"];
-            const memberCount = await getGroupMembersCount(group.id);
-            return {
-              group,
-              role: item.role as "owner" | "admin" | "member",
-              memberCount,
-              activeChallenges: 0,
-            };
-          })
-        );
+        const groupsWithMeta = (data || []).map((item) => {
+          const rg = item.reading_groups as unknown as GroupWithMeta["group"] & {
+            group_members: { count: number }[];
+          };
+          return {
+            group: rg,
+            role: item.role as "owner" | "admin" | "member",
+            memberCount: rg.group_members?.[0]?.count ?? 0,
+            activeChallenges: 0,
+          };
+        });
         setGroups(groupsWithMeta);
       } catch (err) {
         console.error("Error loading groups:", err);

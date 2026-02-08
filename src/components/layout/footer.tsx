@@ -2,25 +2,20 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Instagram, Youtube, Twitter, Mail } from "lucide-react";
+import { Instagram, Youtube, Twitter } from "lucide-react";
 import { FadeIn } from "@/components/ui/motion";
 
 const navigation = {
   main: [
     { name: "Bible", href: "/bible" },
-    { name: "Parcours", href: "/parcours" },
-    { name: "Défi", href: "/defi" },
+    { name: "Apprendre", href: "/apprendre" },
+    { name: "Groupes", href: "/groupes" },
     { name: "Classement", href: "/classement" },
   ],
-  legal: [
-    { name: "Confidentialité", href: "/confidentialite" },
-    { name: "Conditions", href: "/conditions" },
-    { name: "Contact", href: "/contact" },
-  ],
   social: [
-    { name: "Instagram", href: "https://instagram.com", icon: Instagram },
-    { name: "YouTube", href: "https://youtube.com", icon: Youtube },
-    { name: "Twitter", href: "https://twitter.com", icon: Twitter },
+    { name: "Instagram", href: "https://instagram.com/bibleeido", icon: Instagram },
+    { name: "YouTube", href: "https://youtube.com/@bibleeido", icon: Youtube },
+    { name: "Twitter", href: "https://twitter.com/bibleeido", icon: Twitter },
   ],
 };
 
@@ -32,7 +27,7 @@ export function Footer() {
       <footer className="bg-primary-900 dark:bg-primary-950 text-white mt-16">
         <div className="max-w-5xl mx-auto px-4 py-12">
           {/* Top section */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
             {/* Brand */}
             <div className="md:col-span-2">
               <Link href="/" className="flex items-center gap-3 mb-4">
@@ -44,25 +39,10 @@ export function Footer() {
                 />
                 <span className="text-xl font-bold">BibleEidó</span>
               </Link>
-              <p className="text-white/60 mb-4 max-w-sm">
+              <p className="text-white/60 max-w-sm">
                 Apprenez la Bible de manière interactive et ludique.
                 Mémorisez des versets, suivez des parcours et grandissez dans votre foi.
               </p>
-
-              {/* Newsletter */}
-              <form className="flex gap-2" onSubmit={(e) => e.preventDefault()}>
-                <input
-                  type="email"
-                  placeholder="Votre email"
-                  className="flex-1 px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white placeholder-white/40 focus:outline-none focus:border-accent-400 transition-colors"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl bg-accent-400 text-primary-900 font-semibold hover:bg-accent-300 transition-colors"
-                >
-                  <Mail className="w-5 h-5" />
-                </button>
-              </form>
             </div>
 
             {/* Navigation */}
@@ -70,23 +50,6 @@ export function Footer() {
               <h3 className="font-semibold mb-4">Navigation</h3>
               <ul className="space-y-2">
                 {navigation.main.map((item) => (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      className="text-white/60 hover:text-white transition-colors"
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h3 className="font-semibold mb-4">Légal</h3>
-              <ul className="space-y-2">
-                {navigation.legal.map((item) => (
                   <li key={item.name}>
                     <Link
                       href={item.href}
