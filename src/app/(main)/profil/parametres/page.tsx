@@ -291,6 +291,7 @@ export default function ParametresPage() {
           <ArrowLeft className="w-5 h-5 text-primary-600 dark:text-primary-400" />
         </Link>
         <h1 className="text-2xl font-bold text-primary-800 dark:text-parchment-50">Parametres</h1>
+
       </div>
 
       {/* Username */}
@@ -381,6 +382,9 @@ export default function ParametresPage() {
               <button
                 onClick={toggleEmailNotifications}
                 disabled={savingNotifications}
+                aria-label="Activer les notifications email"
+                role="switch"
+                aria-checked={emailNotifications}
                 className={`relative w-12 h-6 rounded-full transition-colors ${
                   emailNotifications
                     ? "bg-olive-500"
@@ -401,16 +405,19 @@ export default function ParametresPage() {
                 <Flame className="w-5 h-5 text-gold-500" />
                 <div>
                   <p className="font-medium text-primary-800 dark:text-parchment-100">
-                    Série en danger
+                    Serie en danger
                   </p>
                   <p className="text-xs text-primary-400 dark:text-primary-500">
-                    Rappel si vous risquez de perdre votre série
+                    Rappel si vous risquez de perdre votre serie
                   </p>
                 </div>
               </div>
               <button
                 onClick={toggleStreakDanger}
                 disabled={savingNotifications || !emailNotifications}
+                aria-label="Activer les alertes de serie en danger"
+                role="switch"
+                aria-checked={notifyStreakDanger && emailNotifications}
                 className={`relative w-12 h-6 rounded-full transition-colors ${
                   notifyStreakDanger && emailNotifications
                     ? "bg-olive-500"
@@ -431,16 +438,19 @@ export default function ParametresPage() {
                 <Trophy className="w-5 h-5 text-gold-500" />
                 <div>
                   <p className="font-medium text-primary-800 dark:text-parchment-100">
-                    Achievements
+                    Succes
                   </p>
                   <p className="text-xs text-primary-400 dark:text-primary-500">
-                    Notification lors d&apos;un nouvel achievement
+                    Notification lors d&apos;un nouveau succes
                   </p>
                 </div>
               </div>
               <button
                 onClick={toggleAchievements}
                 disabled={savingNotifications || !emailNotifications}
+                aria-label="Activer les notifications de succes"
+                role="switch"
+                aria-checked={notifyAchievements && emailNotifications}
                 className={`relative w-12 h-6 rounded-full transition-colors ${
                   notifyAchievements && emailNotifications
                     ? "bg-olive-500"
@@ -461,16 +471,19 @@ export default function ParametresPage() {
                 <Mail className="w-5 h-5 text-info-500" />
                 <div>
                   <p className="font-medium text-primary-800 dark:text-parchment-100">
-                    Résumé hebdomadaire
+                    Resume hebdomadaire
                   </p>
                   <p className="text-xs text-primary-400 dark:text-primary-500">
-                    Recevez un résumé de votre progression
+                    Recevez un resume de votre progression
                   </p>
                 </div>
               </div>
               <button
                 onClick={toggleWeeklySummary}
                 disabled={savingNotifications || !emailNotifications}
+                aria-label="Activer le resume hebdomadaire"
+                role="switch"
+                aria-checked={notifyWeeklySummary && emailNotifications}
                 className={`relative w-12 h-6 rounded-full transition-colors ${
                   notifyWeeklySummary && emailNotifications
                     ? "bg-olive-500"

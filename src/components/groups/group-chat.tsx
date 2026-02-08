@@ -403,6 +403,7 @@ export function GroupChat({ groupId, userId, members }: GroupChatProps) {
             onChange={(e) => setInput(e.target.value.slice(0, 1000))}
             onKeyDown={handleKeyDown}
             placeholder="Ecrire un message..."
+            aria-label="Message"
             rows={1}
             className="flex-1 resize-none bg-parchment-50 dark:bg-primary-800 border border-parchment-200 dark:border-primary-700/50 rounded-xl px-3 py-2 text-sm text-primary-800 dark:text-parchment-100 placeholder-primary-400 dark:placeholder-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 max-h-24"
             style={{ minHeight: "40px" }}
@@ -410,6 +411,7 @@ export function GroupChat({ groupId, userId, members }: GroupChatProps) {
           <button
             onClick={handleSend}
             disabled={!input.trim() || sending}
+            aria-label="Envoyer le message"
             className="p-2.5 bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 disabled:cursor-not-allowed text-white rounded-xl transition-colors flex-shrink-0"
           >
             <Send className="w-4 h-4" />
