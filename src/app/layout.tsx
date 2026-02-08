@@ -19,6 +19,12 @@ export const metadata: Metadata = {
     icon: "/logo-icon.png",
     apple: "/logo-icon.png",
   },
+  manifest: "/manifest.json",
+  other: {
+    "mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "default",
+  },
   openGraph: {
     type: "website",
     locale: "fr_FR",
@@ -42,6 +48,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning>
+      <head>
+        <meta name="theme-color" content="#3B82C4" />
+        <meta name="apple-mobile-web-app-title" content="BibleEido" />
+      </head>
       <body className={`${inter.variable} font-sans`}>
         <ThemeProvider>
           <AuthProvider>

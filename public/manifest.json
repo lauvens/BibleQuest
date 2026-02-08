@@ -1,0 +1,21 @@
+{
+  "name": "BibleEido - Apprenez la Bible en vous amusant",
+  "short_name": "BibleEido",
+  "description": "Application gamifiee pour apprendre la Bible de maniere interactive et ludique.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FAF6F0",
+  "theme_color": "#3B82C4",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "books"],
+  "lang": "fr"
+}

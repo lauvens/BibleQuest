@@ -190,9 +190,16 @@ export function GroupChat({ groupId, userId, members }: GroupChatProps) {
     }
   }
 
+  const lastSentRef = useRef<number>(0);
+
   async function handleSend() {
     const text = input.trim();
     if (!text || sending) return;
+
+    // Rate limit: 1 message per second
+    const now = Date.now();
+    if (now - lastSentRef.current < 1000) return;
+    lastSentRef.current = now;
 
     setSending(true);
     setInput("");
