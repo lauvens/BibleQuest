@@ -38,7 +38,7 @@ export default function MilestonePage() {
     const loadData = async () => {
       setLoading(true);
       try {
-        // Load path, milestone, and all milestones
+        // Load path and milestone in parallel
         const [pathData, milestoneData] = await Promise.all([
           getMasteryPathBySlug(slug),
           getMilestone(milestoneId),
@@ -47,7 +47,7 @@ export default function MilestonePage() {
         setPath(pathData);
         setMilestone(milestoneData);
 
-        // Load all milestones to determine order and next milestone
+        // Load all milestones (uses pathData.id so must be sequential)
         const milestones = await getPathMilestones(pathData.id);
         setAllMilestones(milestones);
 

@@ -187,13 +187,13 @@ export async function getUserAchievements(userId: string) {
   const { data, error } = await supabase()
     .from("achievements")
     .select("*, user_achievements!left(user_id, claimed)")
+    .eq("user_achievements.user_id", userId)
     .order("condition_value");
   if (error) throw error;
 
   return data.map((a) => {
-    const userEntry = (a.user_achievements as { user_id: string; claimed: boolean }[])?.find(
-      (ua) => ua.user_id === userId
-    );
+    const entries = a.user_achievements as { user_id: string; claimed: boolean }[] | null;
+    const userEntry = entries && entries.length > 0 ? entries[0] : null;
     return {
       ...a,
       unlocked: !!userEntry,
@@ -232,20 +232,30 @@ export async function claimAchievementReward(userId: string, achievementId: stri
 
 // Daily verse - deterministic rotation based on day of year
 export async function getDailyVerse() {
-  const { data, error } = await supabase()
+  // Get count first instead of loading all verses
+  const { count, error: countError } = await supabase()
     .from("bible_verses")
-    .select("text, book, chapter, verse");
-  if (error) throw error;
-  if (!data || data.length === 0) return null;
+    .select("*", { count: "exact", head: true });
+  if (countError) throw countError;
+  if (!count || count === 0) return null;
 
   const now = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
   const dayOfYear = Math.floor(
     (now.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
   );
-  const index = dayOfYear % data.length;
-  const v = data[index];
-  return { text: v.text, reference: `${v.book} ${v.chapter}:${v.verse}` };
+  const index = dayOfYear % count;
+
+  // Fetch only the single verse we need
+  const { data, error } = await supabase()
+    .from("bible_verses")
+    .select("text, book, chapter, verse")
+    .range(index, index)
+    .single();
+  if (error) throw error;
+  if (!data) return null;
+
+  return { text: data.text, reference: `${data.book} ${data.chapter}:${data.verse}` };
 }
 
 // Get all verses with optional pagination
@@ -288,15 +298,22 @@ export async function getVersesByBook(book: string, limit: number = 50) {
   return data as Tables["bible_verses"]["Row"][];
 }
 
-// Get unique book names
+// Get unique book names (from dedicated bible_books table - 66 rows vs 31k verses)
 export async function getUniqueBooks() {
   const { data, error } = await supabase()
-    .from("bible_verses")
-    .select("book")
-    .order("book");
-  if (error) throw error;
-  const books = Array.from(new Set((data ?? []).map((v) => v.book)));
-  return books;
+    .from("bible_books")
+    .select("name")
+    .order("order_index");
+  if (error) {
+    // Fallback: query distinct books from verses
+    const { data: fallback, error: fbError } = await supabase()
+      .from("bible_verses")
+      .select("book")
+      .order("book");
+    if (fbError) throw fbError;
+    return Array.from(new Set((fallback ?? []).map((v) => v.book)));
+  }
+  return (data ?? []).map((b) => b.name);
 }
 
 // Get user's favorite verses
@@ -407,17 +424,17 @@ export async function equipCosmetic(userId: string, cosmeticId: string, cosmetic
     .select("cosmetic_id, cosmetics(type)")
     .eq("user_id", userId);
 
-  const sameType = (owned ?? []).filter(
-    (uc) => (uc.cosmetics as unknown as { type: string })?.type === cosmeticType
-  );
+  const sameTypeIds = (owned ?? [])
+    .filter((uc) => (uc.cosmetics as unknown as { type: string })?.type === cosmeticType)
+    .map((uc) => uc.cosmetic_id);
 
-  // Unequip all of same type
-  for (const uc of sameType) {
+  // Batch unequip all of same type in one query
+  if (sameTypeIds.length > 0) {
     await supabase()
       .from("user_cosmetics")
       .update({ is_equipped: false })
       .eq("user_id", userId)
-      .eq("cosmetic_id", uc.cosmetic_id);
+      .in("cosmetic_id", sameTypeIds);
   }
 
   // Equip the chosen one
