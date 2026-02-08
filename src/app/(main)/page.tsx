@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen } from "lucide-react";
+import { BookOpen, AlertTriangle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { HeroSection } from "@/components/home/hero-section";
 import { CategoryCardsSection } from "@/components/home/category-cards-section";
@@ -32,6 +32,31 @@ export default function HomePage() {
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
+      {/* Alpha Test Banner */}
+      <FadeIn>
+        <div className="mb-6 rounded-2xl border border-amber-300 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-950/30 p-4 sm:p-5">
+          <div className="flex gap-3">
+            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-amber-800 dark:text-amber-200 text-sm sm:text-base">
+                Alpha Test en cours
+              </h3>
+              <p className="text-amber-700 dark:text-amber-300/80 text-xs sm:text-sm mt-1 leading-relaxed">
+                BibleEido est actuellement en phase de test alpha. Toutes les progressions (XP, niveaux, succes, etc.) seront reinitialises lors de la sortie officielle.
+              </p>
+              <div className="flex items-center gap-2 mt-2.5 px-3 py-1.5 rounded-lg bg-amber-100/80 dark:bg-amber-900/40 w-fit">
+                <Sparkles className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <p className="text-amber-800 dark:text-amber-200 text-xs sm:text-sm font-medium">
+                  Les comptes crees durant l&apos;alpha recevront un cosmetique exclusif de Testeur Alpha !
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </FadeIn>
+
       <HeroSection
         username={username ?? undefined}
         isGuest={isGuest}
