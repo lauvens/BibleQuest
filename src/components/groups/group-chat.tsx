@@ -251,7 +251,7 @@ export function GroupChat({ groupId, userId, members }: GroupChatProps) {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-280px)] bg-white dark:bg-primary-800/50 rounded-2xl border border-parchment-200 dark:border-primary-700/50 overflow-hidden">
+    <div className="flex flex-col h-[500px] bg-white dark:bg-primary-800/50 rounded-2xl border border-parchment-200 dark:border-primary-700/50 overflow-hidden">
       {/* Messages area */}
       <div
         ref={scrollContainerRef}
