@@ -1552,3 +1552,128 @@ export async function getUserActiveChallenges(userId: string) {
     userProgress: progressMap[c.id] || { completed: false, completed_at: null },
   }));
 }
+
+// ============================================
+// GROUP MESSAGES (CHAT)
+// ============================================
+
+// Fetch messages for a group (paginated, newest last)
+export async function getGroupMessages(
+  groupId: string,
+  limit: number = 50,
+  beforeDate?: string
+) {
+  let query = supabase()
+    .from("group_messages")
+    .select(`
+      id,
+      group_id,
+      user_id,
+      content,
+      reply_to,
+      created_at,
+      users (
+        id,
+        username,
+        avatar_url
+      )
+    `)
+    .eq("group_id", groupId)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (beforeDate) {
+    query = query.lt("created_at", beforeDate);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+
+  return (data || []).reverse();
+}
+
+// Send a message
+export async function sendGroupMessage(
+  groupId: string,
+  userId: string,
+  content: string,
+  replyTo?: string
+) {
+  const { data, error } = await supabase()
+    .from("group_messages")
+    .insert({
+      group_id: groupId,
+      user_id: userId,
+      content: content.trim(),
+      reply_to: replyTo || null,
+    })
+    .select(`
+      id,
+      group_id,
+      user_id,
+      content,
+      reply_to,
+      created_at,
+      users (
+        id,
+        username,
+        avatar_url
+      )
+    `)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+// Get challenge progress details for all members (owner/admin view)
+export async function getChallengeProgressDetails(
+  challengeId: string,
+  groupId: string
+) {
+  const { data: members, error: membersError } = await supabase()
+    .from("group_members")
+    .select(`
+      user_id,
+      users (
+        id,
+        username,
+        avatar_url
+      )
+    `)
+    .eq("group_id", groupId);
+  if (membersError) throw membersError;
+
+  const { data: progress, error: progressError } = await supabase()
+    .from("challenge_progress")
+    .select("user_id, completed, completed_at")
+    .eq("challenge_id", challengeId)
+    .eq("completed", true);
+  if (progressError) throw progressError;
+
+  const progressMap = new Map(
+    (progress || []).map((p) => [p.user_id, p])
+  );
+
+  const result = (members || []).map((m) => {
+    const user = m.users as unknown as { id: string; username: string | null; avatar_url: string | null };
+    const prog = progressMap.get(m.user_id);
+    return {
+      user_id: m.user_id,
+      username: user?.username || "Utilisateur",
+      avatar_url: user?.avatar_url || null,
+      completed: !!prog,
+      completed_at: prog?.completed_at || null,
+    };
+  });
+
+  result.sort((a, b) => {
+    if (a.completed && !b.completed) return -1;
+    if (!a.completed && b.completed) return 1;
+    if (a.completed && b.completed) {
+      return new Date(b.completed_at!).getTime() - new Date(a.completed_at!).getTime();
+    }
+    return a.username.localeCompare(b.username);
+  });
+
+  return result;
+}

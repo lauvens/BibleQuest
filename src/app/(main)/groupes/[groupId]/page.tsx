@@ -12,10 +12,12 @@ import {
   Shield,
   User,
   UserMinus,
+  MessageCircle,
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { ChallengeCard } from "@/components/groups/challenge-card";
+import { GroupChat } from "@/components/groups/group-chat";
 import { useUserStore } from "@/lib/store/user-store";
 import {
   getGroupDetails,
@@ -42,7 +44,7 @@ export default function GroupDetailPage() {
   const [data, setData] = useState<GroupDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState<"challenges" | "members">("challenges");
+  const [activeTab, setActiveTab] = useState<"challenges" | "chat" | "members">("challenges");
 
   const userMember = data?.members?.find((m) => m.user_id === userId);
   const isOwner = userMember?.role === "owner";
@@ -208,6 +210,17 @@ export default function GroupDetailPage() {
               Defis de lecture
             </button>
             <button
+              onClick={() => setActiveTab("chat")}
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-1.5 ${
+                activeTab === "chat"
+                  ? "border-primary-600 dark:border-primary-400 text-primary-800 dark:text-parchment-100"
+                  : "border-transparent text-primary-500 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+              }`}
+            >
+              <MessageCircle className="w-4 h-4" />
+              Chat
+            </button>
+            <button
               onClick={() => setActiveTab("members")}
               className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                 activeTab === "members"
@@ -247,6 +260,8 @@ export default function GroupDetailPage() {
                     totalMembers={data.members?.length || 0}
                     completedCount={data.completedCounts?.[challenge.id] || 0}
                     onMarkComplete={() => handleMarkComplete(challenge.id)}
+                    isOwnerOrAdmin={isOwnerOrAdmin}
+                    groupId={groupId}
                   />
                 ))}
               </div>
@@ -258,6 +273,18 @@ export default function GroupDetailPage() {
               </div>
             )}
           </div>
+        ) : activeTab === "chat" ? (
+          userId ? (
+            <GroupChat
+              groupId={groupId}
+              userId={userId}
+              members={(data.members || []).map((m) => ({
+                user_id: m.user_id,
+                role: m.role as string,
+                users: m.users as unknown as { id: string; username: string | null; avatar_url: string | null },
+              }))}
+            />
+          ) : null
         ) : (
           /* Members list */
           <div className="bg-white dark:bg-primary-800/50 rounded-2xl border border-parchment-200 dark:border-primary-700/50 overflow-hidden">

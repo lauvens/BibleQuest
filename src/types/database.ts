@@ -761,6 +761,32 @@ export interface Database {
           notes?: string | null;
         };
       };
+      group_messages: {
+        Row: {
+          id: string;
+          group_id: string;
+          user_id: string;
+          content: string;
+          reply_to: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          group_id: string;
+          user_id: string;
+          content: string;
+          reply_to?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          group_id?: string;
+          user_id?: string;
+          content?: string;
+          reply_to?: string | null;
+          created_at?: string;
+        };
+      };
     };
   };
 }

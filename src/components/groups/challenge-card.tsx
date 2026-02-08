@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BookOpen, Clock, CheckCircle, Users } from "lucide-react";
+import { BookOpen, Clock, CheckCircle, Users, ChevronDown, ChevronUp, User } from "lucide-react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { getChallengeProgressDetails } from "@/lib/supabase/queries";
 
 interface ChallengeCardProps {
   challenge: {
@@ -29,7 +31,17 @@ interface ChallengeCardProps {
   completedCount?: number;
   onMarkComplete?: () => void;
   showGroupName?: boolean;
+  isOwnerOrAdmin?: boolean;
+  groupId?: string;
 }
+
+type ProgressDetail = {
+  user_id: string;
+  username: string;
+  avatar_url: string | null;
+  completed: boolean;
+  completed_at: string | null;
+};
 
 function formatTimeRemaining(deadline: string): { text: string; urgent: boolean; expired: boolean } {
   const now = new Date();
@@ -71,6 +83,13 @@ function formatBibleReference(challenge: ChallengeCardProps["challenge"]): strin
   return `${book_name} ${chapter_start}`;
 }
 
+function formatCompletedDate(dateStr: string) {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }) +
+    " a " +
+    date.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+}
+
 export function ChallengeCard({
   challenge,
   userProgress,
@@ -78,8 +97,13 @@ export function ChallengeCard({
   completedCount,
   onMarkComplete,
   showGroupName = false,
+  isOwnerOrAdmin = false,
+  groupId,
 }: ChallengeCardProps) {
   const [timeRemaining, setTimeRemaining] = useState(() => formatTimeRemaining(challenge.deadline));
+  const [showProgress, setShowProgress] = useState(false);
+  const [progressDetails, setProgressDetails] = useState<ProgressDetail[] | null>(null);
+  const [loadingProgress, setLoadingProgress] = useState(false);
   const isCompleted = userProgress?.completed || false;
 
   // Update countdown every minute
@@ -89,6 +113,23 @@ export function ChallengeCard({
     }, 60000);
     return () => clearInterval(interval);
   }, [challenge.deadline]);
+
+  async function handleToggleProgress() {
+    const next = !showProgress;
+    setShowProgress(next);
+
+    if (next && !progressDetails && groupId) {
+      setLoadingProgress(true);
+      try {
+        const details = await getChallengeProgressDetails(challenge.id, groupId);
+        setProgressDetails(details);
+      } catch (err) {
+        console.error("Error loading progress:", err);
+      } finally {
+        setLoadingProgress(false);
+      }
+    }
+  }
 
   const bibleRef = formatBibleReference(challenge);
 
@@ -191,6 +232,75 @@ export function ChallengeCard({
             </button>
           )}
         </div>
+
+        {/* Progress details for owner/admin */}
+        {isOwnerOrAdmin && groupId && (
+          <div className="mt-3">
+            <button
+              onClick={handleToggleProgress}
+              className="flex items-center gap-1 text-xs text-primary-500 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+            >
+              {showProgress ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+              Voir la progression
+            </button>
+
+            {showProgress && (
+              <div className="mt-2 space-y-2">
+                {loadingProgress ? (
+                  <div className="flex items-center justify-center py-3">
+                    <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : progressDetails && progressDetails.length > 0 ? (
+                  progressDetails.map((member) => (
+                    <div
+                      key={member.user_id}
+                      className="flex items-center gap-3 py-1.5 px-2 rounded-lg"
+                    >
+                      {/* Avatar */}
+                      <div className="w-7 h-7 rounded-full bg-primary-100 dark:bg-primary-700/50 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                        {member.avatar_url ? (
+                          <Image
+                            src={member.avatar_url}
+                            alt=""
+                            width={28}
+                            height={28}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-3.5 h-3.5 text-primary-400 dark:text-primary-500" />
+                        )}
+                      </div>
+
+                      {/* Name */}
+                      <span className="flex-1 text-xs text-primary-700 dark:text-primary-300 truncate">
+                        {member.username}
+                      </span>
+
+                      {/* Status */}
+                      {member.completed ? (
+                        <div className="flex items-center gap-1 text-xs">
+                          <CheckCircle className="w-3.5 h-3.5 text-success-500" />
+                          <span className="text-success-600 dark:text-success-400">
+                            {formatCompletedDate(member.completed_at!)}
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 text-xs text-primary-400 dark:text-primary-500">
+                          <Clock className="w-3.5 h-3.5" />
+                          <span>En attente</span>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-primary-400 dark:text-primary-500 py-2">
+                    Aucune donnee de progression
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
