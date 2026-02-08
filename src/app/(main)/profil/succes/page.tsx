@@ -3,10 +3,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Lock, Trophy } from "lucide-react";
+import { ChevronLeft, Lock, Trophy, Gift, CheckCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useUserStore } from "@/lib/store/user-store";
-import { getUserAchievements } from "@/lib/supabase/queries";
+import { getUserAchievements, claimAchievementReward } from "@/lib/supabase/queries";
 
 interface Achievement {
   id: string;
@@ -17,21 +17,25 @@ interface Achievement {
   condition_value: number;
   coin_reward: number;
   unlocked: boolean;
+  claimed: boolean;
 }
 
 export default function SuccesPage() {
   const router = useRouter();
-  const { id: userId, isGuest } = useUserStore();
+  const { id: userId, isGuest, addCoins } = useUserStore();
 
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [claiming, setClaiming] = useState<string | null>(null);
 
   const loadAchievements = useCallback(async () => {
     if (!userId || isGuest) return;
     try {
       const data = await getUserAchievements(userId);
-      // Unlocked first, then locked
+      // Unlocked+unclaimed first, then unlocked+claimed, then locked
       const sorted = [...data].sort((a, b) => {
+        if (a.unlocked && !a.claimed && !(b.unlocked && !b.claimed)) return -1;
+        if (!(a.unlocked && !a.claimed) && b.unlocked && !b.claimed) return 1;
         if (a.unlocked && !b.unlocked) return -1;
         if (!a.unlocked && b.unlocked) return 1;
         return a.condition_value - b.condition_value;
@@ -52,7 +56,25 @@ export default function SuccesPage() {
     loadAchievements();
   }, [isGuest, router, loadAchievements]);
 
+  async function handleClaim(achievement: Achievement) {
+    if (!userId || claiming) return;
+    setClaiming(achievement.id);
+    try {
+      await claimAchievementReward(userId, achievement.id, achievement.coin_reward);
+      // Update local state
+      addCoins(achievement.coin_reward);
+      setAchievements((prev) =>
+        prev.map((a) => (a.id === achievement.id ? { ...a, claimed: true } : a))
+      );
+    } catch (err) {
+      console.error("Error claiming achievement:", err);
+    } finally {
+      setClaiming(null);
+    }
+  }
+
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
+  const unclaimedCount = achievements.filter((a) => a.unlocked && !a.claimed).length;
 
   if (loading) {
     return (
@@ -82,6 +104,11 @@ export default function SuccesPage() {
               <h1 className="text-2xl font-bold text-white">Mes Succes</h1>
               <p className="text-white/80 text-sm">
                 {unlockedCount}/{achievements.length} debloques
+                {unclaimedCount > 0 && (
+                  <span className="ml-2 px-2 py-0.5 bg-white/20 rounded-full text-white text-xs font-medium">
+                    {unclaimedCount} a reclamer
+                  </span>
+                )}
               </p>
             </div>
           </div>
@@ -108,50 +135,79 @@ export default function SuccesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {achievements.map((achievement) => (
-              <Card
-                key={achievement.id}
-                className={`transition-all ${
-                  achievement.unlocked
-                    ? "border-gold-300 dark:border-gold-700 shadow-soft"
-                    : "opacity-60"
-                }`}
-              >
-                <CardContent className="p-4 text-center">
-                  {/* Icon */}
-                  <div
-                    className={`w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center ${
-                      achievement.unlocked
-                        ? "bg-gold-100 dark:bg-gold-900/40"
-                        : "bg-parchment-200 dark:bg-primary-800"
-                    }`}
-                  >
-                    {achievement.unlocked ? (
-                      <span className="text-2xl">{achievement.icon}</span>
-                    ) : (
-                      <Lock className="w-5 h-5 text-primary-400 dark:text-primary-500" />
+            {achievements.map((achievement) => {
+              const canClaim = achievement.unlocked && !achievement.claimed && achievement.coin_reward > 0;
+              const isClaiming = claiming === achievement.id;
+
+              return (
+                <Card
+                  key={achievement.id}
+                  className={`transition-all ${
+                    canClaim
+                      ? "border-gold-400 dark:border-gold-600 shadow-elevated ring-2 ring-gold-300/50 dark:ring-gold-600/30"
+                      : achievement.unlocked
+                      ? "border-gold-300 dark:border-gold-700 shadow-soft"
+                      : "opacity-60"
+                  }`}
+                >
+                  <CardContent className="p-4 text-center">
+                    {/* Icon */}
+                    <div
+                      className={`w-14 h-14 rounded-full mx-auto mb-3 flex items-center justify-center ${
+                        achievement.unlocked
+                          ? "bg-gold-100 dark:bg-gold-900/40"
+                          : "bg-parchment-200 dark:bg-primary-800"
+                      }`}
+                    >
+                      {achievement.unlocked ? (
+                        <span className="text-2xl">{achievement.icon}</span>
+                      ) : (
+                        <Lock className="w-5 h-5 text-primary-400 dark:text-primary-500" />
+                      )}
+                    </div>
+
+                    {/* Name */}
+                    <h3 className="font-semibold text-sm text-primary-800 dark:text-parchment-50 mb-1">
+                      {achievement.name}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-xs text-primary-500 dark:text-primary-400 mb-3 line-clamp-2">
+                      {achievement.description}
+                    </p>
+
+                    {/* Reward & Claim */}
+                    {achievement.coin_reward > 0 && (
+                      <>
+                        {canClaim ? (
+                          <button
+                            onClick={() => handleClaim(achievement)}
+                            disabled={isClaiming}
+                            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 bg-gold-400 hover:bg-gold-500 disabled:bg-gold-300 text-white text-xs font-semibold rounded-xl transition-colors"
+                          >
+                            {isClaiming ? (
+                              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            ) : (
+                              <Gift className="w-3.5 h-3.5" />
+                            )}
+                            Reclamer +{achievement.coin_reward} pieces
+                          </button>
+                        ) : achievement.unlocked && achievement.claimed ? (
+                          <span className="inline-flex items-center gap-1 text-xs text-success-600 dark:text-success-400 font-medium">
+                            <CheckCircle className="w-3.5 h-3.5" />
+                            Reclame
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-xs text-primary-400 dark:text-primary-500 font-medium">
+                            +{achievement.coin_reward} pieces
+                          </span>
+                        )}
+                      </>
                     )}
-                  </div>
-
-                  {/* Name */}
-                  <h3 className="font-semibold text-sm text-primary-800 dark:text-parchment-50 mb-1">
-                    {achievement.name}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-xs text-primary-500 dark:text-primary-400 mb-2 line-clamp-2">
-                    {achievement.description}
-                  </p>
-
-                  {/* Reward */}
-                  {achievement.coin_reward > 0 && (
-                    <span className="inline-flex items-center gap-1 text-xs text-gold-600 dark:text-gold-400 font-medium">
-                      +{achievement.coin_reward} pieces
-                    </span>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         )}
       </div>

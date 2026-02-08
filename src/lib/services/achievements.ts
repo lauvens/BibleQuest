@@ -67,28 +67,6 @@ export async function unlockAchievement(
 }
 
 /**
- * Award coin reward for an achievement
- */
-async function awardCoinReward(userId: string, coins: number): Promise<void> {
-  if (coins <= 0) return;
-
-  const { data: user, error: fetchError } = await supabase()
-    .from("users")
-    .select("coins")
-    .eq("id", userId)
-    .single();
-
-  if (fetchError) throw fetchError;
-
-  const { error } = await supabase()
-    .from("users")
-    .update({ coins: user.coins + coins })
-    .eq("id", userId);
-
-  if (error) throw error;
-}
-
-/**
  * Check and unlock achievements based on context
  * Returns list of newly unlocked achievements
  */
@@ -142,7 +120,7 @@ export async function checkAndUnlockAchievements(
     if (shouldUnlock) {
       try {
         await unlockAchievement(userId, achievement.id);
-        await awardCoinReward(userId, achievement.coin_reward);
+        // Coins are now awarded when user claims the achievement on /profil/succes
 
         newlyUnlocked.push({
           id: achievement.id,

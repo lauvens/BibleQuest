@@ -185,16 +185,48 @@ export async function getUserStats(userId: string) {
 export async function getUserAchievements(userId: string) {
   const { data, error } = await supabase()
     .from("achievements")
-    .select("*, user_achievements!left(user_id)")
+    .select("*, user_achievements!left(user_id, claimed)")
     .order("condition_value");
   if (error) throw error;
 
-  return data.map((a) => ({
-    ...a,
-    unlocked: (a.user_achievements as { user_id: string }[])?.some(
+  return data.map((a) => {
+    const userEntry = (a.user_achievements as { user_id: string; claimed: boolean }[])?.find(
       (ua) => ua.user_id === userId
-    ) ?? false,
-  }));
+    );
+    return {
+      ...a,
+      unlocked: !!userEntry,
+      claimed: userEntry?.claimed ?? false,
+    };
+  });
+}
+
+// Claim achievement reward
+export async function claimAchievementReward(userId: string, achievementId: string, coinReward: number) {
+  // Mark as claimed
+  const { error: claimError } = await supabase()
+    .from("user_achievements")
+    .update({ claimed: true })
+    .eq("user_id", userId)
+    .eq("achievement_id", achievementId)
+    .eq("claimed", false);
+  if (claimError) throw claimError;
+
+  // Award coins
+  if (coinReward > 0) {
+    const { data: user, error: fetchError } = await supabase()
+      .from("users")
+      .select("coins")
+      .eq("id", userId)
+      .single();
+    if (fetchError) throw fetchError;
+
+    const { error: updateError } = await supabase()
+      .from("users")
+      .update({ coins: user.coins + coinReward })
+      .eq("id", userId);
+    if (updateError) throw updateError;
+  }
 }
 
 // Daily verse - deterministic rotation based on day of year

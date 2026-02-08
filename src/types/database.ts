@@ -276,16 +276,19 @@ export interface Database {
           user_id: string;
           achievement_id: string;
           unlocked_at: string;
+          claimed: boolean;
         };
         Insert: {
           user_id: string;
           achievement_id: string;
           unlocked_at?: string;
+          claimed?: boolean;
         };
         Update: {
           user_id?: string;
           achievement_id?: string;
           unlocked_at?: string;
+          claimed?: boolean;
         };
       };
       cosmetics: {
