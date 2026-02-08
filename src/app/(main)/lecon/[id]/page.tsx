@@ -147,9 +147,13 @@ function LeconContent() {
       if (isGuest) {
         updateGuestProgress(lessonId, score, passed);
       } else if (userId) {
-        // Save to Supabase in background
+        // Save to Supabase - rollback optimistic updates on failure
         saveProgress(userId, lessonId, score, passed).catch(console.error);
-        updateUserStats(userId, xpEarned, coinsEarned).catch(console.error);
+        updateUserStats(userId, xpEarned, coinsEarned).catch((err) => {
+          console.error("Failed to save stats:", err);
+          addXp(-xpEarned);
+          addCoins(-coinsEarned);
+        });
 
         // Check for achievement unlocks
         if (passed) {
